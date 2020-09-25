@@ -1,24 +1,24 @@
 # bot.py
 import os
-
+import random
 import discord
+
+from discord.ext import commands
 from dotenv import load_dotenv
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
-client = discord.Client()
+bot = commands.Bot(command_prefix='!')
 
-@client.event
-async def on_ready():
-    for guild in client.guilds:
-        if guild.name == GUILD:
-            break
+@bot.command(name='test')
+async def TestFunction(ctx):
+    testing = [
+        'Hello there!','Hey!'
+    ]
 
-    print(
-        f'{client.user} is connected to the following guild:\n'
-        f'{guild.name}(id: {guild.id})'
-    )
+    response = random.choice(testing)
+    await ctx.send(response)
 
-client.run(TOKEN)
+bot.run(TOKEN)
