@@ -1,26 +1,91 @@
 # bot.py
+#!/usr/bin/python
+
 import os
 import random
 import discord
+import speech_recognition as sr
+import re
 
 from discord.ext import commands
 from dotenv import load_dotenv
 
+
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
+filename = "/home/pi/DiscordBot/TheMoonCowboy/TestCases/ad20plus5.wav"
+
+#initialize the recognizer
+r = sr.Recognizer()
 
 bot = commands.Bot(command_prefix='!')
 
 @bot.command(name='roll')
-async def roll(ctx, number_of_dice: int, number_of_sides: int):
-    dice = []
-    totalDice = 0
+async def Roll(ctx, text: str):
+    print(text)
+    outcome = QueryRoll(text)
+
+    await ctx.send(outcome)
+
+@bot.command(name='test')
+async def Speech2Text(ctx):
+    # open the file
+    with sr.AudioFile(filename) as source:
+        # listen for the data (load audio into memory)
+        audio_data = r.record(source)
+        # recognize (convert from speech to text)
+        text = r.recognize_google(audio_data)
+
+        outcome = QueryRoll(text)
     
-    for i in number_of_dice:
-        dice.insert(str(random.choice(range(1, number_of_sides + 1))))
-        totalDice += dice[i]
+    await ctx.send(outcome)
+
+def QueryRoll(text):
+    if re.match("(?:(?i)roll|(?i)rule)?(?: ?).+(?: ?)d(?: ?).+(?: ?)(?:.+(?: ?).+)*", text):
+            dieNum = re.findall("(?:(?:(?i)roll|(?i)rule)|r)?(.+)(?: ?)d(?: ?).+(?: ?)(?:.+(?: ?).+)*", text)
+            print(dieNum[0])
+            if dieNum[0] == 'a': dieNum[0] = 1;
+            dieFaces = re.findall("(?:(?:(?i)roll|(?i)rule)|r)?(?: ?).+(?: ?)d(?: ?)(.+)(?: ?)(?:.+(?: ?).+)*", text)
+            if re.match(".+[+|-]", dieFaces[0]):
+                dieFaces = re.findall("(.+)[+|-]", dieFaces[0])
+            print(dieFaces[0])
+            dieModOperand = re.findall("(?:(?:(?i)roll|(?i)rule)|r)?(?: ?).+(?: ?)d(?: ?).+(?: ?)(.+)(?: ?).+", text)
+            if len(dieModOperand) == 0:
+                dieModOperand.append('+')
+            elif dieModOperand[0] == '':
+                dieModOperand[0] = '+'            
+            print(dieModOperand[0])
+            dieMod = re.findall("(?:(?:(?i)roll|(?i)rule)|r)?(?: ?).+(?: ?)d(?: ?).+(?: ?).+(?: ?)(.+)", text)
+            if len(dieMod) == 0:
+                dieMod.append(0)
+            elif dieMod[0] == '':
+                dieMod[0] = 0           
+            print(dieMod[0])
     
-    await ctx.send('Dice: '+dice+' Total: '+totalDice)
+            return str(RollDice(int(dieFaces[0]), int(dieNum[0]), int(dieMod[0])))
+    else:
+        return 'Error in roll statement.'
+
+def RollDice(dieSides, dieNum=1, dieMod=0):
+    dieOutcomes = ''
+    dieList = []
+    dieTotal = 0
+
+    for die in range(dieNum):
+        diceRoll = random.randint(1, dieSides)
+        dieList.append(str(diceRoll-dieMod))
+        dieTotal += diceRoll-dieMod
+
+    dieOutcomes = ', '.join(dieList)
+    return ('You rolled: '+dieOutcomes+', '+DieModConverter(dieMod)+', Total: '+str(dieTotal+dieMod))
+
+def DieModConverter(dieMod):
+    output = ''
+    if dieMod == 0:
+        output = 'With No Modifier'
+    else:
+        output = '+'+str(dieMod)
+    return output
 
 bot.run(TOKEN)
