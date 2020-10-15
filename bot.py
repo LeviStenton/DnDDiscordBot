@@ -42,21 +42,25 @@ async def Speech2Text(ctx):
     await ctx.send(outcome)
 
 def QueryRoll(text):
-    if re.match("(?:(?i)roll|(?i)rule)?(?: ?).+(?: ?)d(?: ?).+(?: ?)(?:.+(?: ?).+)*", text):
-            dieNum = re.findall("(?:(?:(?i)roll|(?i)rule)|r)?(.+)(?: ?)d(?: ?).+(?: ?)(?:.+(?: ?).+)*", text)
-            print(dieNum[0])
+    if re.match("(?:(?i)roll|(?i)rule)?(?: ?).+(?: ?)d(?: ?).+(?: ?)(?:[+|-](?: ?).+)*", text):
+        
+            dieNum = re.findall("(?:(?:(?i)roll|(?i)rule)|r)?(.+)(?: ?)d(?: ?).+(?: ?)(?:[+|-](?: ?).+)*", text)           
             if dieNum[0] == 'a': dieNum[0] = 1;
-            dieFaces = re.findall("(?:(?:(?i)roll|(?i)rule)|r)?(?: ?).+(?: ?)d(?: ?)(.+)(?: ?)(?:.+(?: ?).+)*", text)
+            print(dieNum[0])
+
+            dieFaces = re.findall("(?:(?:(?i)roll|(?i)rule)|r)?(?: ?).+(?: ?)d(?: ?)(.+)(?: ?)(?:[+|-](?: ?).+)*", text)
             if re.match(".+[+|-]", dieFaces[0]):
                 dieFaces = re.findall("(.+)[+|-]", dieFaces[0])
             print(dieFaces[0])
-            dieModOperand = re.findall("(?:(?:(?i)roll|(?i)rule)|r)?(?: ?).+(?: ?)d(?: ?).+(?: ?)(.+)(?: ?).+", text)
+
+            dieModOperand = re.findall("(?:(?:(?i)roll|(?i)rule)|r)?(?: ?).+(?: ?)d(?: ?).+(?: ?)([+|-])(?: ?).+", text)
             if len(dieModOperand) == 0:
                 dieModOperand.append('+')
             elif dieModOperand[0] == '':
                 dieModOperand[0] = '+'            
             print(dieModOperand[0])
-            dieMod = re.findall("(?:(?:(?i)roll|(?i)rule)|r)?(?: ?).+(?: ?)d(?: ?).+(?: ?).+(?: ?)(.+)", text)
+
+            dieMod = re.findall("(?:(?:(?i)roll|(?i)rule)|r)?(?: ?).+(?: ?)d(?: ?).+(?: ?)[+|-](?: ?)(.+)", text)
             if len(dieMod) == 0:
                 dieMod.append(0)
             elif dieMod[0] == '':
@@ -71,14 +75,22 @@ def RollDice(dieSides, dieNum=1, dieMod=0):
     dieOutcomes = ''
     dieList = []
     dieTotal = 0
+    totalOutcomes = ''
 
     for die in range(dieNum):
         diceRoll = random.randint(1, dieSides)
-        dieList.append(str(diceRoll-dieMod))
-        dieTotal += diceRoll-dieMod
+        if diceRoll == 20 or diceRoll == 1:
+            dieList.append("***"+str(diceRoll)+"***")
+        else:
+            dieList.append(str(diceRoll))
+        dieTotal += diceRoll
 
     dieOutcomes = ', '.join(dieList)
-    return ('You rolled: '+dieOutcomes+', '+DieModConverter(dieMod)+', Total: '+str(dieTotal+dieMod))
+    if dieMod == 0:
+        totalOutcomes = ', Total: '+str(dieTotal)
+    elif dieMod > 0:
+        totalOutcomes = ', Total: '+str(dieTotal)+', Total With Mod: '+str(dieTotal+dieMod)
+    return ('You rolled: '+dieOutcomes+', '+DieModConverter(dieMod)+totalOutcomes)
 
 def DieModConverter(dieMod):
     output = ''
