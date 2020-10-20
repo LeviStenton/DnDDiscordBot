@@ -7,6 +7,7 @@
 from asyncio.tasks import wait_for
 # Operating System
 import os
+from os.path import splitdrive
 # Random
 import random
 from typing import Text
@@ -23,6 +24,8 @@ from re import I
 from dotenv import load_dotenv
 # .csv
 import csv
+# SQLite
+import sqlite3
 # Datetime
 from datetime import datetime
 
@@ -34,6 +37,9 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
+# Initialize the database
+conn = sqlite3.connect('databases/levellingDB.db')
+c = conn.cursor()
 # Initialize the voice recognizer
 r = sr.Recognizer()
 # Emotes
@@ -78,14 +84,15 @@ async def on_ready():
 # On disconnecting, send a message
 @bot.event
 async def close():
-    channel = bot.get_channel(449967222652141568)    
+    channel = bot.get_channel(449967222652141568)      
+    conn.close()  
     for vc in bot.voice_clients:        
         await vc.disconnect()
     
 # When a member joins the server, send a welcoming message
 @bot.event
 async def on_member_join(member):
-    print("member joined")
+    print(f"{member.id} joined!")
     memberID = str(member.id)
     author = member.name
     authorAvatar = member.avatar_url
@@ -97,22 +104,37 @@ async def on_member_join(member):
         colour = embedColour
     )
     embed.set_author(name=author, icon_url=authorAvatar)
-    print("Author ID: "+memberID)  
-    with open('levellingDB.csv', 'a', newline='') as csvFile:
-        levellingWriter = csv.writer(csvFile, delimiter=',', quotechar='\'', quoting=csv.QUOTE_MINIMAL)
-        levellingWriter.writerow([memberID,'0','0','0'])                
+    c.execute(f"INSERT IGNORE INTO userData VALUES (?,0,0,0)", (memberID, ))
+    conn.commit()              
     await member.add_roles(role)
     await channel.send(embed=embed)
 
-# START LEVELING METHOD HERE
-# @bot.event
-# async def on_message(message):
-#     guild = bot.get_guild(249391493880479744)
-#     author = message.author.id
-#     for member in guild.members:
-#         if(member.id == author):
-#             # Implement level up feature
-#             pass
+# Method to do things when a message is sent
+@bot.event
+async def on_message(message):
+    guild = bot.get_guild(249391493880479744)
+    searchQuery = message.author.id
+    stringMessage = str(message.content)
+    userID = ''
+    userLevel = 0
+    userExp = 0
+    userMessagesSent = 0
+    c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
+    fetchedRows = c.fetchall()
+    for item in fetchedRows:             
+        splitRow = str(item).split(", ")        
+        for idx, item in enumerate(splitRow):
+            splitRow[idx] = splitRow[idx].replace('(', '')
+            splitRow[idx] = splitRow[idx].replace(')', '')
+            splitRow[idx] = splitRow[idx].replace('\'', '')
+        userID = splitRow[0]
+        userLevel = int(splitRow[1])
+        userExp = int(splitRow[2]) + len(splitChar(stringMessage))
+        userMessagesSent = int(splitRow[3]) + 1
+        c.execute(f"UPDATE userData SET userID = {userID}, userLevel = {userLevel}, userExp = {userExp}, userSentMsgs = {userMessagesSent} WHERE userID=?", (searchQuery, ))
+        conn.commit()    
+        break 
+    await bot.process_commands(message)   
 
 # ---------------------------------------------------------------------------
 # COMMAND METHODS
@@ -215,33 +237,36 @@ async def leave_voice(ctx):
 @bot.command(name='rank')
 async def req_rank(ctx):
     # Open .csv that stores levelling data
-    with open('levellingDB.csv', newline='') as csvFile:
-        author = ctx.author.name
-        authorAvatar = ctx.author.avatar_url
-        guild = ctx.guild
-        csvRow = []
-        embed = discord.Embed(
-            title = f"{levelEmote} Your stats for {guild}",
-            colour = embedColour
-        )
-        embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767867171391930458/ApprovingElite.png")
-        embed.set_author(name=f'{author}', icon_url=authorAvatar)  
-        levellingReader = csv.reader(csvFile, delimiter=',', quotechar='\'')
-        levellingWriter = csv.writer(csvFile, delimiter=',', quotechar='\'', quoting=csv.QUOTE_MINIMAL)
-        try:                
-            for row in csvFile:
-                splitRow = row.split(",")
-                if splitRow[0] == str(ctx.author.id):                                  
-                        csvRow = splitRow                    
-            embed.add_field(name="Level:", value=f"{csvRow[1]}", inline=False)
-            embed.add_field(name=f"Exp:", value=f"{csvRow[2]}", inline=False)
-            embed.add_field(name=f"Messages Sent:", value=f"{csvRow[3]}", inline=False)               
-        except:
-            embed.add_field(name=f"Error", value="Could not retrieve data.", inline=False)      
-      
+    author = ctx.author.name
+    authorAvatar = ctx.author.avatar_url
+    guild = ctx.guild
+    embed = discord.Embed(
+        title = f"{levelEmote} Your stats for {guild}",
+        colour = embedColour
+    )
+    embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767867171391930458/ApprovingElite.png")
+    embed.set_author(name=f'{author}', icon_url=authorAvatar)  
+    searchQuery = ctx.author.id
+    try:
+        c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
+        fetchedRows = c.fetchall()
+        for item in fetchedRows:             
+            splitRow = str(item).split(", ")        
+            for idx, item in enumerate(splitRow):
+                splitRow[idx] = splitRow[idx].replace('(', '')
+                splitRow[idx] = splitRow[idx].replace(')', '')
+                splitRow[idx] = splitRow[idx].replace('\'', '')
+                print(splitRow[idx])                              
+            embed.add_field(name="Level:", value=f"{splitRow[1]}", inline=False)
+            embed.add_field(name=f"Exp:", value=f"{splitRow[2]}", inline=False)
+            embed.add_field(name=f"Messages Sent:", value=f"{splitRow[3]}", inline=False) 
+            pass      
+    except:
+        embed.add_field(name="Error", value=f"Could not retriece data.", inline=False)
+    print("Author: "+str(ctx.author.id))
     await ctx.send(embed=embed)
 
-# Retrieves member, exp, and level data from levellingDB
+# Retrieves user account info based on their public profile
 @bot.command(name='userinfo')
 async def req_userinfo(ctx):
     authorName = ctx.author.name
@@ -278,17 +303,18 @@ async def req_userinfo(ctx):
 @bot.command(name='ResetServerLevelData')
 async def collectLevelData(ctx):
     try:
-        with open('levellingDB.csv', 'w', newline='') as csvFile:
-            levellingWriter = csv.writer(csvFile, delimiter=',', quotechar='\'', quoting=csv.QUOTE_MINIMAL)
-            if(ctx.message.author.id == 218890729550774282):
-                for member in ctx.guild.members:
-                    memberID = str(member.id)             
-                    levellingWriter.writerow([memberID,'0','0','0'])
+        if(ctx.message.author.id == 218890729550774282):
+            c.execute("CREATE TABLE IF NOT EXISTS userData(userID TEXT, userLevel TEXT, userExp TEXT, userSentMsgs TEXT)")
+            for member in ctx.guild.members:
+                memberID = str(member.id)             
+                c.execute(f"INSERT INTO userData VALUES (?,0,0,0)", (memberID, ))
+                conn.commit()
             print("Storing fresh data successful.")
             await ctx.send("Storing fresh data successful.")
     except:
-        print("Could not fetch fresh user data.")
-
+        print("Error resetting database.")
+        await ctx.send("Error resetting database.")
+    
 # If the command is sent with 'rollhelp', query a roll from the sent dice rolling data
 @bot.command(name='roll')
 async def Roll(ctx, text: str):
@@ -419,6 +445,10 @@ def DieModConverter(dieMod, minus=False):
         else:
             output = '*+'+str(dieMod)+'*'
     return output
+
+# Split a string into characters
+def splitChar(word): 
+    return [char for char in word]
 
 bot.run(TOKEN)
 
