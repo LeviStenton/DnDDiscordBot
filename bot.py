@@ -9,6 +9,7 @@ from asyncio.tasks import wait_for
 import os
 # Random
 import random
+from typing import Text
 # Discord
 import discord
 from discord.ext import commands
@@ -22,6 +23,8 @@ from re import I
 from dotenv import load_dotenv
 # .csv
 import csv
+# Datetime
+from datetime import datetime
 
 # ----------------------------------------------------------------------------
 # DECLARE ALL VARIABLES NECESSARY TO RUN THE PROGRAM
@@ -31,9 +34,6 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
-with open('levellingDB', newline='') as csvFile:
-    levellingReader = csv.reader(csvFile, delimiter=' ', quotechar='|')
-    levellingWriter = csv.writer(csvFile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 # Initialize the voice recognizer
 r = sr.Recognizer()
 # Emotes
@@ -41,6 +41,8 @@ rollEmote = '<:d20:766295310129430568>'
 voiceEmote = ':microphone2:'
 prefixEmote = ':exclamation:'
 restartEmote = ':electric_plug:'
+levelEmote = ':crossed_swords:'
+accountEmote = ':desktop:'
 cowboyEmote = ':cowboy:'
 # Embed Colour
 embedColour = discord.Colour.orange()
@@ -84,6 +86,7 @@ async def close():
 @bot.event
 async def on_member_join(member):
     print("member joined")
+    memberID = str(member.id)
     author = member.name
     authorAvatar = member.avatar_url
     role = discord.utils.get(member.guild.roles, name='ｄｅｂｒｉｓ 𝓭𝓻𝓲𝓯𝓽𝓮𝓻𝓼')
@@ -94,18 +97,22 @@ async def on_member_join(member):
         colour = embedColour
     )
     embed.set_author(name=author, icon_url=authorAvatar)
+    print("Author ID: "+memberID)  
+    with open('levellingDB.csv', 'a', newline='') as csvFile:
+        levellingWriter = csv.writer(csvFile, delimiter=',', quotechar='\'', quoting=csv.QUOTE_MINIMAL)
+        levellingWriter.writerow([memberID,'0','0','0'])                
     await member.add_roles(role)
     await channel.send(embed=embed)
 
 # START LEVELING METHOD HERE
-@bot.event
-async def on_message(message):
-    guild = bot.get_guild(249391493880479744)
-    author = message.author.id
-    for member in guild:
-        if(member.id == author):
-            # Implement level up feature
-            pass
+# @bot.event
+# async def on_message(message):
+#     guild = bot.get_guild(249391493880479744)
+#     author = message.author.id
+#     for member in guild.members:
+#         if(member.id == author):
+#             # Implement level up feature
+#             pass
 
 # ---------------------------------------------------------------------------
 # COMMAND METHODS
@@ -123,6 +130,8 @@ async def help(ctx):
     embed.set_author(name=f'{author}', icon_url=authorAvatar)
     embed.add_field(name=f"{rollEmote} Dice rolling:", value=f"To roll, type something like: **{ReadCommandPrefix()}roll 1d20**\nThe modifiers '+' or '-' may be added: **{ReadCommandPrefix()}roll 1d20+3**", inline=False)
     embed.add_field(name=f"{voiceEmote} Voice Chat:", value=f"To join voice chat, type: **{ReadCommandPrefix()}join** \nTo leave voice chat, type: **{ReadCommandPrefix()}leave**", inline=False)
+    embed.add_field(name=f"{levelEmote} Rank:", value=f"To view your level stats, type: **{ReadCommandPrefix()}rank**", inline=False)
+    embed.add_field(name=f"{accountEmote} Account Info:", value=f"To view your account info, type: **{ReadCommandPrefix()}userinfo**", inline=False)
     embed.add_field(name=f"{prefixEmote} Command Prefixes:", value=f"To change the prefix, type: **{ReadCommandPrefix()}setprefix <prefix>** \nNote: you must be an administrator to do this", inline=False)
     embed.add_field(name=f"{restartEmote} Restarting:", value=f"To restart the bot, type: **{ReadCommandPrefix()}restart** \nNote: you must be an administrator to do this", inline=False)
     await ctx.send(embed=embed)
@@ -201,6 +210,84 @@ async def leave_voice(ctx):
     for vc in bot.voice_clients:
             if vc.guild == ctx.guild:
                 await vc.disconnect()              
+
+# Retrieves member, exp, and level data from levellingDB
+@bot.command(name='rank')
+async def req_rank(ctx):
+    # Open .csv that stores levelling data
+    with open('levellingDB.csv', newline='') as csvFile:
+        author = ctx.author.name
+        authorAvatar = ctx.author.avatar_url
+        guild = ctx.guild
+        csvRow = []
+        embed = discord.Embed(
+            title = f"{levelEmote} Your stats for {guild}",
+            colour = embedColour
+        )
+        embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767867171391930458/ApprovingElite.png")
+        embed.set_author(name=f'{author}', icon_url=authorAvatar)  
+        levellingReader = csv.reader(csvFile, delimiter=',', quotechar='\'')
+        levellingWriter = csv.writer(csvFile, delimiter=',', quotechar='\'', quoting=csv.QUOTE_MINIMAL)
+        try:                
+            for row in csvFile:
+                splitRow = row.split(",")
+                if splitRow[0] == str(ctx.author.id):                                  
+                        csvRow = splitRow                    
+            embed.add_field(name="Level:", value=f"{csvRow[1]}", inline=False)
+            embed.add_field(name=f"Exp:", value=f"{csvRow[2]}", inline=False)
+            embed.add_field(name=f"Messages Sent:", value=f"{csvRow[3]}", inline=False)               
+        except:
+            embed.add_field(name=f"Error", value="Could not retrieve data.", inline=False)      
+      
+    await ctx.send(embed=embed)
+
+# Retrieves member, exp, and level data from levellingDB
+@bot.command(name='userinfo')
+async def req_userinfo(ctx):
+    authorName = ctx.author.name
+    authorAvatar = ctx.author.avatar_url
+    currentTime = datetime.now()
+    accCreatedAt = str(ctx.author.created_at).split(" ")
+    accJoinedAt = str(ctx.author.joined_at).split(" ")
+    timeCreated = accCreatedAt[1].split(".")
+    timeJoined = accJoinedAt[1].split(".")
+    timeSinceAccCreated = str(currentTime - ctx.author.created_at).split(",")
+    timeSinceAccJoined = str(currentTime - ctx.author.joined_at).split(",")
+    authorNick = ctx.author.nick
+    authorID = ctx.author.id
+    authorRoles = ""
+    for idx, role in enumerate(ctx.author.roles):
+        if idx > 0:
+            authorRoles = authorRoles+"<@&"+str(role.id)+"> "
+    guild = ctx.guild
+    embed = discord.Embed(
+        title = f"{accountEmote} Your Account Details",
+        colour = embedColour
+    )
+    # embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767867171391930458/ApprovingElite.png")
+    embed.set_author(name=f'{authorName}', icon_url=authorAvatar)  
+    embed.add_field(name=f"Current Nickname:", value=f"{authorNick}", inline=True)
+    embed.add_field(name=f"Account Name:", value=f"{authorName}", inline=True)
+    embed.add_field(name=f"Roles:", value=f"{authorRoles}", inline=False)
+    embed.add_field(name=f"Account Created {timeSinceAccCreated[0]} ago", value=f"**{accCreatedAt[0]}** {timeCreated[0]}", inline=True)
+    embed.add_field(name=f"Server Joined {timeSinceAccJoined[0]} ago", value=f"**{accJoinedAt[0]}** {timeJoined[0]}", inline=True)    
+    embed.set_footer(text=f"UserID: {authorID}")
+    await ctx.send(embed=embed)  
+
+# DO NOT USE THIS UNLESS YOU WANT TO WIPE ALL LEVEL DATA
+@bot.command(name='ResetServerLevelData')
+async def collectLevelData(ctx):
+    try:
+        with open('levellingDB.csv', 'w', newline='') as csvFile:
+            levellingWriter = csv.writer(csvFile, delimiter=',', quotechar='\'', quoting=csv.QUOTE_MINIMAL)
+            if(ctx.message.author.id == 218890729550774282):
+                for member in ctx.guild.members:
+                    memberID = str(member.id)             
+                    levellingWriter.writerow([memberID,'0','0','0'])
+            print("Storing fresh data successful.")
+            await ctx.send("Storing fresh data successful.")
+    except:
+        print("Could not fetch fresh user data.")
 
 # If the command is sent with 'rollhelp', query a roll from the sent dice rolling data
 @bot.command(name='roll')
