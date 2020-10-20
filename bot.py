@@ -10,7 +10,6 @@ import os
 from os.path import splitdrive
 # Random
 import random
-from typing import Text
 # Discord
 import discord
 from discord.ext import commands
@@ -22,12 +21,12 @@ import re
 from re import I
 # .env
 from dotenv import load_dotenv
-# .csv
-import csv
 # SQLite
 import sqlite3
 # Datetime
 from datetime import datetime
+# Subprocessing
+import subprocess
 
 # ----------------------------------------------------------------------------
 # DECLARE ALL VARIABLES NECESSARY TO RUN THE PROGRAM
@@ -46,12 +45,11 @@ r = sr.Recognizer()
 rollEmote = '<:d20:766295310129430568>'
 voiceEmote = ':microphone2:'
 prefixEmote = ':exclamation:'
-restartEmote = ':electric_plug:'
 levelEmote = ':crossed_swords:'
 accountEmote = ':desktop:'
 cowboyEmote = ':cowboy:'
 # Embed Colour
-embedColour = discord.Colour.orange()
+embedColour = discord.Colour.dark_blue()
 # Write to the prefix file
 def WriteCommandPrefix(prefix):
     commandPrefix = open("prefix.txt", "w")
@@ -113,28 +111,9 @@ async def on_member_join(member):
 @bot.event
 async def on_message(message):
     guild = bot.get_guild(249391493880479744)
-    searchQuery = message.author.id
-    stringMessage = str(message.content)
-    userID = ''
-    userLevel = 0
-    userExp = 0
-    userMessagesSent = 0
-    c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
-    fetchedRows = c.fetchall()
-    for item in fetchedRows:             
-        splitRow = str(item).split(", ")        
-        for idx, item in enumerate(splitRow):
-            splitRow[idx] = splitRow[idx].replace('(', '')
-            splitRow[idx] = splitRow[idx].replace(')', '')
-            splitRow[idx] = splitRow[idx].replace('\'', '')
-        userID = splitRow[0]
-        userLevel = int(splitRow[1])
-        userExp = int(splitRow[2]) + len(splitChar(stringMessage))
-        userMessagesSent = int(splitRow[3]) + 1
-        c.execute(f"UPDATE userData SET userID = {userID}, userLevel = {userLevel}, userExp = {userExp}, userSentMsgs = {userMessagesSent} WHERE userID=?", (searchQuery, ))
-        conn.commit()    
-        break 
-    await bot.process_commands(message)   
+    ExpSystem(message)
+    await bot.process_commands(message) 
+
 
 # ---------------------------------------------------------------------------
 # COMMAND METHODS
@@ -155,7 +134,6 @@ async def help(ctx):
     embed.add_field(name=f"{levelEmote} Rank:", value=f"To view your level stats, type: **{ReadCommandPrefix()}rank**", inline=False)
     embed.add_field(name=f"{accountEmote} Account Info:", value=f"To view your account info, type: **{ReadCommandPrefix()}userinfo**", inline=False)
     embed.add_field(name=f"{prefixEmote} Command Prefixes:", value=f"To change the prefix, type: **{ReadCommandPrefix()}setprefix <prefix>** \nNote: you must be an administrator to do this", inline=False)
-    embed.add_field(name=f"{restartEmote} Restarting:", value=f"To restart the bot, type: **{ReadCommandPrefix()}restart** \nNote: you must be an administrator to do this", inline=False)
     await ctx.send(embed=embed)
 
 # Sets a new prefix
@@ -172,7 +150,9 @@ async def set_prefix(ctx, newPrefix):
         for prefix in acceptablePrefixes:
             if str(newPrefix) == prefix:            
                 WriteCommandPrefix(newPrefix)
-                embedMessage = f"You changed the command prefix to: **{ReadCommandPrefix()}**\nRestart the bot for the changes to take effect."
+                bot.command_prefix = ReadCommandPrefix()
+                embedMessage = f"You changed the command prefix to: **{ReadCommandPrefix()}**"
+                await bot.change_presence(activity = discord.Activity(type = discord.ActivityType.listening, name = f"{ReadCommandPrefix()}help"))
                 break
             
             else:
@@ -184,23 +164,6 @@ async def set_prefix(ctx, newPrefix):
     )
     embed.set_author(name=f'{author}', icon_url=authorAvatar)
     await ctx.send(embed=embed)
-
-# BROKEN, FIX SOON
-@bot.command(name='restart')
-@has_permissions(administrator=True, manage_messages=True, manage_roles=True)
-async def restart_bot(ctx):
-    restartDesc = ""
-    try:
-        reboot = subprocess.call("restart.bash")
-        restartDesc = "Restarted!"   
-    except:
-        restartDesc = "Failed!"
-    embed = discord.Embed(
-            title = f"{restartEmote} Restarting...",
-            description = restartDesc,
-            colour = embedColour
-        )
-    await ctx.send(embed=embed)        
 
 # If the command is sent with 'join', join the voice channel that the autor is in
 @bot.command(name='join')
@@ -255,15 +218,13 @@ async def req_rank(ctx):
             for idx, item in enumerate(splitRow):
                 splitRow[idx] = splitRow[idx].replace('(', '')
                 splitRow[idx] = splitRow[idx].replace(')', '')
-                splitRow[idx] = splitRow[idx].replace('\'', '')
-                print(splitRow[idx])                              
+                splitRow[idx] = splitRow[idx].replace('\'', '')                             
             embed.add_field(name="Level:", value=f"{splitRow[1]}", inline=False)
             embed.add_field(name=f"Exp:", value=f"{splitRow[2]}", inline=False)
             embed.add_field(name=f"Messages Sent:", value=f"{splitRow[3]}", inline=False) 
             pass      
     except:
         embed.add_field(name="Error", value=f"Could not retriece data.", inline=False)
-    print("Author: "+str(ctx.author.id))
     await ctx.send(embed=embed)
 
 # Retrieves user account info based on their public profile
@@ -329,10 +290,10 @@ async def Roll(ctx, text: str):
     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767677300333477888/48cb5349f515f6e59edc2a4de294f439.png")
     embed.set_author(name=f'{author}', icon_url=authorAvatar)    
     embed.add_field(name="You Rolled:", value=f"{outcome[0]}", inline=False)
-    embed.add_field(name="Modifier:", value=f"{outcome[1]}", inline=False)
-    embed.add_field(name="Total:", value=f"{outcome[2]}", inline=False)
+    embed.add_field(name="Modifier", value=f"{outcome[1]}", inline=True)
+    embed.add_field(name="Total", value=f"{outcome[2]}", inline=True)
     if len(outcome) > 3:
-        embed.add_field(name="Total With Mod:", value=f"{outcome[3]}", inline=False)
+        embed.add_field(name="Total With Mod", value=f"{outcome[3]}", inline=True)
     
     await ctx.send(embed=embed)
 
@@ -359,10 +320,10 @@ async def Speech2Text(ctx,):
     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767677300333477888/48cb5349f515f6e59edc2a4de294f439.png")
     embed.set_author(name=f'{author}', icon_url=authorAvatar)    
     embed.add_field(name="You Rolled:", value=f"{outcome[0]}", inline=False)
-    embed.add_field(name="Modifier:", value=f"{outcome[1]}", inline=False)
-    embed.add_field(name="Total:", value=f"{outcome[2]}", inline=False)
+    embed.add_field(name="Modifier", value=f"{outcome[1]}", inline=True)
+    embed.add_field(name="Total", value=f"{outcome[2]}", inline=True)
     if len(outcome) > 3:
-        embed.add_field(name="Total With Mod:", value=f"{outcome[3]}", inline=False)
+        embed.add_field(name="Total With Mod", value=f"{outcome[3]}", inline=True)
 
     await ctx.send(embed=embed)
 
@@ -445,6 +406,30 @@ def DieModConverter(dieMod, minus=False):
         else:
             output = '*+'+str(dieMod)+'*'
     return output
+
+# A method to promote users with exp when they message
+def ExpSystem(message):
+    searchQuery = message.author.id
+    stringMessage = str(message.content)
+    userID = ''
+    userLevel = 0
+    userExp = 0
+    userMessagesSent = 0
+    c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
+    fetchedRows = c.fetchall()
+    for item in fetchedRows:             
+        splitRow = str(item).split(", ")        
+        for idx, item in enumerate(splitRow):
+            splitRow[idx] = splitRow[idx].replace('(', '')
+            splitRow[idx] = splitRow[idx].replace(')', '')
+            splitRow[idx] = splitRow[idx].replace('\'', '')
+        userID = splitRow[0]
+        userLevel = int(splitRow[1])
+        userExp = int(splitRow[2]) + len(splitChar(stringMessage))
+        userMessagesSent = int(splitRow[3]) + 1
+        c.execute(f"UPDATE userData SET userID = {userID}, userLevel = {userLevel}, userExp = {userExp}, userSentMsgs = {userMessagesSent} WHERE userID=?", (searchQuery, ))
+        conn.commit()           
+        break
 
 # Split a string into characters
 def splitChar(word): 

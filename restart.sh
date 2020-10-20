@@ -1,5 +1,4 @@
 #!/bin/sh
 
-cd ~/DiscordBot/TheMoonCowboy
-killall bot.py
-python3 bot.py
+pkill python3
+nohup python3 bot.py &
