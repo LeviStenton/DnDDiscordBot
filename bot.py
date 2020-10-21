@@ -121,7 +121,9 @@ async def on_message(message):
     generalID = 449967222652141568
     botID = 715110532532797490
     encounterChance = 0.02
+    encounterTypeChance = 0.3
     randFloat = random.random()
+    encounterFloat = random.random()
     channelID = message.channel.id
     channel = bot.get_channel(channelID)    
     MsgExpSystem(message)    
@@ -129,48 +131,28 @@ async def on_message(message):
         global encounterType
         global encounterID 
         global encounterBool
-        encounterType = RandomEncounter()
-        encounterMsg = await channel.send(embed=encounterType[0])        
-        encounterID = str(encounterMsg.id)
-        encounterBool = True
-        #print(encounterID)
-        await encounterMsg.add_reaction(rollEmote)        
+        if encounterFloat >= encounterTypeChance:
+            encounterType = SkillRandomEncounter()
+            encounterMsg = await channel.send(embed=encounterType[0])        
+            encounterID = str(encounterMsg.id)
+            encounterBool = True
+            #print(encounterID)
+            await encounterMsg.add_reaction(rollEmote) 
+        elif encounterFloat < encounterTypeChance:
+            encounterType = DNDMonRandomEncounter()
+            encounterMsg = await channel.send(embed=encounterType[0])        
+            encounterID = str(encounterMsg.id)
+            encounterBool = True
+            #print(encounterID)
+            await encounterMsg.add_reaction(rollEmote)                 
     await bot.process_commands(message) 
 
 # Method to do things when a reaction is added
 @bot.event
 async def on_reaction_add(reaction, user):
     general = bot.get_channel(449967222652141568)
-    botID = 715110532532797490
-    global encounterBool
-    global encounterType
-    authorAvatar = user.avatar_url
-    author = user.name
-    outcome = QueryRoll("1d20")
-    expReward = encounterType[1]
-    rollNum = outcome[2]
-    outcomeMsg = ''
-    if str(reaction.message.id) == str(encounterID) and user.id != botID and str(reaction.emoji) == str(rollEmote) and encounterBool:   
-        if int(rollNum) >= encounterType[2]:
-            if rollNum == 20:
-                RctExpSystem(user, int(expReward)*2)
-                outcomeMsg = f'***Nat 20!*** You defeated the monster! ***{int(expReward)*2}*** Exp rewarded!'            
-            else:    
-                RctExpSystem(user, expReward)
-                outcomeMsg = f'You defeated the monster! **{expReward}** Exp rewarded!'  
-        elif rollNum == 1:
-                RctExpSystem(user, -int(expReward))
-                outcomeMsg = f'***Nat 1!*** You were slain by the monster! **{-int(expReward)}** Exp lost!'      
-        else:
-            outcomeMsg = 'You were defeated.'
-        embed = discord.Embed(
-            title = f"You rolled: {rollNum}",
-            description = outcomeMsg,
-            colour = discord.Colour.red()
-        )        
-        encounterBool = False
-        embed.set_author(name=f'{author}', icon_url=authorAvatar)
-        await general.send(embed=embed)
+    embed = ClearEncounter(reaction, user)
+    await general.send(embed=embed)
 
 # ---------------------------------------------------------------------------
 # COMMAND METHODS
@@ -387,38 +369,37 @@ async def Speech2Text(ctx,):
 # Takes a string that is Regex'd to find specific dice rolling data
 def QueryRoll(text):
     if re.match(r"(?:roll|rule)?(?: ?).+(?: ?)d(?: ?).+(?: ?)(?:[\+|\-|minus|plus](?: ?).+)*", text, flags=I):
+        dieNum = re.findall(r"(?:(?:roll|rule)|r)?(.+)(?: ?)d(?: ?).+(?: ?)(?:[\+|\-|minus|plus](?: ?).+)*", text, flags=I)
+        if re.match(r"(?: ?)a", dieNum[0]):
+            dieNum[0] = 1;
+        elif re.match(r"(?: ?)for", dieNum[0]):
+            dieNum[0] = 4
 
-            dieNum = re.findall(r"(?:(?:roll|rule)|r)?(.+)(?: ?)d(?: ?).+(?: ?)(?:[\+|\-|minus|plus](?: ?).+)*", text, flags=I)
-            if re.match(r"(?: ?)a", dieNum[0]):
-                dieNum[0] = 1;
-            elif re.match(r"(?: ?)for", dieNum[0]):
-                dieNum[0] = 4
+        dieFaces = re.findall(r"(?:(?:roll|rule)|r)?(?: ?).+(?: ?)d(?: ?)(.+)(?: ?)(?:[\+|\-|minus|plus](?: ?).+)*", text, flags=I)
+        if re.match(r".+(?: ?)(?:\+|\-|minus|plus)", dieFaces[0]):
+            dieFaces = re.findall(r"(.+)(?: ?)(?:\+|\-|minus|plus)", dieFaces[0])
 
-            dieFaces = re.findall(r"(?:(?:roll|rule)|r)?(?: ?).+(?: ?)d(?: ?)(.+)(?: ?)(?:[\+|\-|minus|plus](?: ?).+)*", text, flags=I)
-            if re.match(r".+(?: ?)(?:\+|\-|minus|plus)", dieFaces[0]):
-                dieFaces = re.findall(r"(.+)(?: ?)(?:\+|\-|minus|plus)", dieFaces[0])
+        dieModOperand = re.findall(r"(?:(?:roll|rule)|r)?(?: ?).+(?: ?)d(?: ?).+(?: ?)(\+|\-|minus|plus)(?: ?).+", text, flags=I)
+        if len(dieModOperand) == 0:
+            dieModOperand.append('+')
+        elif dieModOperand[0] == '':
+            dieModOperand[0] = '+'
+        elif dieModOperand[0] == 'plus':
+            dieModOperand[0] = '+'
+        elif dieModOperand[0] == 'minus':
+            dieModOperand[0] = '-'
+        if dieModOperand[0] == '-':
+            minusMod = True
+        else:
+            minusMod = False
 
-            dieModOperand = re.findall(r"(?:(?:roll|rule)|r)?(?: ?).+(?: ?)d(?: ?).+(?: ?)(\+|\-|minus|plus)(?: ?).+", text, flags=I)
-            if len(dieModOperand) == 0:
-                dieModOperand.append('+')
-            elif dieModOperand[0] == '':
-                dieModOperand[0] = '+'
-            elif dieModOperand[0] == 'plus':
-                dieModOperand[0] = '+'
-            elif dieModOperand[0] == 'minus':
-                dieModOperand[0] = '-'
-            if dieModOperand[0] == '-':
-                minusMod = True
-            else:
-                minusMod = False
+        dieMod = re.findall(r"(?:(?:roll|rule)|r)?(?: ?).+(?: ?)d(?: ?).+(?: ?)[\+|\-|minus|plus](?: ?)(.+)", text, flags=I)
+        if len(dieMod) == 0:
+            dieMod.append(0)
+        elif dieMod[0] == '':
+            dieMod[0] = 0
 
-            dieMod = re.findall(r"(?:(?:roll|rule)|r)?(?: ?).+(?: ?)d(?: ?).+(?: ?)[\+|\-|minus|plus](?: ?)(.+)", text, flags=I)
-            if len(dieMod) == 0:
-                dieMod.append(0)
-            elif dieMod[0] == '':
-                dieMod[0] = 0
-
-            return RollDice(int(dieFaces[0]), int(dieNum[0]), int(dieMod[0]), minusMod)
+        return RollDice(int(dieFaces[0]), int(dieNum[0]), int(dieMod[0]), minusMod)
     else:
         return 'Error in roll statement.'
 
@@ -464,17 +445,51 @@ def DieModConverter(dieMod, minus=False):
             output = '*+'+str(dieMod)+'*'
     return output
 
-def RandomEncounter():    
-    monsters = ["Wolf","Goblin","Bandit","Gorgon","Harpy","Green Dragon Wyrmling"]
-    experience = ["50","50","25","1800","200","450"]
-    challengeRating = ["1/4","1/4","1/8","5","1","2"]
-    armourClass = [13,15,12,19,11,17]
+def ClearEncounter(reaction, user):    
+    botID = 715110532532797490
+    global encounterBool
+    global encounterType
+    authorAvatar = user.avatar_url
+    author = user.name
+    outcome = QueryRoll("1d20")
+    expReward = encounterType[1]
+    rollNum = int(outcome[2])
+    outcomeMsg = ''
+    if str(reaction.message.id) == str(encounterID) and user.id != botID and str(reaction.emoji) == str(rollEmote) and encounterBool:   
+        if rollNum == 20:
+            RctExpSystem(user, int(expReward)*2)
+            outcomeMsg = f'***Nat 20!*** You defeated the encounter! ***{int(expReward)*2}*** Exp rewarded!'
+        elif int(rollNum) >= encounterType[2]:
+            RctExpSystem(user, expReward)
+            outcomeMsg = f'You defeated the encounter! **{expReward}** Exp rewarded!'  
+        elif rollNum == 1:
+                RctExpSystem(user, -int(expReward))
+                outcomeMsg = f'***Nat 1!*** You were slain by the encounter! **{-int(expReward)}** Exp lost!'      
+        else:
+            outcomeMsg = 'You were defeated.'
+        embed = discord.Embed(
+            title = f"You rolled: {rollNum}",
+            description = outcomeMsg,
+            colour = discord.Colour.red()
+        )        
+        encounterBool = False
+        embed.set_author(name=f'{author}', icon_url=authorAvatar)
+        return embed
+
+### Comment
+def DNDMonRandomEncounter():    
+    monsters = ["Wolf","Goblin","Bandit","Gorgon","Harpy","Green Dragon Wyrmling","Werewolf","Stone Giant"]
+    experience = ["50","50","25","1800","200","450","700","2900"]
+    challengeRating = ["1/4","1/4","1/8","5","1","2","3","7"]
+    armourClass = [13,15,12,19,11,17,12,17]
     monPicture = ["https://media-waterdeep.cursecdn.com/avatars/thumbnails/0/54/1000/1000/636252725270715296.jpeg",
     "https://media-waterdeep.cursecdn.com/avatars/thumbnails/0/351/1000/1000/636252777818652432.jpeg",
     "https://media-waterdeep.cursecdn.com/avatars/thumbnails/0/181/1000/1000/636252761965117015.jpeg",
     "https://media-waterdeep.cursecdn.com/avatars/thumbnails/0/355/1000/1000/636252778125099430.jpeg",
     "https://media-waterdeep.cursecdn.com/avatars/thumbnails/0/391/1000/1000/636252781955908234.jpeg",
-    "https://media-waterdeep.cursecdn.com/avatars/thumbnails/0/363/1000/1000/636252778639163748.jpeg"]
+    "https://media-waterdeep.cursecdn.com/avatars/thumbnails/0/363/1000/1000/636252778639163748.jpeg",
+    "https://media-waterdeep.cursecdn.com/avatars/thumbnails/0/74/1000/1000/636252734224239957.jpeg",
+    "https://media-waterdeep.cursecdn.com/avatars/thumbnails/0/109/1000/1000/636252744518731463.jpeg"]
     randomInt = random.randint(0,len(monsters))
 
     embed = discord.Embed(
@@ -483,8 +498,33 @@ def RandomEncounter():
         colour = discord.Colour.red()
     )
     embed.set_thumbnail(url=f"{monPicture[randomInt]}")
-    embed.set_author(name=f'Combat Encounter!', icon_url="https://cdn.discordapp.com/attachments/758193066913562656/768099158493364314/D20.png")
+    embed.set_author(name=f'Combat Encounter!', icon_url="https://i.pinimg.com/originals/48/cb/53/48cb5349f515f6e59edc2a4de294f439.png")
     embed.add_field(name=f"**AC**", value=f"{armourClass[randomInt]}", inline=True)
+    embed.add_field(name=f"**CR**", value=f"{challengeRating[randomInt]}", inline=True)
+    embed.add_field(name=f"**EXP**", value=f"{experience[randomInt]}", inline=True)    
+    return embed, experience[randomInt], armourClass[randomInt] 
+
+def SkillRandomEncounter():    
+    monsters = ["A Boulder Is Falling!","Lockpick The Chest!","Withstand The Storm!","You Are Lost In A Desert","Flee The Treant!","A Thief Approaches!"]
+    experience = ["100","200","350","300","1000","50"]
+    challengeRating = ["1","2","3","2 1/2","5","1/2"]
+    armourClass = [14,15,16,14,18,12]
+    monPicture = ["https://pbs.twimg.com/media/C8L2wgVWkAUCi32.png",
+    "https://media-waterdeep.cursecdn.com/avatars/thumbnails/0/211/1000/1000/636252764731637373.jpeg",
+    "https://i1.wp.com/nerdarchy.com/wp-content/uploads/2018/05/Brainstorm.png?fit=864%2C628&ssl=1",
+    "https://static.wikia.nocookie.net/emerald-isles/images/8/87/Desert.jpg/revision/latest/top-crop/width/220/height/220?cb=20180209064004",
+    "https://comicvine1.cbsistatic.com/uploads/original/11120/111209888/5139105-014afdf2e2481539ed8959752233f379.jpg",
+    "https://roadbeerdotnet.files.wordpress.com/2020/07/thief-six-1024x1024-1.jpg"]
+    randomInt = random.randint(0,len(monsters))
+
+    embed = discord.Embed(
+        title = f"{monsters[randomInt]}",
+        description= "",
+        colour = discord.Colour.red()
+    )
+    embed.set_thumbnail(url=f"{monPicture[randomInt]}")
+    embed.set_author(name=f'Skill Encounter!', icon_url="https://i.pinimg.com/originals/48/cb/53/48cb5349f515f6e59edc2a4de294f439.png")
+    embed.add_field(name=f"**DC**", value=f"{armourClass[randomInt]}", inline=True)
     embed.add_field(name=f"**CR**", value=f"{challengeRating[randomInt]}", inline=True)
     embed.add_field(name=f"**EXP**", value=f"{experience[randomInt]}", inline=True)    
     return embed, experience[randomInt], armourClass[randomInt] 
