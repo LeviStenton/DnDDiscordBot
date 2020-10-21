@@ -4,7 +4,7 @@
 # IMPORT ALL NECESSARY ASSETS TO RUN THE PROGRAMS
 
 # Async
-from asyncio.tasks import wait_for
+import asyncio
 # Operating System
 import os
 from os.path import splitdrive
@@ -12,6 +12,8 @@ from os.path import splitdrive
 import random
 # Discord
 import discord
+from discord import reaction
+from discord import user
 from discord.ext import commands
 from discord.ext.commands import has_permissions, CheckFailure
 # Speech Recognition
@@ -25,8 +27,8 @@ from dotenv import load_dotenv
 import sqlite3
 # Datetime
 from datetime import datetime
-# Subprocessing
-import subprocess
+# Time
+import time
 
 # ----------------------------------------------------------------------------
 # DECLARE ALL VARIABLES NECESSARY TO RUN THE PROGRAM
@@ -59,12 +61,18 @@ def WriteCommandPrefix(prefix):
 def ReadCommandPrefix():
     commandPrefix = open("prefix.txt", "r")
     return commandPrefix.read()
-intents = discord.Intents.default()
+intents = discord.Intents.all()
 intents.members = True
+intents.reactions = True
 # Sets the bot's command prefix to the prefix in prefix.txt
 bot = commands.Bot(command_prefix=ReadCommandPrefix(), intents=intents)  
 # Remove the in-built help command to write my own
 bot.remove_command("help")
+# Global variables for Encounters
+encounterID = ""
+encounterBool = False
+encounterType = []
+
 # ---------------------------------------------------------------------------
 # ON EVENT METHODS
 
@@ -110,10 +118,59 @@ async def on_member_join(member):
 # Method to do things when a message is sent
 @bot.event
 async def on_message(message):
-    guild = bot.get_guild(249391493880479744)
-    ExpSystem(message)
+    generalID = 449967222652141568
+    botID = 715110532532797490
+    encounterChance = 0.02
+    randFloat = random.random()
+    channelID = message.channel.id
+    channel = bot.get_channel(channelID)    
+    MsgExpSystem(message)    
+    if(randFloat < encounterChance and channelID == generalID and message.author.id != botID):
+        global encounterType
+        global encounterID 
+        global encounterBool
+        encounterType = RandomEncounter()
+        encounterMsg = await channel.send(embed=encounterType[0])        
+        encounterID = str(encounterMsg.id)
+        encounterBool = True
+        #print(encounterID)
+        await encounterMsg.add_reaction(rollEmote)        
     await bot.process_commands(message) 
 
+# Method to do things when a reaction is added
+@bot.event
+async def on_reaction_add(reaction, user):
+    general = bot.get_channel(449967222652141568)
+    botID = 715110532532797490
+    global encounterBool
+    global encounterType
+    authorAvatar = user.avatar_url
+    author = user.name
+    outcome = QueryRoll("1d20")
+    expReward = encounterType[1]
+    rollNum = outcome[2]
+    outcomeMsg = ''
+    if str(reaction.message.id) == str(encounterID) and user.id != botID and str(reaction.emoji) == str(rollEmote) and encounterBool:   
+        if int(rollNum) >= encounterType[2]:
+            if rollNum == 20:
+                RctExpSystem(user, int(expReward)*2)
+                outcomeMsg = f'***Nat 20!*** You defeated the monster! ***{int(expReward)*2}*** Exp rewarded!'            
+            else:    
+                RctExpSystem(user, expReward)
+                outcomeMsg = f'You defeated the monster! **{expReward}** Exp rewarded!'  
+        elif rollNum == 1:
+                RctExpSystem(user, -int(expReward))
+                outcomeMsg = f'***Nat 1!*** You were slain by the monster! **{-int(expReward)}** Exp lost!'      
+        else:
+            outcomeMsg = 'You were defeated.'
+        embed = discord.Embed(
+            title = f"You rolled: {rollNum}",
+            description = outcomeMsg,
+            colour = discord.Colour.red()
+        )        
+        encounterBool = False
+        embed.set_author(name=f'{author}', icon_url=authorAvatar)
+        await general.send(embed=embed)
 
 # ---------------------------------------------------------------------------
 # COMMAND METHODS
@@ -275,7 +332,7 @@ async def collectLevelData(ctx):
     except:
         print("Error resetting database.")
         await ctx.send("Error resetting database.")
-    
+
 # If the command is sent with 'rollhelp', query a roll from the sent dice rolling data
 @bot.command(name='roll')
 async def Roll(ctx, text: str):
@@ -407,8 +464,33 @@ def DieModConverter(dieMod, minus=False):
             output = '*+'+str(dieMod)+'*'
     return output
 
+def RandomEncounter():    
+    monsters = ["Wolf","Goblin","Bandit","Gorgon","Harpy","Green Dragon Wyrmling"]
+    experience = ["50","50","25","1800","200","450"]
+    challengeRating = ["1/4","1/4","1/8","5","1","2"]
+    armourClass = [13,15,12,19,11,17]
+    monPicture = ["https://media-waterdeep.cursecdn.com/avatars/thumbnails/0/54/1000/1000/636252725270715296.jpeg",
+    "https://media-waterdeep.cursecdn.com/avatars/thumbnails/0/351/1000/1000/636252777818652432.jpeg",
+    "https://media-waterdeep.cursecdn.com/avatars/thumbnails/0/181/1000/1000/636252761965117015.jpeg",
+    "https://media-waterdeep.cursecdn.com/avatars/thumbnails/0/355/1000/1000/636252778125099430.jpeg",
+    "https://media-waterdeep.cursecdn.com/avatars/thumbnails/0/391/1000/1000/636252781955908234.jpeg",
+    "https://media-waterdeep.cursecdn.com/avatars/thumbnails/0/363/1000/1000/636252778639163748.jpeg"]
+    randomInt = random.randint(0,len(monsters))
+
+    embed = discord.Embed(
+        title = f"A {monsters[randomInt]} appeared!",
+        description= "",
+        colour = discord.Colour.red()
+    )
+    embed.set_thumbnail(url=f"{monPicture[randomInt]}")
+    embed.set_author(name=f'Combat Encounter!', icon_url="https://cdn.discordapp.com/attachments/758193066913562656/768099158493364314/D20.png")
+    embed.add_field(name=f"**AC**", value=f"{armourClass[randomInt]}", inline=True)
+    embed.add_field(name=f"**CR**", value=f"{challengeRating[randomInt]}", inline=True)
+    embed.add_field(name=f"**EXP**", value=f"{experience[randomInt]}", inline=True)    
+    return embed, experience[randomInt], armourClass[randomInt] 
+
 # A method to promote users with exp when they message
-def ExpSystem(message):
+def MsgExpSystem(message):
     searchQuery = message.author.id
     stringMessage = str(message.content)
     userID = ''
@@ -431,9 +513,61 @@ def ExpSystem(message):
         conn.commit()           
         break
 
+# A method to promote users with exp when they complete random events
+def RctExpSystem(rctUser, exp):
+    searchQuery = rctUser.id
+    userID = ''
+    userLevel = 0
+    userExp = 0
+    userMessagesSent = 0
+    c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
+    fetchedRows = c.fetchall()
+    for item in fetchedRows:             
+        splitRow = str(item).split(", ")        
+        for idx, item in enumerate(splitRow):
+            splitRow[idx] = splitRow[idx].replace('(', '')
+            splitRow[idx] = splitRow[idx].replace(')', '')
+            splitRow[idx] = splitRow[idx].replace('\'', '')
+        userID = splitRow[0]
+        userLevel = int(splitRow[1])
+        userExp = int(splitRow[2]) + int(exp)
+        userMessagesSent = int(splitRow[3]) + 1
+        c.execute(f"UPDATE userData SET userID = {userID}, userLevel = {userLevel}, userExp = {userExp}, userSentMsgs = {userMessagesSent} WHERE userID=?", (searchQuery, ))
+        conn.commit()           
+        break
+
 # Split a string into characters
 def splitChar(word): 
     return [char for char in word]
+
+# Limit the rate something can be called. Taken from: https://stackoverflow.com/questions/51144059/how-to-rate-limit-a-coroutine-and-re-call-the-coroutine-after-the-limit
+# def rate_limited(max_per_second):
+#     min_interval = 1.0 / float(max_per_second)
+#     def decorate(func):
+#         last_time_called = [0.0]
+#         async def rate_limited_function(*args, **kargs):
+#             elapsed = time.time() - last_time_called[0]
+#             left_to_wait = min_interval - elapsed
+#             while left_to_wait > 0:
+#                 await asyncio.sleep(left_to_wait)
+#                 elapsed = time.time() - last_time_called[0]
+#                 left_to_wait = min_interval - elapsed
+#             ret = func(*args, **kargs)
+#             last_time_called[0] = time.time()
+#             return ret
+#         return rate_limited_function
+#     return decorate
+
+# @rate_limited(0.2)
+# def print_number():
+#     print("Actually called at time: %r" % (time.time(),))
+
+# loop = asyncio.get_event_loop()
+# asyncio.ensure_future(print_number())
+# asyncio.ensure_future(print_number())
+# asyncio.ensure_future(print_number())
+# asyncio.ensure_future(print_number())
+# loop.run_forever()
 
 bot.run(TOKEN)
 
