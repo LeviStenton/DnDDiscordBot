@@ -3,8 +3,6 @@
 # ---------------------------------------------------------------------------
 # IMPORT ALL NECESSARY ASSETS TO RUN THE PROGRAMS
 
-# Async
-import asyncio
 # Operating System
 import os
 from os.path import splitdrive
@@ -27,8 +25,8 @@ from dotenv import load_dotenv
 import sqlite3
 # Datetime
 from datetime import datetime
-# Time
-import time
+from datetime import timedelta
+
 
 # ----------------------------------------------------------------------------
 # DECLARE ALL VARIABLES NECESSARY TO RUN THE PROGRAM
@@ -118,6 +116,7 @@ async def on_member_join(member):
 # Method to do things when a message is sent
 @bot.event
 async def on_message(message):
+    # Declaring variables to be used
     generalID = 449967222652141568
     botID = 715110532532797490
     encounterChance = 0.02
@@ -125,8 +124,21 @@ async def on_message(message):
     randFloat = random.random()
     encounterFloat = random.random()
     channelID = message.channel.id
-    channel = bot.get_channel(channelID)    
-    MsgExpSystem(message)    
+    channel = bot.get_channel(channelID)
+    # Checking time since author's last message ### GETTING THE CURRENT MESSAGE
+    oldestMessage = await channel.history().find(lambda m: m.author.id == message.author.id)         
+    delayedTime = datetime.now() - timedelta(seconds=3)
+    correctMsgTime = oldestMessage.created_at + timedelta(hours=10)
+    print(delayedTime) 
+    print(correctMsgTime)
+    if correctMsgTime > delayedTime:
+        expBool = True
+    else:
+        expBool = False
+    print(expBool)
+    # Rewarding exp
+    MsgExpSystem(message, expBool)  
+    # Generating an encounter  
     if(randFloat < encounterChance and channelID == generalID and message.author.id != botID):
         global encounterType
         global encounterID 
@@ -136,14 +148,12 @@ async def on_message(message):
             encounterMsg = await channel.send(embed=encounterType[0])        
             encounterID = str(encounterMsg.id)
             encounterBool = True
-            #print(encounterID)
             await encounterMsg.add_reaction(rollEmote) 
         elif encounterFloat < encounterTypeChance:
             encounterType = DNDMonRandomEncounter()
             encounterMsg = await channel.send(embed=encounterType[0])        
             encounterID = str(encounterMsg.id)
             encounterBool = True
-            #print(encounterID)
             await encounterMsg.add_reaction(rollEmote)                 
     await bot.process_commands(message) 
 
@@ -445,6 +455,7 @@ def DieModConverter(dieMod, minus=False):
             output = '*+'+str(dieMod)+'*'
     return output
 
+# A method that is called when someone reacts the d20 to the message, calls RctExpSystem
 def ClearEncounter(reaction, user):    
     botID = 715110532532797490
     global encounterBool
@@ -476,7 +487,7 @@ def ClearEncounter(reaction, user):
         embed.set_author(name=f'{author}', icon_url=authorAvatar)
         return embed
 
-### Comment
+# Method to call to create a new monster encounter embedded message, stores monster data
 def DNDMonRandomEncounter():    
     monsters = ["Wolf","Goblin","Bandit","Gorgon","Harpy","Green Dragon Wyrmling","Werewolf","Stone Giant"]
     experience = ["50","50","25","1800","200","450","700","2900"]
@@ -494,7 +505,7 @@ def DNDMonRandomEncounter():
 
     embed = discord.Embed(
         title = f"A {monsters[randomInt]} appeared!",
-        description= "",
+        description= "Roll to attack!",
         colour = discord.Colour.red()
     )
     embed.set_thumbnail(url=f"{monPicture[randomInt]}")
@@ -504,6 +515,7 @@ def DNDMonRandomEncounter():
     embed.add_field(name=f"**EXP**", value=f"{experience[randomInt]}", inline=True)    
     return embed, experience[randomInt], armourClass[randomInt] 
 
+# Method to call to create a new skill encounter embedded message, stores encounter data
 def SkillRandomEncounter():    
     monsters = ["A Boulder Is Falling!","Lockpick The Chest!","Withstand The Storm!","You Are Lost In A Desert","Flee The Treant!","A Thief Approaches!"]
     experience = ["100","200","350","300","1000","50"]
@@ -519,7 +531,7 @@ def SkillRandomEncounter():
 
     embed = discord.Embed(
         title = f"{monsters[randomInt]}",
-        description= "",
+        description= "Roll to test your skill!",
         colour = discord.Colour.red()
     )
     embed.set_thumbnail(url=f"{monPicture[randomInt]}")
@@ -530,7 +542,7 @@ def SkillRandomEncounter():
     return embed, experience[randomInt], armourClass[randomInt] 
 
 # A method to promote users with exp when they message
-def MsgExpSystem(message):
+def MsgExpSystem(message, expBool):
     searchQuery = message.author.id
     stringMessage = str(message.content)
     userID = ''
@@ -547,9 +559,12 @@ def MsgExpSystem(message):
             splitRow[idx] = splitRow[idx].replace('\'', '')
         userID = splitRow[0]
         userLevel = int(splitRow[1])
-        userExp = int(splitRow[2]) + len(splitChar(stringMessage))
+        if expBool:
+            userExp = int(splitRow[2]) + len(splitChar(stringMessage))
+        else:
+            userExp = int(splitRow[2])
         userMessagesSent = int(splitRow[3]) + 1
-        c.execute(f"UPDATE userData SET userID = {userID}, userLevel = {userLevel}, userExp = {userExp}, userSentMsgs = {userMessagesSent} WHERE userID=?", (searchQuery, ))
+        c.execute(f"UPDATE userData SET userID = {userID}, userLevel = {userLevel}, userExp = {ExpReward(userExp)}, userSentMsgs = {userMessagesSent} WHERE userID=?", (searchQuery, ))
         conn.commit()           
         break
 
@@ -580,34 +595,9 @@ def RctExpSystem(rctUser, exp):
 def splitChar(word): 
     return [char for char in word]
 
-# Limit the rate something can be called. Taken from: https://stackoverflow.com/questions/51144059/how-to-rate-limit-a-coroutine-and-re-call-the-coroutine-after-the-limit
-# def rate_limited(max_per_second):
-#     min_interval = 1.0 / float(max_per_second)
-#     def decorate(func):
-#         last_time_called = [0.0]
-#         async def rate_limited_function(*args, **kargs):
-#             elapsed = time.time() - last_time_called[0]
-#             left_to_wait = min_interval - elapsed
-#             while left_to_wait > 0:
-#                 await asyncio.sleep(left_to_wait)
-#                 elapsed = time.time() - last_time_called[0]
-#                 left_to_wait = min_interval - elapsed
-#             ret = func(*args, **kargs)
-#             last_time_called[0] = time.time()
-#             return ret
-#         return rate_limited_function
-#     return decorate
-
-# @rate_limited(0.2)
-# def print_number():
-#     print("Actually called at time: %r" % (time.time(),))
-
-# loop = asyncio.get_event_loop()
-# asyncio.ensure_future(print_number())
-# asyncio.ensure_future(print_number())
-# asyncio.ensure_future(print_number())
-# asyncio.ensure_future(print_number())
-# loop.run_forever()
+def ExpReward(exp):
+    exp = int(exp)
+    return exp
 
 bot.run(TOKEN)
 
