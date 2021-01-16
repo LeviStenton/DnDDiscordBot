@@ -1,1 +1,2 @@
-/home/pi/TheMoonCowboy/.env
+# Sensitive environment variables
+TheMoonCowboy/.env
