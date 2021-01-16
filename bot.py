@@ -8,6 +8,8 @@ import os
 from os.path import splitdrive
 # Random
 import random
+# Math
+import math
 # Discord
 import discord
 from discord import reaction
@@ -70,6 +72,7 @@ bot.remove_command("help")
 encounterID = ""
 encounterBool = False
 encounterType = []
+levellingConstant = 0.1
 
 # ---------------------------------------------------------------------------
 # ON EVENT METHODS
@@ -118,26 +121,56 @@ async def on_member_join(member):
 async def on_message(message):
     # Declaring variables to be used
     generalID = 449967222652141568
+    levelUp = bot.get_channel(685776640667811895)
     botID = 715110532532797490
-    encounterChance = 0.02
+    author = message.author
+    encounterChance = 0.05
     encounterTypeChance = 0.3
     randFloat = random.random()
     encounterFloat = random.random()
     channelID = message.channel.id
     channel = bot.get_channel(channelID)
+
+    # Rate limiting the exp users gain from messages
     # Checking time since author's last message ### GETTING THE CURRENT MESSAGE
-    oldestMessage = await channel.history().find(lambda m: m.author.id == message.author.id)         
-    delayedTime = datetime.now() - timedelta(seconds=3)
-    correctMsgTime = oldestMessage.created_at + timedelta(hours=10)
-    print(delayedTime) 
-    print(correctMsgTime)
-    if correctMsgTime > delayedTime:
-        expBool = True
-    else:
-        expBool = False
-    print(expBool)
+    # userMessages = []
+    # for chnlMsg in channel.history():
+    #     if chnlMsg.author.id == message.auther.id:
+    #         userMessages.append(message.content)
+    # for usrMsg, idx in userMessages:
+    #     if idx > 0:
+    #         oldestMessage = await message.find(lambda m: m.author.id == message.author.id) 
+    #         break;
+    #     else:
+    #         oldestMessage = None 
+
+    # delayedTime = datetime.now() - timedelta(seconds=3)
+    # correctMsgTime = oldestMessage.created_at + timedelta(hours=10)
+    # print(delayedTime) 
+    # print(correctMsgTime)
+    # if correctMsgTime > delayedTime:
+    #     expBool = True
+    # else:
+    #     expBool = False
+    # print(expBool)
     # Rewarding exp
+    expBool = True
     MsgExpSystem(message, expBool)  
+
+    # Issueing the levelup message on levelups
+    # searchQuery = message.author.id
+    # level = 0
+    # c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
+    # fetchedRows = c.fetchall()
+    # for item in fetchedRows:
+    #     splitRow = str(item).split(", ")
+    #     for idx, item in enumerate(splitRow):
+    #         splitRow[idx] = splitRow[idx].replace('(', '')
+    #         splitRow[idx] = splitRow[idx].replace(')', '')
+    #         splitRow[idx] = splitRow[idx].replace('\'', '')
+    # if(len(splitChar(message.content)) >= 0):
+    #     await levelUp.send(embed=LevelUpMsg(author, int(float(splitRow[2]))))
+
     # Generating an encounter  
     if(randFloat < encounterChance and channelID == generalID and message.author.id != botID):
         global encounterType
@@ -259,21 +292,23 @@ async def req_rank(ctx):
     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767867171391930458/ApprovingElite.png")
     embed.set_author(name=f'{author}', icon_url=authorAvatar)  
     searchQuery = ctx.author.id
-    try:
-        c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
-        fetchedRows = c.fetchall()
-        for item in fetchedRows:             
-            splitRow = str(item).split(", ")        
-            for idx, item in enumerate(splitRow):
-                splitRow[idx] = splitRow[idx].replace('(', '')
-                splitRow[idx] = splitRow[idx].replace(')', '')
-                splitRow[idx] = splitRow[idx].replace('\'', '')                             
-            embed.add_field(name="Level:", value=f"{splitRow[1]}", inline=False)
-            embed.add_field(name=f"Exp:", value=f"{splitRow[2]}", inline=False)
-            embed.add_field(name=f"Messages Sent:", value=f"{splitRow[3]}", inline=False) 
-            pass      
-    except:
-        embed.add_field(name="Error", value=f"Could not retriece data.", inline=False)
+    c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
+    fetchedRows = c.fetchall()
+    for item in fetchedRows:             
+        splitRow = str(item).split(", ")        
+        for idx, item in enumerate(splitRow):
+            splitRow[idx] = splitRow[idx].replace('(', '')
+            splitRow[idx] = splitRow[idx].replace(')', '')
+            splitRow[idx] = splitRow[idx].replace('\'', '')     
+        level = math.floor(float(splitRow[1]))
+        exp = splitRow[2]
+        expRemaining = round((math.ceil(float(splitRow[1])) ** 2) / (levellingConstant * levellingConstant) - int(exp))
+        msgsSent = splitRow[3]
+        embed.add_field(name="Level:", value=f"{level}", inline=False)
+        embed.add_field(name=f"Exp:", value=f"{exp}", inline=False)
+        embed.add_field(name=f"Exp Until Next Level:", value=f"{expRemaining}", inline=False)
+        embed.add_field(name=f"Messages Sent:", value=f"{msgsSent}", inline=False) 
+        pass    
     await ctx.send(embed=embed)
 
 # Retrieves user account info based on their public profile
@@ -517,16 +552,17 @@ def DNDMonRandomEncounter():
 
 # Method to call to create a new skill encounter embedded message, stores encounter data
 def SkillRandomEncounter():    
-    monsters = ["A Boulder Is Falling!","Lockpick The Chest!","Withstand The Storm!","You Are Lost In A Desert","Flee The Treant!","A Thief Approaches!"]
-    experience = ["100","200","350","300","1000","50"]
-    challengeRating = ["1","2","3","2 1/2","5","1/2"]
-    armourClass = [14,15,16,14,18,12]
+    monsters = ["A Boulder Is Falling!","Lockpick The Chest!","Withstand The Storm!","You Are Lost In A Desert","Flee The Treant!","A Thief Approaches!", "Save Rogue Bear!"]
+    experience = ["100","200","350","300","1000","50", "1250"]
+    challengeRating = ["1","2","3","2 1/2","5","1/2", "7"]
+    armourClass = [14,15,16,14,18,12,19]
     monPicture = ["https://pbs.twimg.com/media/C8L2wgVWkAUCi32.png",
     "https://media-waterdeep.cursecdn.com/avatars/thumbnails/0/211/1000/1000/636252764731637373.jpeg",
     "https://i1.wp.com/nerdarchy.com/wp-content/uploads/2018/05/Brainstorm.png?fit=864%2C628&ssl=1",
     "https://static.wikia.nocookie.net/emerald-isles/images/8/87/Desert.jpg/revision/latest/top-crop/width/220/height/220?cb=20180209064004",
     "https://comicvine1.cbsistatic.com/uploads/original/11120/111209888/5139105-014afdf2e2481539ed8959752233f379.jpg",
-    "https://roadbeerdotnet.files.wordpress.com/2020/07/thief-six-1024x1024-1.jpg"]
+    "https://roadbeerdotnet.files.wordpress.com/2020/07/thief-six-1024x1024-1.jpg",
+    "https://static.wikia.nocookie.net/forgottenrealms/images/c/c3/Druid_and_bear-5e.jpg/revision/latest/scale-to-width-down/350?cb=20190808192744"]
     randomInt = random.randint(0,len(monsters))
 
     embed = discord.Embed(
@@ -546,7 +582,7 @@ def MsgExpSystem(message, expBool):
     searchQuery = message.author.id
     stringMessage = str(message.content)
     userID = ''
-    userLevel = 0
+    userLevel = 0.00
     userExp = 0
     userMessagesSent = 0
     c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
@@ -557,10 +593,10 @@ def MsgExpSystem(message, expBool):
             splitRow[idx] = splitRow[idx].replace('(', '')
             splitRow[idx] = splitRow[idx].replace(')', '')
             splitRow[idx] = splitRow[idx].replace('\'', '')
-        userID = splitRow[0]
-        userLevel = int(splitRow[1])
+        userID = splitRow[0]     
         if expBool:
             userExp = int(splitRow[2]) + len(splitChar(stringMessage))
+            userLevel = (levellingConstant * math.sqrt(userExp))
         else:
             userExp = int(splitRow[2])
         userMessagesSent = int(splitRow[3]) + 1
@@ -584,8 +620,8 @@ def RctExpSystem(rctUser, exp):
             splitRow[idx] = splitRow[idx].replace(')', '')
             splitRow[idx] = splitRow[idx].replace('\'', '')
         userID = splitRow[0]
-        userLevel = int(splitRow[1])
         userExp = int(splitRow[2]) + int(exp)
+        userLevel = levellingConstant * math.sqrt(userExp)
         userMessagesSent = int(splitRow[3]) + 1
         c.execute(f"UPDATE userData SET userID = {userID}, userLevel = {userLevel}, userExp = {userExp}, userSentMsgs = {userMessagesSent} WHERE userID=?", (searchQuery, ))
         conn.commit()           
@@ -598,6 +634,17 @@ def splitChar(word):
 def ExpReward(exp):
     exp = int(exp)
     return exp
+
+def LevelUpMsg(level, user):    
+    author = user.name
+    authorAvatar = user.avatar_url
+    embed = discord.Embed(
+        title = f"@You Leveled Up!",
+        description = f"You are now *{level}* steps closer to the cosmos!",
+        colour = discord.Colour.purple()
+    )        
+    embed.set_author(name=f'{author}', icon_url=authorAvatar)
+    return embed
 
 bot.run(TOKEN)
 
