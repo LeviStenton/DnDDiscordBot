@@ -13831,3 +13831,1432 @@ client_session: <aiohttp.client.ClientSession object at 0xb57ffeb0>
 Unclosed connector
 connections: ['[(<aiohttp.client_proto.ResponseHandler object at 0xb580d768>, 2600852.850796255)]']
 connector: <aiohttp.connector.TCPConnector object at 0xb57ffed0>
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in command None:
+discord.ext.commands.errors.CommandNotFound: Command "RANK" is not found
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 186, in on_message
+    encounterType = DNDMonRandomEncounter()
+  File "bot.py", line 542, in DNDMonRandomEncounter
+    title = f"A {monsters[randomInt]} appeared!",
+IndexError: list index out of range
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 180, in on_message
+    encounterType = SkillRandomEncounter()
+  File "bot.py", line 569, in SkillRandomEncounter
+    title = f"{monsters[randomInt]}",
+IndexError: list index out of range
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in command None:
+discord.ext.commands.errors.CommandNotFound: Command "rtrank" is not found
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 186, in on_message
+    encounterType = DNDMonRandomEncounter()
+  File "bot.py", line 542, in DNDMonRandomEncounter
+    title = f"A {monsters[randomInt]} appeared!",
+IndexError: list index out of range
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 186, in on_message
+    encounterType = DNDMonRandomEncounter()
+  File "bot.py", line 542, in DNDMonRandomEncounter
+    title = f"A {monsters[randomInt]} appeared!",
+IndexError: list index out of range
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 180, in on_message
+    encounterType = SkillRandomEncounter()
+  File "bot.py", line 569, in SkillRandomEncounter
+    title = f"{monsters[randomInt]}",
+IndexError: list index out of range
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/aiohttp/connector.py", line 967, in _create_direct_connection
+    traces=traces), loop=self._loop)
+  File "/home/pi/.local/lib/python3.7/site-packages/aiohttp/connector.py", line 830, in _resolve_host
+    self._resolver.resolve(host, port, family=self._family)
+  File "/home/pi/.local/lib/python3.7/site-packages/aiohttp/resolver.py", line 30, in resolve
+    host, port, type=socket.SOCK_STREAM, family=family)
+  File "/usr/lib/python3.7/asyncio/base_events.py", line 789, in getaddrinfo
+    None, getaddr_func, host, port, family, type, proto, flags)
+  File "/usr/lib/python3.7/concurrent/futures/thread.py", line 57, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/usr/lib/python3.7/socket.py", line 748, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno -3] Temporary failure in name resolution
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 181, in on_message
+    encounterMsg = await channel.send(embed=encounterType[0])
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 185, in request
+    async with self.__session.request(method, url, **kwargs) as r:
+  File "/home/pi/.local/lib/python3.7/site-packages/aiohttp/client.py", line 1012, in __aenter__
+    self._resp = await self._coro
+  File "/home/pi/.local/lib/python3.7/site-packages/aiohttp/client.py", line 483, in _request
+    timeout=real_timeout
+  File "/home/pi/.local/lib/python3.7/site-packages/aiohttp/connector.py", line 523, in connect
+    proto = await self._create_connection(req, traces, timeout)
+  File "/home/pi/.local/lib/python3.7/site-packages/aiohttp/connector.py", line 859, in _create_connection
+    req, traces, timeout)
+  File "/home/pi/.local/lib/python3.7/site-packages/aiohttp/connector.py", line 971, in _create_direct_connection
+    raise ClientConnectorError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host discord.com:443 ssl:default [Temporary failure in name resolution]
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 180, in on_message
+    encounterType = SkillRandomEncounter()
+  File "bot.py", line 569, in SkillRandomEncounter
+    title = f"{monsters[randomInt]}",
+IndexError: list index out of range
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+Fatal read error on socket transport
+protocol: <asyncio.sslproto.SSLProtocol object at 0xb44f9710>
+transport: <_SelectorSocketTransport fd=9 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/usr/lib/python3.7/asyncio/selector_events.py", line 801, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+TimeoutError: [Errno 110] Connection timed out
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in command join:
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/ext/commands/core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "bot.py", line 253, in join_voice
+    connected = ctx.author.voice
+AttributeError: 'User' object has no attribute 'voice'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/ext/commands/bot.py", line 903, in invoke
+    await ctx.command.invoke(ctx)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/ext/commands/core.py", line 859, in invoke
+    await injected(*ctx.args, **ctx.kwargs)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/ext/commands/core.py", line 94, in wrapped
+    raise CommandInvokeError(exc) from exc
+discord.ext.commands.errors.CommandInvokeError: Command raised an exception: AttributeError: 'User' object has no attribute 'voice'
+Ignoring exception in command join:
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/ext/commands/core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "bot.py", line 253, in join_voice
+    connected = ctx.author.voice
+AttributeError: 'User' object has no attribute 'voice'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/ext/commands/bot.py", line 903, in invoke
+    await ctx.command.invoke(ctx)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/ext/commands/core.py", line 859, in invoke
+    await injected(*ctx.args, **ctx.kwargs)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/ext/commands/core.py", line 94, in wrapped
+    raise CommandInvokeError(exc) from exc
+discord.ext.commands.errors.CommandInvokeError: Command raised an exception: AttributeError: 'User' object has no attribute 'voice'
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/http.py", line 245, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/client.py", line 333, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 198, in on_reaction_add
+    await general.send(embed=embed)
+  File "/home/pi/.local/lib/python3.7/site-packages/discord/abc.py", line 905, in send
+    nonce=nonce, allowed_mentions=allowed_mentions)
