@@ -21,7 +21,7 @@ import speech_recognition as sr
 # Regex
 import re
 from re import I
-# .env
+# .env 
 from dotenv import load_dotenv
 # SQLite
 import sqlite3
@@ -34,12 +34,13 @@ from datetime import timedelta
 # DECLARE ALL VARIABLES NECESSARY TO RUN THE PROGRAM
 
 # Parse the bot's token, my server, and the file the text to speech reads from
+# This file is in the .gitignore and you will need to create your own
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
 # Initialize the database
-conn = sqlite3.connect('databases/levellingDB.db')
+conn = sqlite3.connect('/home/server/TheMoonCowboy/databases/levellingDB.db')
 c = conn.cursor()
 # Initialize the voice recognizer
 r = sr.Recognizer()
@@ -53,13 +54,14 @@ cowboyEmote = ':cowboy:'
 # Embed Colour
 embedColour = discord.Colour.dark_blue()
 # Write to the prefix file
+prefixPath = "/home/server/TheMoonCowboy/prefix.txt"
 def WriteCommandPrefix(prefix):
-    commandPrefix = open("prefix.txt", "w")
+    commandPrefix = open(prefixPath, "w")
     commandPrefix.write(prefix)
     commandPrefix.close()
-# Write to the prefix file
+# Read from the prefix file
 def ReadCommandPrefix():
-    commandPrefix = open("prefix.txt", "r")
+    commandPrefix = open(prefixPath, "r")
     return commandPrefix.read()
 intents = discord.Intents.all()
 intents.members = True
@@ -119,82 +121,74 @@ async def on_member_join(member):
 # Method to do things when a message is sent
 @bot.event
 async def on_message(message):
-    # Declaring variables to be used
-    generalID = 449967222652141568
-    levelUp = bot.get_channel(685776640667811895)
-    botID = 715110532532797490
-    author = message.author
-    encounterChance = 0.05
-    encounterTypeChance = 0.3
-    randFloat = random.random()
-    encounterFloat = random.random()
-    channelID = message.channel.id
-    channel = bot.get_channel(channelID)
+    if (isinstance(message.channel, discord.channel.DMChannel)):
+        pass
+    else:
+        # Declaring variables to be used
+        generalID = 449967222652141568
+        levelUp = bot.get_channel(685776640667811895)
+        botID = 715110532532797490
+        author = message.author
+        encounterChance = 0.05
+        encounterTypeChance = 0.3
+        randFloat = random.random()
+        encounterFloat = random.random()
+        channelID = message.channel.id
+        channel = bot.get_channel(channelID)
+        channelHistoryLength = 50
 
-    # Rate limiting the exp users gain from messages
-    # Checking time since author's last message ### GETTING THE CURRENT MESSAGE
-    # userMessages = []
-    # for chnlMsg in channel.history():
-    #     if chnlMsg.author.id == message.auther.id:
-    #         userMessages.append(message.content)
-    # for usrMsg, idx in userMessages:
-    #     if idx > 0:
-    #         oldestMessage = await message.find(lambda m: m.author.id == message.author.id) 
-    #         break;
-    #     else:
-    #         oldestMessage = None 
+        # Rate limiting the exp users gain from messages
+        userMessages = []
+        channelMessages = await message.channel.history(limit=channelHistoryLength).flatten()
+        for chnlMsg in channelMessages:
+            if chnlMsg.author.id == message.author.id:
+                userMessages.append(chnlMsg)
+        timeDistance = message.created_at - userMessages[1].created_at
+        if timeDistance <= timedelta(seconds=3):
+            expBool = False      
+        else:
+            expBool = True
+        MsgExpSystem(message, expBool)  
 
-    # delayedTime = datetime.now() - timedelta(seconds=3)
-    # correctMsgTime = oldestMessage.created_at + timedelta(hours=10)
-    # print(delayedTime) 
-    # print(correctMsgTime)
-    # if correctMsgTime > delayedTime:
-    #     expBool = True
-    # else:
-    #     expBool = False
-    # print(expBool)
-    # Rewarding exp
-    expBool = True
-    MsgExpSystem(message, expBool)  
+        # Issueing the levelup message on levelups
+        # searchQuery = message.author.id
+        # level = 0
+        # c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
+        # fetchedRows = c.fetchall()
+        # for item in fetchedRows:
+        #     splitRow = str(item).split(", ")
+        #     for idx, item in enumerate(splitRow):
+        #         splitRow[idx] = splitRow[idx].replace('(', '')
+        #         splitRow[idx] = splitRow[idx].replace(')', '')
+        #         splitRow[idx] = splitRow[idx].replace('\'', '')
+        # if(len(splitChar(message.content)) >= 0):
+        #     await levelUp.send(embed=LevelUpMsg(author, int(float(splitRow[2]))))
 
-    # Issueing the levelup message on levelups
-    # searchQuery = message.author.id
-    # level = 0
-    # c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
-    # fetchedRows = c.fetchall()
-    # for item in fetchedRows:
-    #     splitRow = str(item).split(", ")
-    #     for idx, item in enumerate(splitRow):
-    #         splitRow[idx] = splitRow[idx].replace('(', '')
-    #         splitRow[idx] = splitRow[idx].replace(')', '')
-    #         splitRow[idx] = splitRow[idx].replace('\'', '')
-    # if(len(splitChar(message.content)) >= 0):
-    #     await levelUp.send(embed=LevelUpMsg(author, int(float(splitRow[2]))))
-
-    # Generating an encounter  
-    if(randFloat < encounterChance and channelID == generalID and message.author.id != botID):
-        global encounterType
-        global encounterID 
-        global encounterBool
-        if encounterFloat >= encounterTypeChance:
-            encounterType = SkillRandomEncounter()
-            encounterMsg = await channel.send(embed=encounterType[0])        
-            encounterID = str(encounterMsg.id)
-            encounterBool = True
-            await encounterMsg.add_reaction(rollEmote) 
-        elif encounterFloat < encounterTypeChance:
-            encounterType = DNDMonRandomEncounter()
-            encounterMsg = await channel.send(embed=encounterType[0])        
-            encounterID = str(encounterMsg.id)
-            encounterBool = True
-            await encounterMsg.add_reaction(rollEmote)                 
-    await bot.process_commands(message) 
+        # Generating an encounter  
+        if(randFloat < encounterChance and channelID == generalID and message.author.id != botID):
+            global encounterType
+            global encounterID 
+            global encounterBool
+            if encounterFloat >= encounterTypeChance:
+                encounterType = SkillRandomEncounter()
+                encounterMsg = await channel.send(embed=encounterType[0])        
+                encounterID = str(encounterMsg.id)
+                encounterBool = True
+                await encounterMsg.add_reaction(rollEmote) 
+            elif encounterFloat < encounterTypeChance:
+                encounterType = DNDMonRandomEncounter()
+                encounterMsg = await channel.send(embed=encounterType[0])        
+                encounterID = str(encounterMsg.id)
+                encounterBool = True
+                await encounterMsg.add_reaction(rollEmote)                 
+        await bot.process_commands(message) 
 
 # Method to do things when a reaction is added
 @bot.event
 async def on_reaction_add(reaction, user):
     general = bot.get_channel(449967222652141568)
-    embed = ClearEncounter(reaction, user)
+    if reaction.emoji == rollEmote:
+        embed = ClearEncounter(reaction, user)
     await general.send(embed=embed)
 
 # ---------------------------------------------------------------------------
@@ -501,7 +495,7 @@ def ClearEncounter(reaction, user):
     expReward = encounterType[1]
     rollNum = int(outcome[2])
     outcomeMsg = ''
-    if str(reaction.message.id) == str(encounterID) and user.id != botID and str(reaction.emoji) == str(rollEmote) and encounterBool:   
+    if str(reaction.message.id) == str(encounterID) and user.id != botID and encounterBool:   
         if rollNum == 20:
             RctExpSystem(user, int(expReward)*2)
             outcomeMsg = f'***Nat 20!*** You defeated the encounter! ***{int(expReward)*2}*** Exp rewarded!'
