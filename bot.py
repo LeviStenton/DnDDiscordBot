@@ -113,7 +113,7 @@ async def on_member_join(member):
         colour = embedColour
     )
     embed.set_author(name=author, icon_url=authorAvatar)
-    c.execute(f"INSERT IGNORE INTO userData VALUES (?,0,0,0)", (memberID, ))
+    c.execute(f"INSERT or IGNORE INTO userData VALUES(?,0,0,0)", (memberID, ))
     conn.commit()              
     await member.add_roles(role)
     await channel.send(embed=embed)
@@ -151,18 +151,30 @@ async def on_message(message):
         MsgExpSystem(message, expBool)  
 
         # Issueing the levelup message on levelups
-        # searchQuery = message.author.id
-        # level = 0
-        # c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
-        # fetchedRows = c.fetchall()
-        # for item in fetchedRows:
-        #     splitRow = str(item).split(", ")
-        #     for idx, item in enumerate(splitRow):
-        #         splitRow[idx] = splitRow[idx].replace('(', '')
-        #         splitRow[idx] = splitRow[idx].replace(')', '')
-        #         splitRow[idx] = splitRow[idx].replace('\'', '')
-        # if(len(splitChar(message.content)) >= 0):
-        #     await levelUp.send(embed=LevelUpMsg(author, int(float(splitRow[2]))))
+        # Returning 0 exp and 0 remaining when levels up are meant to happen for some reason
+        if expBool:
+            searchQuery = message.author.id
+            c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
+            fetchedRows = c.fetchall()
+            userExp = 0
+            expRemaining = 0
+            splitRow = []
+            for item in fetchedRows:
+                splitRow = str(item).split(", ")
+                for idx, item in enumerate(splitRow):
+                    splitRow[idx] = splitRow[idx].replace('(', '')
+                    splitRow[idx] = splitRow[idx].replace(')', '')
+                    splitRow[idx] = splitRow[idx].replace('\'', '')
+                userExp = len(splitChar(str(message.content)))
+                expRemaining = round((math.ceil(float(splitRow[1])) ** 2) / (levellingConstant * levellingConstant) - int(userExp))
+                print(userExp)
+                print(expRemaining)
+                if userExp >= expRemaining and userExp > 0:
+                    await levelUp.send(embed=LevelUpMsg(int(float(splitRow[1])+1), author))
+                    pass
+                else:
+                    pass
+            
 
         # Generating an encounter  
         if(randFloat < encounterChance and channelID == generalID and message.author.id != botID):
@@ -630,10 +642,10 @@ def ExpReward(exp):
     return exp
 
 def LevelUpMsg(level, user):    
-    author = user.name
+    author = '@'+user.name
     authorAvatar = user.avatar_url
     embed = discord.Embed(
-        title = f"@You Leveled Up!",
+        title = f"You Leveled Up!",
         description = f"You are now *{level}* steps closer to the cosmos!",
         colour = discord.Colour.purple()
     )        
