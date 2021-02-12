@@ -37,10 +37,10 @@ from datetime import timedelta
 # This file is in the .gitignore and you will need to create your own
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
-GUILD = os.getenv('DISCORD_GUILD')
+#GUILD = os.getenv('DISCORD_GUILD')
 
 # Initialize the database
-conn = sqlite3.connect('/home/server/TheMoonCowboy/databases/levellingDB.db')
+conn = sqlite3.connect('databases/levellingDB.db')
 c = conn.cursor()
 # Initialize the voice recognizer
 r = sr.Recognizer()
@@ -54,7 +54,7 @@ cowboyEmote = ':cowboy:'
 # Embed Colour
 embedColour = discord.Colour.dark_blue()
 # Write to the prefix file
-prefixPath = "/home/server/TheMoonCowboy/prefix.txt"
+prefixPath = "prefix.txt"
 def WriteCommandPrefix(prefix):
     commandPrefix = open(prefixPath, "w")
     commandPrefix.write(prefix)
@@ -75,6 +75,11 @@ encounterID = ""
 encounterBool = False
 encounterType = []
 levellingConstant = 0.1
+# Global channel variables
+generalChannel = 0
+levelUpChannel = 0
+# Global ID variables
+botID = 0
 
 # ---------------------------------------------------------------------------
 # ON EVENT METHODS
@@ -82,18 +87,26 @@ levellingConstant = 0.1
 # When joining a server for the first time, send a message
 @bot.event
 async def on_guild_join():
-    channel = bot.get_channel(449967222652141568)
+    channel = bot.get_channel(generalChannel)
     await channel.send(f":cowboy: Eyes up Moon Cowboys, I'm connected! Type **{ReadCommandPrefix()}help** to get started.")
 
 # On ready, set the custom status
 @bot.event
 async def on_ready():
+    channels = bot.get_all_channels()
+    global botID
+    global generalChannel
+    global levelUpChannel
+    botID = bot.user.id
+    general = discord.utils.get(channels, name="general")
+    generalChannel = general.id
+    levelUps = discord.utils.get(channels, name="level-ups")
+    levelUpChannel = levelUps.id
     await bot.change_presence(activity = discord.Activity(type = discord.ActivityType.listening, name = f"{ReadCommandPrefix()}help"))
 
 # On disconnecting, send a message
 @bot.event
-async def close():
-    channel = bot.get_channel(449967222652141568)      
+async def close():     
     conn.close()  
     for vc in bot.voice_clients:        
         await vc.disconnect()
@@ -101,12 +114,13 @@ async def close():
 # When a member joins the server, send a welcoming message
 @bot.event
 async def on_member_join(member):
+    global generalChannel
     print(f"{member.id} joined!")
     memberID = str(member.id)
     author = member.name
     authorAvatar = member.avatar_url
     role = discord.utils.get(member.guild.roles, name='ｄｅｂｒｉｓ 𝓭𝓻𝓲𝓯𝓽𝓮𝓻𝓼')
-    channel = bot.get_channel(449967222652141568)
+    channel = bot.get_channel(generalChannel)
     embed = discord.Embed(
         title = f"{cowboyEmote} Eyes up",
         description = "You're a ｍｏｏｎ 𝒸𝑜𝓌𝒷𝑜𝓎 now.",
@@ -114,7 +128,7 @@ async def on_member_join(member):
     )
     embed.set_author(name=author, icon_url=authorAvatar)
     c.execute(f"INSERT or IGNORE INTO userData VALUES(?,0,0,0)", (memberID, ))
-    conn.commit()              
+    conn.commit()           
     await member.add_roles(role)
     await channel.send(embed=embed)
 
@@ -125,9 +139,9 @@ async def on_message(message):
         pass
     else:
         # Declaring variables to be used
-        generalID = 449967222652141568
-        levelUp = bot.get_channel(685776640667811895)
-        botID = 715110532532797490
+        generalID = generalChannel
+        levelUp = bot.get_channel(levelUpChannel)
+        global botID
         author = message.author
         encounterChance = 0.05
         encounterTypeChance = 0.3
@@ -167,8 +181,8 @@ async def on_message(message):
                     splitRow[idx] = splitRow[idx].replace('\'', '')
                 userExp = len(splitChar(str(message.content)))
                 expRemaining = round((math.ceil(float(splitRow[1])) ** 2) / (levellingConstant * levellingConstant) - int(userExp))
-                print(userExp)
-                print(expRemaining)
+                print("Message EXP:"+str(userExp))
+                print("Current Remaining EXP:"+str(expRemaining))
                 if userExp >= expRemaining and userExp > 0:
                     await levelUp.send(embed=LevelUpMsg(int(float(splitRow[1])+1), author))
                     pass
@@ -198,10 +212,10 @@ async def on_message(message):
 # Method to do things when a reaction is added
 @bot.event
 async def on_reaction_add(reaction, user):
-    general = bot.get_channel(449967222652141568)
+    general = bot.get_channel(generalChannel)
     if reaction.emoji == rollEmote:
         embed = ClearEncounter(reaction, user)
-    await general.send(embed=embed)
+        await general.send(embed=embed)
 
 # ---------------------------------------------------------------------------
 # COMMAND METHODS
@@ -391,7 +405,7 @@ async def Roll(ctx, text: str):
 @bot.command(name='test')
 async def Speech2Text(ctx,):
     # open the file
-    filename = "/home/pi/TheMoonCowboy/TestCases/4d20plus4.wav"
+    filename = "TestCases/4d20plus4.wav"
     with sr.AudioFile(filename) as source:
         # listen for the data (load audio into memory)
         audio_data = r.record(source)
