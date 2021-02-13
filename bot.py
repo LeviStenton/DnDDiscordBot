@@ -45,7 +45,7 @@ c = conn.cursor()
 # Initialize the voice recognizer
 r = sr.Recognizer()
 # Emotes
-rollEmote = ':game_die:'
+rollEmote = '🎲'
 voiceEmote = ':microphone2:'
 prefixEmote = ':exclamation:'
 levelEmote = ':crossed_swords:'
@@ -88,7 +88,11 @@ botID = 0
 
 # When joining a server for the first time, send a message
 @bot.event
-async def on_guild_join():
+async def on_guild_join(guild):
+    channels = bot.get_all_channels()
+    global generalChannel
+    general = discord.utils.get(channels, name="general")
+    generalChannel = general.id
     channel = bot.get_channel(generalChannel)
     await channel.send(f":cowboy: Eyes up Moon Cowboys, I'm connected! Type **{ReadCommandPrefix()}help** to get started.")
 
@@ -189,8 +193,7 @@ async def on_message(message):
                     await levelUp.send(embed=LevelUpMsg(int(float(splitRow[1])+1), author))
                     pass
                 else:
-                    pass
-            
+                    pass            
 
         # Generating an encounter  
         if(randFloat < encounterChance and channelID == generalID and message.author.id != botID):
@@ -215,7 +218,7 @@ async def on_message(message):
 @bot.event
 async def on_reaction_add(reaction, user):
     general = bot.get_channel(generalChannel)
-    if reaction.emoji == rollEmote:
+    if reaction.emoji == rollEmote and user.id != botID:
         embed = ClearEncounter(reaction, user)
         await general.send(embed=embed)
 
@@ -467,6 +470,41 @@ async def Speech2Text(ctx,):
         embed.add_field(name="Total With Mod", value=f"{outcome[3]}", inline=True)
 
     await ctx.send(embed=embed)
+
+# Spawns an encounter
+@bot.command(name='encounter')
+@has_permissions(administrator=True, manage_messages=True, manage_roles=True)
+async def Spawn_Encounter(ctx):
+    # Generating an encounter  
+    # Declaring variables to be used
+    generalID = generalChannel
+    global botID
+    encounterTypeChance = 0.3
+    encounterFloat = random.random()
+    channelID = ctx.channel.id
+    channel = bot.get_channel(channelID)
+    print("here!")
+    print(generalID)
+    print(channelID)
+    if(channelID == generalID and ctx.author.id != botID):
+        global encounterType
+        global encounterID 
+        global encounterBool
+        print("here 2!")
+        if encounterFloat >= encounterTypeChance:
+            encounterType = SkillRandomEncounter()
+            encounterMsg = await channel.send(embed=encounterType[0])        
+            encounterID = str(encounterMsg.id)
+            encounterBool = True
+            await encounterMsg.add_reaction(rollEmote) 
+            print("here 3!")
+        elif encounterFloat < encounterTypeChance:
+            encounterType = DNDMonRandomEncounter()
+            encounterMsg = await channel.send(embed=encounterType[0])        
+            encounterID = str(encounterMsg.id)
+            encounterBool = True
+            print("here 4!")
+            await encounterMsg.add_reaction(rollEmote)   
 
 # Takes a string that is Regex'd to find specific dice rolling data
 def QueryRoll(text):
