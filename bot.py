@@ -77,6 +77,7 @@ encounterID = ""
 encounterBool = False
 encounterType = []
 levellingConstant = 0.1
+expPerMsg = 1
 # Global channel variables
 generalChannel = 0
 levelUpChannel = 0
@@ -172,28 +173,31 @@ async def on_message(message):
 
         # Issueing the levelup message on levelups
         # Returning 0 exp and 0 remaining when levels up are meant to happen for some reason
-        if expBool:
+        if expBool and message.author.id != botID:
             searchQuery = message.author.id
             c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
-            fetchedRows = c.fetchall()
-            userExp = 0
-            expRemaining = 0
-            splitRow = []
-            for item in fetchedRows:
-                splitRow = str(item).split(", ")
-                for idx, item in enumerate(splitRow):
-                    splitRow[idx] = splitRow[idx].replace('(', '')
-                    splitRow[idx] = splitRow[idx].replace(')', '')
-                    splitRow[idx] = splitRow[idx].replace('\'', '')
-                userExp = len(splitChar(str(message.content)))
-                expRemaining = round((math.ceil(float(splitRow[1])) ** 2) / (levellingConstant * levellingConstant) - int(userExp))
-                print("Message EXP:"+str(userExp))
-                print("Current Remaining EXP:"+str(expRemaining))
-                if userExp >= expRemaining and userExp > 0:
-                    await levelUp.send(embed=LevelUpMsg(int(float(splitRow[1])+1), author))
-                    pass
-                else:
-                    pass            
+            fetchedRow = c.fetchone()
+            print(fetchedRow)
+            splitRow = str(fetchedRow).split(", ")
+            print(len(splitRow))
+            for idx, item in enumerate(splitRow):
+                print("Row: "+splitRow[idx])
+                splitRow[idx] = splitRow[idx].replace('(', '')
+                splitRow[idx] = splitRow[idx].replace(')', '')
+                splitRow[idx] = splitRow[idx].replace('\'', '')
+            messageExp = expPerMsg
+            userExp = splitRow[2]
+            expRemaining = round((math.ceil(float(splitRow[1])) ** 2) / (levellingConstant * levellingConstant) - int(userExp))
+            print("Message EXP: "+str(messageExp))
+            print("Current Remaining EXP: "+str(expRemaining))
+            if expRemaining - messageExp <= 0:
+                print("LEVEL UP!")
+                await levelUp.send(embed=LevelUpMsg(int(float(splitRow[1])), author))
+                pass
+            else:
+                pass
+            print("-----------------------------------------------------------")
+                          
 
         # Generating an encounter  
         if(randFloat < encounterChance and channelID == generalID and message.author.id != botID):
@@ -406,6 +410,7 @@ async def req_userinfo(ctx):
 
 # DO NOT USE THIS UNLESS YOU WANT TO WIPE ALL LEVEL DATA
 @bot.command(name='ResetServerLevelData')
+@has_permissions(administrator=True, manage_messages=True, manage_roles=True)
 async def collectLevelData(ctx):
     try:
         if(ctx.message.author.id == 218890729550774282):
@@ -419,6 +424,43 @@ async def collectLevelData(ctx):
     except:
         print("Error resetting database.")
         await ctx.send("Error resetting database.")
+
+# WILL WIPE A USER'S DATA
+@bot.command(name='resetmylevel')
+async def resetUserData(ctx):
+    authorID = str(ctx.author.id)
+    try:
+        c.execute(f"UPDATE userData SET userLevel = 0, userExp = 0, userSentMsgs = 0 WHERE userID = ?", (authorID, ))
+        conn.commit()
+        print(authorID+"'s data has been reset.")
+        await ctx.send("Resetting level successful.") 
+    except:
+        print("Error resetting user data.")
+        await ctx.send("Error resetting level.")
+
+# WILL WIPE A USER'S DATA
+@bot.command(name='giveexp')
+async def giveExp(ctx, exp):
+    searchQuery = ctx.author.id
+    userID = ''
+    userLevel = 0.00
+    userExp = 0
+    userMessagesSent = 0
+    c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
+    fetchedRows = c.fetchall()
+    for item in fetchedRows:             
+        splitRow = str(item).split(", ")        
+        for idx, item in enumerate(splitRow):
+            splitRow[idx] = splitRow[idx].replace('(', '')
+            splitRow[idx] = splitRow[idx].replace(')', '')
+            splitRow[idx] = splitRow[idx].replace('\'', '')
+        userID = splitRow[0]     
+        userExp = int(splitRow[2]) + int(exp)
+        userLevel = (levellingConstant * math.sqrt(userExp))
+        userMessagesSent = int(splitRow[3]) + 1
+        c.execute(f"UPDATE userData SET userID = {userID}, userLevel = {userLevel}, userExp = {ExpReward(userExp)}, userSentMsgs = {userMessagesSent} WHERE userID=?", (searchQuery, ))
+        conn.commit()           
+        break
 
 # If the command is sent with 'rollhelp', query a roll from the sent dice rolling data
 @bot.command(name='roll')
@@ -690,7 +732,7 @@ def MsgExpSystem(message, expBool):
             splitRow[idx] = splitRow[idx].replace('\'', '')
         userID = splitRow[0]     
         if expBool:
-            userExp = int(splitRow[2]) + len(splitChar(stringMessage))
+            userExp = int(splitRow[2]) + expPerMsg
             userLevel = (levellingConstant * math.sqrt(userExp))
         else:
             userExp = int(splitRow[2])
@@ -724,7 +766,7 @@ def RctExpSystem(rctUser, exp):
 
 # Split a string into characters
 def splitChar(word): 
-    return [char for char in word]
+    return expPerMsg
 
 def ExpReward(exp):
     exp = int(exp)
