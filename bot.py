@@ -76,8 +76,10 @@ bot.remove_command("help")
 encounterID = ""
 encounterBool = False
 encounterType = []
+# Global variables for levelling
 levellingConstant = 0.1
 expPerMsg = 1
+rateLimit = 2
 # Global channel variables
 generalChannel = 0
 levelUpChannel = 0
@@ -142,6 +144,7 @@ async def on_member_join(member):
 # Method to do things when a message is sent
 @bot.event
 async def on_message(message):
+    # If messages are sent to the bot through DMs, do not count for anything
     if (isinstance(message.channel, discord.channel.DMChannel)):
         pass
     else:
@@ -165,14 +168,13 @@ async def on_message(message):
             if chnlMsg.author.id == message.author.id:
                 userMessages.append(chnlMsg)
         timeDistance = message.created_at - userMessages[1].created_at
-        if timeDistance <= timedelta(seconds=3):
+        if timeDistance <= timedelta(seconds=rateLimit):
             expBool = False      
         else:
             expBool = True
         MsgExpSystem(message, expBool)  
 
         # Issueing the levelup message on levelups
-        # Returning 0 exp and 0 remaining when levels up are meant to happen for some reason
         if expBool and message.author.id != botID:
             searchQuery = message.author.id
             c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
