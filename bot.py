@@ -45,7 +45,7 @@ c = conn.cursor()
 # Initialize the voice recognizer
 r = sr.Recognizer()
 # Emotes
-rollEmote = '<:d20:766295310129430568>'
+rollEmote = ':game_die:'
 voiceEmote = ':microphone2:'
 prefixEmote = ':exclamation:'
 levelEmote = ':crossed_swords:'
@@ -54,8 +54,10 @@ cowboyEmote = ':cowboy:'
 # Embed Colour
 embedColour = discord.Colour.dark_blue()
 # Write to the prefix file
-prefixPath = "prefix.txt"
-def WriteCommandPrefix(prefix):
+prefixPath = "prefixes/defaultprefix.txt"
+def WriteCommandPrefix(prefix, guild):
+    global prefixPath
+    prefixPath = f"prefixes/{guild}-prefix.txt"
     commandPrefix = open(prefixPath, "w")
     commandPrefix.write(prefix)
     commandPrefix.close()
@@ -108,7 +110,7 @@ async def on_ready():
 @bot.event
 async def close():     
     conn.close()  
-    for vc in bot.voice_clients:        
+    for vc in bot.voice_clients: 
         await vc.disconnect()
     
 # When a member joins the server, send a welcoming message
@@ -243,15 +245,16 @@ async def help(ctx):
 @has_permissions(administrator=True, manage_messages=True, manage_roles=True)
 async def set_prefix(ctx, newPrefix):    
     acceptablePrefixes = ['!' ,'@' ,'#' ,'$' ,'%' ,'^' ,'&' ,'*' ,'(' ,')' ,'-' ,'=' ,'_' ,'+']
-    author = ctx.author.name
+    authorName = ctx.author.name
     authorAvatar = ctx.author.avatar_url
+    guild = ctx.guild
     embedMessage = ''
     if newPrefix == ReadCommandPrefix():
         embedMessage = f"The command prefix is already: **{ReadCommandPrefix()}**!"
     else:
         for prefix in acceptablePrefixes:
             if str(newPrefix) == prefix:            
-                WriteCommandPrefix(newPrefix)
+                WriteCommandPrefix(newPrefix, guild)
                 bot.command_prefix = ReadCommandPrefix()
                 embedMessage = f"You changed the command prefix to: **{ReadCommandPrefix()}**"
                 await bot.change_presence(activity = discord.Activity(type = discord.ActivityType.listening, name = f"{ReadCommandPrefix()}help"))
@@ -264,40 +267,73 @@ async def set_prefix(ctx, newPrefix):
         description = embedMessage,
         colour = embedColour
     )
-    embed.set_author(name=f'{author}', icon_url=authorAvatar)
+    embed.set_author(name=f'{authorName}', icon_url=authorAvatar)
     await ctx.send(embed=embed)
 
-# If the command is sent with 'join', join the voice channel that the autor is in
+# Loads your guild's prefix
+@bot.command(name='loadprefix')
+@has_permissions(administrator=True, manage_messages=True, manage_roles=True)
+async def load_prefix(ctx):    
+    guild = ctx.guild
+    authorName = ctx.author.name
+    authorAvatar = ctx.author.avatar_url
+    global prefixPath
+    prefixPath = f"prefixes/{guild}-prefix.txt"
+    tempPrefix = ReadCommandPrefix()
+    print(tempPrefix)
+    WriteCommandPrefix(tempPrefix, guild)
+    await bot.change_presence(activity = discord.Activity(type = discord.ActivityType.listening, name = f"{ReadCommandPrefix()}help"))
+    embed = discord.Embed(
+        title = f"{prefixEmote} Loading Prefix...",
+        description = "Prefix loaded!",
+        colour = embedColour
+    )
+    embed.set_author(name=f'{authorName}', icon_url=authorAvatar)
+    await ctx.send(embed=embed)
+
+# If the command is sent with 'join', join the voice channel that the author is in
 @bot.command(name='join')
 async def join_voice(ctx):
-    connected = ctx.author.voice
-    channel = ctx.author.voice.channel
     author = ctx.author.name
     authorAvatar = ctx.author.avatar_url
-    embedMessage = ''       
+    embedMessage = '' 
+    connected = None
+    channel = None
     try:
-        if connected:
-            await connected.channel.connect()
+        connected = ctx.author.voice
+        channel = ctx.author.voice.channel        
+    except:
+        embedMessage = f"You need to join a voice channel first!"
+    try:
+        if connected:           
+            await channel.connect()          
             for client in bot.voice_clients:
                 if client.channel == channel:
-                    embedMessage = f"I've connected to **{str(channel)}**!"
+                    embedMessage = f"I've connected to **{str(channel)}**!"                    
     except:
         embedMessage = f"I\'m already connected to **{str(channel)}**."
-    embed = discord.Embed(
+    joinEmbed = discord.Embed(
         title = f"{voiceEmote} Connecting...",
         description = embedMessage,
         colour = embedColour
     )
-    embed.set_author(name=f'{author}', icon_url=authorAvatar) 
-    await ctx.send(embed=embed)
+    joinEmbed.set_author(name=f'{author}', icon_url=authorAvatar) 
+    await ctx.send(embed=joinEmbed)
 
 # If the command is sent with 'leave', leave all voice channels    
 @bot.command(name='leave')
 async def leave_voice(ctx):
-    for vc in bot.voice_clients:
-            if vc.guild == ctx.guild:
-                await vc.disconnect()              
-
+    for vc in bot.voice_clients: 
+        if(vc.guild == ctx.guild):
+            await vc.disconnect()
+            joinEmbed = discord.Embed(
+                title = f"{voiceEmote} Leaving...",
+                description = f"Left!",
+                colour = embedColour
+            )
+            joinEmbed.set_author(name=f'{ctx.message.author.name}', icon_url=ctx.author.avatar_url) 
+            await ctx.send(embed=joinEmbed)
+       
 # Retrieves member, exp, and level data from levellingDB
 @bot.command(name='rank')
 async def req_rank(ctx):
@@ -349,7 +385,8 @@ async def req_userinfo(ctx):
     for idx, role in enumerate(ctx.author.roles):
         if idx > 0:
             authorRoles = authorRoles+"<@&"+str(role.id)+"> "
-    guild = ctx.guild
+        else:
+            authorRoles = "No roles!"
     embed = discord.Embed(
         title = f"{accountEmote} Your Account Details",
         colour = embedColour
@@ -393,9 +430,9 @@ async def Roll(ctx, text: str):
     )
     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767677300333477888/48cb5349f515f6e59edc2a4de294f439.png")
     embed.set_author(name=f'{author}', icon_url=authorAvatar)    
-    embed.add_field(name="You Rolled:", value=f"{outcome[0]}", inline=False)
+    embed.add_field(name="You Rolled", value=f"{outcome[0]}", inline=True)
     embed.add_field(name="Modifier", value=f"{outcome[1]}", inline=True)
-    embed.add_field(name="Total", value=f"{outcome[2]}", inline=True)
+    embed.add_field(name="Total", value=f"{outcome[2]}", inline=False)
     if len(outcome) > 3:
         embed.add_field(name="Total With Mod", value=f"{outcome[3]}", inline=True)
     
