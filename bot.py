@@ -179,26 +179,19 @@ async def on_message(message):
             searchQuery = message.author.id
             c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
             fetchedRow = c.fetchone()
-            print(fetchedRow)
             splitRow = str(fetchedRow).split(", ")
-            print(len(splitRow))
             for idx, item in enumerate(splitRow):
-                print("Row: "+splitRow[idx])
                 splitRow[idx] = splitRow[idx].replace('(', '')
                 splitRow[idx] = splitRow[idx].replace(')', '')
                 splitRow[idx] = splitRow[idx].replace('\'', '')
             messageExp = expPerMsg
             userExp = splitRow[2]
             expRemaining = round((math.ceil(float(splitRow[1])) ** 2) / (levellingConstant * levellingConstant) - int(userExp))
-            print("Message EXP: "+str(messageExp))
-            print("Current Remaining EXP: "+str(expRemaining))
             if expRemaining - messageExp <= 0:
-                print("LEVEL UP!")
                 await levelUp.send(embed=LevelUpMsg(int(float(splitRow[1])), author))
                 pass
             else:
                 pass
-            print("-----------------------------------------------------------")
                           
 
         # Generating an encounter  
@@ -224,9 +217,36 @@ async def on_message(message):
 @bot.event
 async def on_reaction_add(reaction, user):
     general = bot.get_channel(generalChannel)
-    if reaction.emoji == rollEmote and user.id != botID:
-        embed = ClearEncounter(reaction, user)
+    levelUp = bot.get_channel(levelUpChannel)  
+    global encounterType
+    outcome = QueryRoll("1d20")
+    rollNum = int(outcome[2])
+
+    # Issueing the levelup message on levelups
+    if user.id != botID and int(rollNum) >= encounterType[2]:
+        searchQuery = user.id
+        c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
+        fetchedRow = c.fetchone()
+        splitRow = str(fetchedRow).split(", ")
+        for idx, item in enumerate(splitRow):
+            splitRow[idx] = splitRow[idx].replace('(', '')
+            splitRow[idx] = splitRow[idx].replace(')', '')
+            splitRow[idx] = splitRow[idx].replace('\'', '')
+        encounterExp = int(encounterType[1])
+        userExp = int(splitRow[2])
+        userLevel = (levellingConstant * math.sqrt(userExp + encounterExp))
+        expRemaining = round((math.ceil(float(splitRow[1])) ** 2) / (levellingConstant * levellingConstant) - userExp)
+        if expRemaining - encounterExp <= 0:
+            await levelUp.send(embed=LevelUpMsg(int(userLevel), user))
+            pass
+        else:
+            pass
+
+    if reaction.emoji == rollEmote and user.id != botID:        
+        embed = ClearEncounter(reaction, user, rollNum)
         await general.send(embed=embed)
+    
+    
 
 # ---------------------------------------------------------------------------
 # COMMAND METHODS
@@ -289,7 +309,6 @@ async def load_prefix(ctx):
     global prefixPath
     prefixPath = f"prefixes/{guild}-prefix.txt"
     tempPrefix = ReadCommandPrefix()
-    print(tempPrefix)
     WriteCommandPrefix(tempPrefix, guild)
     await bot.change_presence(activity = discord.Activity(type = discord.ActivityType.listening, name = f"{ReadCommandPrefix()}help"))
     embed = discord.Embed(
@@ -528,27 +547,21 @@ async def Spawn_Encounter(ctx):
     encounterFloat = random.random()
     channelID = ctx.channel.id
     channel = bot.get_channel(channelID)
-    print("here!")
-    print(generalID)
-    print(channelID)
     if(channelID == generalID and ctx.author.id != botID):
         global encounterType
         global encounterID 
         global encounterBool
-        print("here 2!")
         if encounterFloat >= encounterTypeChance:
             encounterType = SkillRandomEncounter()
             encounterMsg = await channel.send(embed=encounterType[0])        
             encounterID = str(encounterMsg.id)
             encounterBool = True
             await encounterMsg.add_reaction(rollEmote) 
-            print("here 3!")
         elif encounterFloat < encounterTypeChance:
             encounterType = DNDMonRandomEncounter()
             encounterMsg = await channel.send(embed=encounterType[0])        
             encounterID = str(encounterMsg.id)
             encounterBool = True
-            print("here 4!")
             await encounterMsg.add_reaction(rollEmote)   
 
 # Takes a string that is Regex'd to find specific dice rolling data
@@ -631,15 +644,13 @@ def DieModConverter(dieMod, minus=False):
     return output
 
 # A method that is called when someone reacts the d20 to the message, calls RctExpSystem
-def ClearEncounter(reaction, user):    
+def ClearEncounter(reaction, user, rollNum):    
     botID = 715110532532797490
     global encounterBool
     global encounterType
     authorAvatar = user.avatar_url
-    author = user.name
-    outcome = QueryRoll("1d20")
-    expReward = encounterType[1]
-    rollNum = int(outcome[2])
+    author = user.name    
+    expReward = encounterType[1]    
     outcomeMsg = ''
     if str(reaction.message.id) == str(encounterID) and user.id != botID and encounterBool:   
         if rollNum == 20:
