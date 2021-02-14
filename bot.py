@@ -440,8 +440,9 @@ async def resetUserData(ctx):
         print("Error resetting user data.")
         await ctx.send("Error resetting level.")
 
-# WILL WIPE A USER'S DATA
+# Give yourself as much EXP as specified
 @bot.command(name='giveexp')
+@has_permissions(administrator=True, manage_messages=True, manage_roles=True)
 async def giveExp(ctx, exp):
     searchQuery = ctx.author.id
     userID = ''
@@ -738,6 +739,7 @@ def MsgExpSystem(message, expBool):
             userLevel = (levellingConstant * math.sqrt(userExp))
         else:
             userExp = int(splitRow[2])
+            userLevel = (levellingConstant * math.sqrt(userExp))
         userMessagesSent = int(splitRow[3]) + 1
         c.execute(f"UPDATE userData SET userID = {userID}, userLevel = {userLevel}, userExp = {ExpReward(userExp)}, userSentMsgs = {userMessagesSent} WHERE userID=?", (searchQuery, ))
         conn.commit()           
