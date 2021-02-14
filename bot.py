@@ -69,7 +69,7 @@ intents = discord.Intents.all()
 intents.members = True
 intents.reactions = True
 # Sets the bot's command prefix to the prefix in prefix.txt
-bot = commands.Bot(command_prefix=ReadCommandPrefix(), intents=intents)  
+bot = commands.Bot(command_prefix=ReadCommandPrefix(), intents=intents, activity = discord.Activity(type = discord.ActivityType.listening, name = f"{ReadCommandPrefix()}help"))  
 # Remove the in-built help command to write my own
 bot.remove_command("help")
 # Global variables for Encounters
@@ -99,19 +99,23 @@ async def on_guild_join(guild):
     channel = bot.get_channel(generalChannel)
     await channel.send(f":cowboy: Eyes up Moon Cowboys, I'm connected! Type **{ReadCommandPrefix()}help** to get started.")
 
-# On ready, set the custom status
-@bot.event
-async def on_ready():
+# On ready, get channel ID
+async def find_channel():
+    await bot.wait_until_ready()
     channels = bot.get_all_channels()
+    for channel in channels:
+        if(channel.name == "general"):
+            global generalChannel
+            generalChannel = channel.id
+            print(channel)
+        if(channel.name == "level-up"):
+            global levelUpChannel
+            levelUpChannel = channel.id
+            print(channel)
     global botID
-    global generalChannel
-    global levelUpChannel
     botID = bot.user.id
-    general = discord.utils.get(channels, name="general")
-    generalChannel = general.id
-    levelUps = discord.utils.get(channels, name="level-ups")
-    levelUpChannel = levelUps.id
-    await bot.change_presence(activity = discord.Activity(type = discord.ActivityType.listening, name = f"{ReadCommandPrefix()}help"))
+
+bot.loop.create_task(find_channel())
 
 # On disconnecting, send a message
 @bot.event
@@ -244,9 +248,7 @@ async def on_reaction_add(reaction, user):
 
     if reaction.emoji == rollEmote and user.id != botID:        
         embed = ClearEncounter(reaction, user, rollNum)
-        await general.send(embed=embed)
-    
-    
+        await general.send(embed=embed)    
 
 # ---------------------------------------------------------------------------
 # COMMAND METHODS
