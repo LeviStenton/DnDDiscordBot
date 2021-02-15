@@ -107,11 +107,9 @@ async def find_channel():
         if(channel.name == "general"):
             global generalChannel
             generalChannel = channel.id
-            print(channel)
         if(channel.name == "level-up"):
             global levelUpChannel
             levelUpChannel = channel.id
-            print(channel)
     global botID
     botID = bot.user.id
 
@@ -223,19 +221,21 @@ async def on_reaction_add(reaction, user):
     general = bot.get_channel(generalChannel)
     levelUp = bot.get_channel(levelUpChannel)  
     global encounterType
-    outcome = QueryRoll("1d20")
+    searchQuery = user.id
+    c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
+    fetchedRow = c.fetchone()
+    splitRow = str(fetchedRow).split(", ")
+    for idx, item in enumerate(splitRow):
+        splitRow[idx] = splitRow[idx].replace('(', '')
+        splitRow[idx] = splitRow[idx].replace(')', '')
+        splitRow[idx] = splitRow[idx].replace('\'', '') 
+    print(int(splitRow[4]))       
+    userMod = int(splitRow[4])
+    outcome = QueryRoll(f"1d20")
     rollNum = int(outcome[2])
 
     # Issueing the levelup message on levelups
-    if user.id != botID and int(rollNum) >= encounterType[2]:
-        searchQuery = user.id
-        c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
-        fetchedRow = c.fetchone()
-        splitRow = str(fetchedRow).split(", ")
-        for idx, item in enumerate(splitRow):
-            splitRow[idx] = splitRow[idx].replace('(', '')
-            splitRow[idx] = splitRow[idx].replace(')', '')
-            splitRow[idx] = splitRow[idx].replace('\'', '')
+    if user.id != botID and rollNum+userMod >= encounterType[2]:        
         encounterExp = int(encounterType[1])
         userExp = int(splitRow[2])
         userLevel = (levellingConstant * math.sqrt(userExp + encounterExp))
@@ -247,7 +247,7 @@ async def on_reaction_add(reaction, user):
             pass
 
     if reaction.emoji == rollEmote and user.id != botID:        
-        embed = ClearEncounter(reaction, user, rollNum)
+        embed = ClearEncounter(reaction, user, rollNum, userMod)
         await general.send(embed=embed)    
 
 # ---------------------------------------------------------------------------
@@ -339,7 +339,7 @@ async def join_voice(ctx):
             await channel.connect()          
             for client in bot.voice_clients:
                 if client.channel == channel:
-                    embedMessage = f"I've connected to **{str(channel)}**!"                    
+                    embedMessage = f"I've connected to **{str(channel)}**!"
     except:
         embedMessage = f"I\'m already connected to **{str(channel)}**."
     joinEmbed = discord.Embed(
@@ -646,7 +646,7 @@ def DieModConverter(dieMod, minus=False):
     return output
 
 # A method that is called when someone reacts the d20 to the message, calls RctExpSystem
-def ClearEncounter(reaction, user, rollNum):    
+def ClearEncounter(reaction, user, rollNum, userMod):    
     botID = 715110532532797490
     global encounterBool
     global encounterType
@@ -654,11 +654,12 @@ def ClearEncounter(reaction, user, rollNum):
     author = user.name    
     expReward = encounterType[1]    
     outcomeMsg = ''
+    rollTotal = rollNum+userMod
     if str(reaction.message.id) == str(encounterID) and user.id != botID and encounterBool:   
         if rollNum == 20:
             RctExpSystem(user, int(expReward)*2)
             outcomeMsg = f'***Nat 20!*** You defeated the encounter! ***{int(expReward)*2}*** Exp rewarded!'
-        elif int(rollNum) >= encounterType[2]:
+        elif rollTotal >= encounterType[2]:
             RctExpSystem(user, expReward)
             outcomeMsg = f'You defeated the encounter! **{expReward}** Exp rewarded!'  
         elif rollNum == 1:
@@ -667,11 +668,12 @@ def ClearEncounter(reaction, user, rollNum):
         else:
             outcomeMsg = 'You were defeated.'
         embed = discord.Embed(
-            title = f"You rolled: {rollNum}",
+            title = f"You rolled: *{rollNum} +{userMod}*",
             description = outcomeMsg,
             colour = discord.Colour.red()
         )        
         encounterBool = False
+        #embed.add_field(name=f"Your modifier", value=f"+{userMod}", inline=True)
         embed.set_author(name=f'{author}', icon_url=authorAvatar)
         return embed
 
