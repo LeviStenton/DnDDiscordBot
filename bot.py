@@ -51,6 +51,8 @@ prefixEmote = ':exclamation:'
 levelEmote = ':crossed_swords:'
 accountEmote = ':desktop:'
 cowboyEmote = ':cowboy:'
+tickEmote = '✔️'
+crossEmote = '❌'
 # Embed Colour
 embedColour = discord.Colour.dark_blue()
 # Write to the prefix file
@@ -73,9 +75,13 @@ bot = commands.Bot(command_prefix=ReadCommandPrefix(), intents=intents, activity
 # Remove the in-built help command to write my own
 bot.remove_command("help")
 # Global variables for Encounters
-encounterID = ""
+encounterID = 0
 encounterBool = False
 encounterType = []
+encClearID = 0
+encClearBool = False
+encClearLoot = []
+encClearUser = 0
 # Global variables for levelling
 levellingConstant = 0.1
 expPerMsg = 1
@@ -107,11 +113,9 @@ async def find_channel():
         if(channel.name == "general"):
             global generalChannel
             generalChannel = channel.id
-            print(channel)
         if(channel.name == "level-up"):
             global levelUpChannel
             levelUpChannel = channel.id
-            print(channel)
     global botID
     botID = bot.user.id
 
@@ -206,13 +210,13 @@ async def on_message(message):
             if encounterFloat >= encounterTypeChance:
                 encounterType = SkillRandomEncounter()
                 encounterMsg = await channel.send(embed=encounterType[0])        
-                encounterID = str(encounterMsg.id)
+                encounterID = encounterMsg.id
                 encounterBool = True
                 await encounterMsg.add_reaction(rollEmote) 
             elif encounterFloat < encounterTypeChance:
                 encounterType = DNDMonRandomEncounter()
                 encounterMsg = await channel.send(embed=encounterType[0])        
-                encounterID = str(encounterMsg.id)
+                encounterID = encounterMsg.id
                 encounterBool = True
                 await encounterMsg.add_reaction(rollEmote)                 
         await bot.process_commands(message) 
@@ -223,22 +227,26 @@ async def on_reaction_add(reaction, user):
     general = bot.get_channel(generalChannel)
     levelUp = bot.get_channel(levelUpChannel)  
     global encounterType
-    outcome = QueryRoll("1d20")
+    global encounterID
+    global encClearID    
+    searchQuery = user.id
+    c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
+    fetchedRow = c.fetchone()
+    splitRow = str(fetchedRow).split(", ")
+    for idx, item in enumerate(splitRow):
+        splitRow[idx] = splitRow[idx].replace('(', '')
+        splitRow[idx] = splitRow[idx].replace(')', '')
+        splitRow[idx] = splitRow[idx].replace('\'', '')    
+    userMod = int(splitRow[4])
+    outcome = QueryRoll(f"1d20")
     rollNum = int(outcome[2])
-
+    equipment = splitRow[5]
+    
     # Issueing the levelup message on levelups
-    if user.id != botID and int(rollNum) >= encounterType[2]:
-        searchQuery = user.id
-        c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
-        fetchedRow = c.fetchone()
-        splitRow = str(fetchedRow).split(", ")
-        for idx, item in enumerate(splitRow):
-            splitRow[idx] = splitRow[idx].replace('(', '')
-            splitRow[idx] = splitRow[idx].replace(')', '')
-            splitRow[idx] = splitRow[idx].replace('\'', '')
+    if user.id != botID and rollNum+userMod >= encounterType[2]:        
         encounterExp = int(encounterType[1])
         userExp = int(splitRow[2])
-        userLevel = (levellingConstant * math.sqrt(userExp + encounterExp))
+        userLevel = (levellingConstant * math.sqrt(userExp + encounterExp))        
         expRemaining = round((math.ceil(float(splitRow[1])) ** 2) / (levellingConstant * levellingConstant) - userExp)
         if expRemaining - encounterExp <= 0:
             await levelUp.send(embed=LevelUpMsg(int(userLevel), user))
@@ -246,9 +254,19 @@ async def on_reaction_add(reaction, user):
         else:
             pass
 
-    if reaction.emoji == rollEmote and user.id != botID:        
-        embed = ClearEncounter(reaction, user, rollNum)
-        await general.send(embed=embed)    
+    if reaction.emoji == rollEmote and user.id != botID and reaction.message.id == encounterID:        
+        embed = ClearEncounter(reaction, user, rollNum, userMod, equipment)
+        encClearMsg = await general.send(embed=embed)   
+        encClearID = encClearMsg.id
+        if rollNum+userMod >= encounterType[2]:
+            await encClearMsg.add_reaction(tickEmote)
+            await encClearMsg.add_reaction(crossEmote)
+
+    if reaction.emoji == tickEmote and user.id != botID and reaction.message.id == encClearID and user.id == encClearUser:
+        c.execute(f"UPDATE userData SET userMod = \"{encClearLoot[1]}\", userEquipment = \"{encClearLoot[0]}\" WHERE userID=?", (searchQuery, ))
+        conn.commit()
+    elif reaction.emoji == crossEmote and user.id != botID and reaction.message.id == encClearID and user == encClearUser:
+        pass
 
 # ---------------------------------------------------------------------------
 # COMMAND METHODS
@@ -339,7 +357,7 @@ async def join_voice(ctx):
             await channel.connect()          
             for client in bot.voice_clients:
                 if client.channel == channel:
-                    embedMessage = f"I've connected to **{str(channel)}**!"                    
+                    embedMessage = f"I've connected to **{str(channel)}**!"
     except:
         embedMessage = f"I\'m already connected to **{str(channel)}**."
     joinEmbed = discord.Embed(
@@ -518,8 +536,7 @@ async def Speech2Text(ctx,):
         # recognize (convert from speech to text)
         text = r.recognize_google(audio_data)
 
-    author = ctx.author.id
-    author = ctx.author.name
+    authorName = ctx.author.name
     authorAvatar = ctx.author.avatar_url
     outcome = QueryRoll(text)
     embed = discord.Embed(
@@ -528,7 +545,7 @@ async def Speech2Text(ctx,):
         colour = embedColour
     )
     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767677300333477888/48cb5349f515f6e59edc2a4de294f439.png")
-    embed.set_author(name=f'{author}', icon_url=authorAvatar)    
+    embed.set_author(name=f'{authorName}', icon_url=authorAvatar)    
     embed.add_field(name="You Rolled:", value=f"{outcome[0]}", inline=False)
     embed.add_field(name="Modifier", value=f"{outcome[1]}", inline=True)
     embed.add_field(name="Total", value=f"{outcome[2]}", inline=True)
@@ -556,15 +573,43 @@ async def Spawn_Encounter(ctx):
         if encounterFloat >= encounterTypeChance:
             encounterType = SkillRandomEncounter()
             encounterMsg = await channel.send(embed=encounterType[0])        
-            encounterID = str(encounterMsg.id)
+            encounterID = encounterMsg.id
             encounterBool = True
             await encounterMsg.add_reaction(rollEmote) 
         elif encounterFloat < encounterTypeChance:
             encounterType = DNDMonRandomEncounter()
             encounterMsg = await channel.send(embed=encounterType[0])        
-            encounterID = str(encounterMsg.id)
+            encounterID = encounterMsg.id
             encounterBool = True
             await encounterMsg.add_reaction(rollEmote)   
+
+# Display the current equipment and modifier for a user that calls this command
+@bot.command(name='equipment')
+async def ShowEquipment(ctx):
+    searchQuery = ctx.author.id
+    authorName = ctx.author.name
+    authorAvatar = ctx.author.avatar_url
+    authorMod = ""
+    authorEquip = ""
+    c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
+    fetchedRows = c.fetchall()
+    for item in fetchedRows:             
+        splitRow = str(item).split(", ")        
+        for idx, item in enumerate(splitRow):
+            splitRow[idx] = splitRow[idx].replace('(', '')
+            splitRow[idx] = splitRow[idx].replace(')', '')
+            splitRow[idx] = splitRow[idx].replace('\'', '')   
+        authorMod = splitRow[4]
+        authorEquip = splitRow[5]
+    embed = discord.Embed(
+        title = f"Your Equipment",
+        colour = embedColour
+    )
+    embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767677300333477888/48cb5349f515f6e59edc2a4de294f439.png")
+    embed.set_author(name=f'{authorName}', icon_url=authorAvatar)    
+    embed.add_field(name="Item", value=f"{authorEquip}", inline=True)
+    embed.add_field(name="Modifier", value=f"{authorMod}", inline=True)
+    await ctx.send(embed=embed)
 
 # Takes a string that is Regex'd to find specific dice rolling data
 def QueryRoll(text):
@@ -646,34 +691,58 @@ def DieModConverter(dieMod, minus=False):
     return output
 
 # A method that is called when someone reacts the d20 to the message, calls RctExpSystem
-def ClearEncounter(reaction, user, rollNum):    
+def ClearEncounter(reaction, user, rollNum, userMod, equipment):    
+    lootChance = random.random()
+    lootDropThresh = 0.33
     botID = 715110532532797490
     global encounterBool
     global encounterType
+    global encClearLoot
+    global encClearUser
+    encClearUser = user.id
     authorAvatar = user.avatar_url
     author = user.name    
     expReward = encounterType[1]    
     outcomeMsg = ''
-    if str(reaction.message.id) == str(encounterID) and user.id != botID and encounterBool:   
+    rollTotal = rollNum+userMod
+    if reaction.message.id == encounterID and user.id != botID and encounterBool:   
         if rollNum == 20:
             RctExpSystem(user, int(expReward)*2)
-            outcomeMsg = f'***Nat 20!*** You defeated the encounter! ***{int(expReward)*2}*** Exp rewarded!'
-        elif int(rollNum) >= encounterType[2]:
+            outcomeMsg = f'***Nat 20!*** You defeated the encounter with your {equipment}! ***{int(expReward)*2}*** Exp rewarded!'
+        elif rollTotal >= encounterType[2]:
             RctExpSystem(user, expReward)
-            outcomeMsg = f'You defeated the encounter! **{expReward}** Exp rewarded!'  
+            outcomeMsg = f'You defeated the encounter with your {equipment}! **{expReward}** Exp rewarded!'  
         elif rollNum == 1:
                 RctExpSystem(user, -int(expReward))
                 outcomeMsg = f'***Nat 1!*** You were slain by the encounter! **{-int(expReward)}** Exp lost!'      
         else:
             outcomeMsg = 'You were defeated.'
         embed = discord.Embed(
-            title = f"You rolled: {rollNum}",
+            title = f"You rolled: *{rollNum} +{userMod}*",
             description = outcomeMsg,
             colour = discord.Colour.red()
         )        
         encounterBool = False
+        if lootChance >= lootDropThresh and rollTotal >= encounterType[2]:
+            encClearLoot = EncounterLoot()
+            embed.add_field(name=f"You got", value=f"*{encClearLoot[0]}*", inline=True)
+            embed.add_field(name=f"It's modifier", value=f"+{encClearLoot[1]}", inline=True)
+            embed.add_field(name=f"Do you pick it up?", value="React to equip.", inline=False)            
         embed.set_author(name=f'{author}', icon_url=authorAvatar)
         return embed
+
+# The loot that is dropped by defeating an encounter
+def EncounterLoot():
+    condition = ["Worthless ", "Rusty ", "Damascus ", "Overdriven ", "Astral ", "Eldritch "]
+    ranCond = random.randint(0,len(condition)-1)
+    equipment = ["Limp Noodle", "Boot Knife", "Lasso", "Six Shooter", "Gatling Laser", "Cow"]
+    ranEquip = random.randint(0,len(equipment)-1)
+    enchantment = [" of Garbage", " of Mediocrity", " of Moondust", " of Unfallible Accuracy", " of Starfire",  " of Cosmic Knowledge"]
+    ranEnchant = random.randint(0,len(enchantment)-1)
+    totalEquipment = condition[ranCond]+equipment[ranEquip]+enchantment[ranEnchant]
+    totalEquipmentMod = str(ranCond+ranEquip+ranEnchant)
+    print(totalEquipment)
+    return totalEquipment, totalEquipmentMod
 
 # Method to call to create a new monster encounter embedded message, stores monster data
 def DNDMonRandomEncounter():    
@@ -689,7 +758,7 @@ def DNDMonRandomEncounter():
     "https://media-waterdeep.cursecdn.com/avatars/thumbnails/0/363/1000/1000/636252778639163748.jpeg",
     "https://media-waterdeep.cursecdn.com/avatars/thumbnails/0/74/1000/1000/636252734224239957.jpeg",
     "https://media-waterdeep.cursecdn.com/avatars/thumbnails/0/109/1000/1000/636252744518731463.jpeg"]
-    randomInt = random.randint(0,len(monsters))
+    randomInt = random.randint(0,len(monsters)-1)
 
     embed = discord.Embed(
         title = f"A {monsters[randomInt]} appeared!",
@@ -716,7 +785,7 @@ def SkillRandomEncounter():
     "https://comicvine1.cbsistatic.com/uploads/original/11120/111209888/5139105-014afdf2e2481539ed8959752233f379.jpg",
     "https://roadbeerdotnet.files.wordpress.com/2020/07/thief-six-1024x1024-1.jpg",
     "https://static.wikia.nocookie.net/forgottenrealms/images/c/c3/Druid_and_bear-5e.jpg/revision/latest/scale-to-width-down/350?cb=20190808192744"]
-    randomInt = random.randint(0,len(monsters))
+    randomInt = random.randint(0,len(monsters)-1)
 
     embed = discord.Embed(
         title = f"{monsters[randomInt]}",
