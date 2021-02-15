@@ -48,11 +48,12 @@ r = sr.Recognizer()
 rollEmote = '🎲'
 voiceEmote = ':microphone2:'
 prefixEmote = ':exclamation:'
-levelEmote = ':crossed_swords:'
+levelEmote = '🛡️'
 accountEmote = ':desktop:'
 cowboyEmote = ':cowboy:'
 tickEmote = '✔️'
 crossEmote = '❌'
+equipmentEmote = '⚔️'
 # Embed Colour
 embedColour = discord.Colour.dark_blue()
 # Write to the prefix file
@@ -82,6 +83,8 @@ encClearID = 0
 encClearBool = False
 encClearLoot = []
 encClearUser = 0
+lootDropThresh = 0.33 
+lootChance = 0.0
 # Global variables for levelling
 levellingConstant = 0.1
 expPerMsg = 1
@@ -113,7 +116,7 @@ async def find_channel():
         if(channel.name == "general"):
             global generalChannel
             generalChannel = channel.id
-        if(channel.name == "level-up"):
+        if(channel.name == "level-ups"):
             global levelUpChannel
             levelUpChannel = channel.id
     global botID
@@ -229,6 +232,8 @@ async def on_reaction_add(reaction, user):
     global encounterType
     global encounterID
     global encClearID    
+    global lootChance
+    global lootDropThresh
     searchQuery = user.id
     c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
     fetchedRow = c.fetchone()
@@ -236,11 +241,19 @@ async def on_reaction_add(reaction, user):
     for idx, item in enumerate(splitRow):
         splitRow[idx] = splitRow[idx].replace('(', '')
         splitRow[idx] = splitRow[idx].replace(')', '')
-        splitRow[idx] = splitRow[idx].replace('\'', '')    
-    userMod = int(splitRow[4])
-    outcome = QueryRoll(f"1d20")
-    rollNum = int(outcome[2])
-    equipment = splitRow[5]
+        splitRow[idx] = splitRow[idx].replace('\'', '')  
+    userMod = 0
+    rollNum = 0
+    equipment = 0
+    try:  
+        userMod = int(splitRow[4])
+        outcome = QueryRoll(f"1d20")
+        rollNum = int(outcome[2])
+        equipment = splitRow[5]
+        print("User reacting.")
+    except:
+        print("No user reacting.")
+        pass
     
     # Issueing the levelup message on levelups
     if user.id != botID and rollNum+userMod >= encounterType[2]:        
@@ -254,11 +267,12 @@ async def on_reaction_add(reaction, user):
         else:
             pass
 
-    if reaction.emoji == rollEmote and user.id != botID and reaction.message.id == encounterID:        
-        embed = ClearEncounter(reaction, user, rollNum, userMod, equipment)
+    if reaction.emoji == rollEmote and user.id != botID and reaction.message.id == encounterID:    
+        lootChance = random.random()    
+        embed = ClearEncounter(reaction, user, rollNum, userMod, equipment)                   
         encClearMsg = await general.send(embed=embed)   
-        encClearID = encClearMsg.id
-        if rollNum+userMod >= encounterType[2]:
+        encClearID = encClearMsg.id          
+        if rollNum+userMod >= encounterType[2] and lootChance >= lootDropThresh:
             await encClearMsg.add_reaction(tickEmote)
             await encClearMsg.add_reaction(crossEmote)
 
@@ -285,6 +299,7 @@ async def help(ctx):
     embed.add_field(name=f"{rollEmote} Dice rolling:", value=f"To roll, type something like: **{ReadCommandPrefix()}roll 1d20**\nThe modifiers '+' or '-' may be added: **{ReadCommandPrefix()}roll 1d20+3**", inline=False)
     embed.add_field(name=f"{voiceEmote} Voice Chat:", value=f"To join voice chat, type: **{ReadCommandPrefix()}join** \nTo leave voice chat, type: **{ReadCommandPrefix()}leave**", inline=False)
     embed.add_field(name=f"{levelEmote} Rank:", value=f"To view your level stats, type: **{ReadCommandPrefix()}rank**", inline=False)
+    embed.add_field(name=f"{equipmentEmote} Equipment:", value=f"To view your current equipment, type: **{ReadCommandPrefix()}equipment**", inline=False)
     embed.add_field(name=f"{accountEmote} Account Info:", value=f"To view your account info, type: **{ReadCommandPrefix()}userinfo**", inline=False)
     embed.add_field(name=f"{prefixEmote} Command Prefixes:", value=f"To change the prefix, type: **{ReadCommandPrefix()}setprefix <prefix>** \nNote: you must be an administrator to do this", inline=False)
     await ctx.send(embed=embed)
@@ -691,14 +706,13 @@ def DieModConverter(dieMod, minus=False):
     return output
 
 # A method that is called when someone reacts the d20 to the message, calls RctExpSystem
-def ClearEncounter(reaction, user, rollNum, userMod, equipment):    
-    lootChance = random.random()
-    lootDropThresh = 0.33
+def ClearEncounter(reaction, user, rollNum, userMod, equipment):       
     botID = 715110532532797490
     global encounterBool
     global encounterType
     global encClearLoot
     global encClearUser
+    global lootChance
     encClearUser = user.id
     authorAvatar = user.avatar_url
     author = user.name    
@@ -722,7 +736,7 @@ def ClearEncounter(reaction, user, rollNum, userMod, equipment):
             description = outcomeMsg,
             colour = discord.Colour.red()
         )        
-        encounterBool = False
+        encounterBool = False        
         if lootChance >= lootDropThresh and rollTotal >= encounterType[2]:
             encClearLoot = EncounterLoot()
             embed.add_field(name=f"You got", value=f"*{encClearLoot[0]}*", inline=True)
@@ -741,7 +755,6 @@ def EncounterLoot():
     ranEnchant = random.randint(0,len(enchantment)-1)
     totalEquipment = condition[ranCond]+equipment[ranEquip]+enchantment[ranEnchant]
     totalEquipmentMod = str(ranCond+ranEquip+ranEnchant)
-    print(totalEquipment)
     return totalEquipment, totalEquipmentMod
 
 # Method to call to create a new monster encounter embedded message, stores monster data
