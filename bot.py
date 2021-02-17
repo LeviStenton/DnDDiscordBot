@@ -1,4 +1,9 @@
 #!/usr/bin/python
+# cogs/Experience.py
+# cogs/RollDice.py
+# cogs/Encoutners.py
+# cogs/DisplayData.py
+# cogs/Main.py
 
 # ---------------------------------------------------------------------------
 # IMPORT ALL NECESSARY ASSETS TO RUN THE PROGRAMS
@@ -23,12 +28,12 @@ import sqlite3
 # Datetime
 from datetime import datetime
 from datetime import timedelta
-# Other Files
-from cogs.RollDice import DiceRolling as rollDice
-from cogs.Encounters import RandomEncounters as encounters
-from cogs.Experience import ExperienceSystem as experience
-from cogs.DisplayData import UserDataCommands as displayData
-from cogs.Main import BotMain as main
+# Other scripts
+from RollDice import DiceRolling as diceRolling
+from Encounters import RandomEncounters as encounter
+from Experience import ExperienceSystem as experience
+from DisplayData import UserDataCommands as userData
+from Main import BotMain as main
 
 # ----------------------------------------------------------------------------
 # DECLARE ALL VARIABLES NECESSARY TO RUN THE PROGRAM
@@ -57,10 +62,15 @@ intents = discord.Intents.all()
 intents.members = True
 intents.reactions = True
 # Sets the bot's command prefix to the prefix in prefix.txt
-bot = commands.Bot(command_prefix=ReadCommandPrefix(), intents=intents, activity = discord.Activity(type = discord.ActivityType.listening, name = f"{ReadCommandPrefix()}help"))  
+bot = commands.Bot(command_prefix=ReadCommandPrefix(), bot=True, intents=intents, activity = discord.Activity(type = discord.ActivityType.listening, name = f"{ReadCommandPrefix()}help"))  
 # Remove the in-built help command to write my own
 bot.remove_command("help")
-
+# Cog extensions
+cog_extensions = ['Experience', 'RollDice', 'Encounters', 'DisplayData', 'Main']
+if __name__ == 'bot':
+    for extension in cog_extensions:
+        print("Cog Extensions: "+extension)
+        bot.load_extension(extension)
 
 # ---------------------------------------------------------------------------
 # ON EVENT METHODS
@@ -98,7 +108,7 @@ async def close():
 # When a member joins the server, send a welcoming message
 @bot.event
 async def on_member_join(member):
-    dat = displayData(bot)
+    dat = userData(bot)
     mai = main(bot)
     print(f"{member.id} joined!")
     memberID = str(member.id)
@@ -173,8 +183,8 @@ async def on_message(message):
 
         # Generating an encounter  
         if(randFloat < encounterChance and channelID == generalID and message.author.id != mai.botID):
-            enc = encounters(bot)            
-            dat = displayData(bot)
+            enc = encounter(bot)            
+            dat = userData(bot)
             global encounterType
             global encounterID 
             global encounterBool
@@ -195,9 +205,9 @@ async def on_message(message):
 # Method to do things when a reaction is added
 @bot.event
 async def on_reaction_add(reaction, user):
-    rol = rollDice(bot)
-    enc = encounters(bot)
-    dat = displayData(bot)
+    rol = diceRolling(bot)
+    enc = encounter(bot)            
+    dat = userData(bot)
     mai = main(bot)
     general = bot.get_channel(mai.generalChannel)
     levelUp = bot.get_channel(mai.levelUpChannel)
@@ -256,8 +266,8 @@ async def on_reaction_add(reaction, user):
 # Sets a new prefix
 @bot.command(name='setprefix')
 @has_permissions(administrator=True, manage_messages=True, manage_roles=True)
-async def set_prefix(ctx, newPrefix):    
-    dat = displayData(bot)
+async def set_prefix(ctx, newPrefix):               
+    dat = userData(bot)
     acceptablePrefixes = ['!' ,'@' ,'#' ,'$' ,'%' ,'^' ,'&' ,'*' ,'(' ,')' ,'-' ,'=' ,'_' ,'+']
     authorName = ctx.author.name
     authorAvatar = ctx.author.avatar_url
@@ -287,8 +297,8 @@ async def set_prefix(ctx, newPrefix):
 # Loads your guild's prefix
 @bot.command(name='loadprefix')
 @has_permissions(administrator=True, manage_messages=True, manage_roles=True)
-async def load_prefix(ctx):  
-    dat = displayData(bot)  
+async def load_prefix(ctx):             
+    dat = userData(bot)
     guild = ctx.guild
     authorName = ctx.author.name
     authorAvatar = ctx.author.avatar_url
@@ -305,11 +315,7 @@ async def load_prefix(ctx):
     embed.set_author(name=f'{authorName}', icon_url=authorAvatar)
     await ctx.send(embed=embed)
 
-bot.load_extension("cogs.RollDice")
-bot.load_extension("cogs.Encounters")
-bot.load_extension("cogs.Experience")
-bot.load_extension("cogs.DisplayData")
-bot.load_extension("cogs.Main")
+
 
 bot.run(TOKEN)
 

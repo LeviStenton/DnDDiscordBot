@@ -10,8 +10,8 @@ from datetime import datetime
 # Math
 import math
 # Other scripts
-from cogs.Experience import ExperienceSystem as experience
-from cogs.Main import BotMain as main
+from Experience import ExperienceSystem as experience
+from Main import BotMain as main
 from bot import ReadCommandPrefix as bRead
 
 class UserDataCommands(commands.Cog):

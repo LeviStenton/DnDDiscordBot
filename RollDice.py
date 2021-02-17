@@ -9,7 +9,7 @@ from re import I
 # Random
 import random
 # Other Scripts
-from cogs.DisplayData import UserDataCommands as displayData
+from DisplayData import UserDataCommands as displayData
 
 class DiceRolling(commands.Cog):
     # Initialize the voice recognizer

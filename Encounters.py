@@ -5,9 +5,9 @@ from discord.ext.commands import has_permissions, CheckFailure
 # Random
 import random
 # Other scripts
-from cogs.Experience import ExperienceSystem as experience
-from cogs.DisplayData import UserDataCommands as displayData
-from cogs.Main import BotMain as main
+from Experience import ExperienceSystem as experience
+from DisplayData import UserDataCommands as displayData
+from Main import BotMain as main
 
 class RandomEncounters(commands.Cog):
     # Global variables for Encounters
