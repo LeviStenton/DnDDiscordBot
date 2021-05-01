@@ -15459,3 +15459,831 @@ Traceback (most recent call last):
   File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
     raise HTTPException(r, data)
 discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 181, in on_message
+    timeDistance = message.created_at - userMessages[1].created_at
+IndexError: list index out of range
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 181, in on_message
+    timeDistance = message.created_at - userMessages[1].created_at
+IndexError: list index out of range
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 181, in on_message
+    timeDistance = message.created_at - userMessages[1].created_at
+IndexError: list index out of range
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 181, in on_message
+    timeDistance = message.created_at - userMessages[1].created_at
+IndexError: list index out of range
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 181, in on_message
+    timeDistance = message.created_at - userMessages[1].created_at
+IndexError: list index out of range
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 181, in on_message
+    timeDistance = message.created_at - userMessages[1].created_at
+IndexError: list index out of range
+Ignoring exception in command encounter:
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/ext/commands/bot.py", line 902, in invoke
+    await ctx.command.invoke(ctx)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/ext/commands/core.py", line 856, in invoke
+    await self.prepare(ctx)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/ext/commands/core.py", line 778, in prepare
+    if not await self.can_run(ctx):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/ext/commands/core.py", line 1081, in can_run
+    return await discord.utils.async_all(predicate(ctx) for predicate in predicates)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/utils.py", line 336, in async_all
+    for elem in gen:
+  File "/home/server/.local/lib/python3.8/site-packages/discord/ext/commands/core.py", line 1081, in <genexpr>
+    return await discord.utils.async_all(predicate(ctx) for predicate in predicates)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/ext/commands/core.py", line 1780, in predicate
+    raise MissingPermissions(missing)
+discord.ext.commands.errors.MissingPermissions: You are missing Administrator, Manage Messages, and Manage Roles permission(s) to run this command.
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 181, in on_message
+    timeDistance = message.created_at - userMessages[1].created_at
+IndexError: list index out of range
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 181, in on_message
+    timeDistance = message.created_at - userMessages[1].created_at
+IndexError: list index out of range
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 181, in on_message
+    timeDistance = message.created_at - userMessages[1].created_at
+IndexError: list index out of range
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 181, in on_message
+    timeDistance = message.created_at - userMessages[1].created_at
+IndexError: list index out of range
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in command None:
+discord.ext.commands.errors.CommandNotFound: Command "yoink" is not found
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 181, in on_message
+    timeDistance = message.created_at - userMessages[1].created_at
+IndexError: list index out of range
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 181, in on_message
+    timeDistance = message.created_at - userMessages[1].created_at
+IndexError: list index out of range
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 181, in on_message
+    timeDistance = message.created_at - userMessages[1].created_at
+IndexError: list index out of range
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 181, in on_message
+    timeDistance = message.created_at - userMessages[1].created_at
+IndexError: list index out of range
+Ignoring exception in command None:
+discord.ext.commands.errors.CommandNotFound: Command "Join" is not found
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in command None:
+discord.ext.commands.errors.CommandNotFound: Command "fuckenstupidrobots" is not found
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 181, in on_message
+    timeDistance = message.created_at - userMessages[1].created_at
+IndexError: list index out of range
+Ignoring exception in command None:
+discord.ext.commands.errors.CommandNotFound: Command "ranl" is not found
+Ignoring exception in command None:
+discord.ext.commands.errors.CommandNotFound: Command "addexp" is not found
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 181, in on_message
+    timeDistance = message.created_at - userMessages[1].created_at
+IndexError: list index out of range
+Ignoring exception in command None:
+discord.ext.commands.errors.CommandNotFound: Command "pvp" is not found
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 181, in on_message
+    timeDistance = message.created_at - userMessages[1].created_at
+IndexError: list index out of range
+Ignoring exception in command None:
+discord.ext.commands.errors.CommandNotFound: Command "eatshitanddie" is not found
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+Ignoring exception in on_reaction_add
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "bot.py", line 273, in on_reaction_add
+    encClearMsg = await general.send(embed=embed)
+  File "/home/server/.local/lib/python3.8/site-packages/discord/abc.py", line 935, in send
+    data = await state.http.send_message(channel.id, content, tts=tts, embed=embed,
+  File "/home/server/.local/lib/python3.8/site-packages/discord/http.py", line 247, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50006): Cannot send an empty message
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.
+User reacting.

@@ -10,6 +10,7 @@ from os.path import splitdrive
 import random
 # Math
 import math
+import decimal
 # Discord
 import discord
 from discord import reaction
@@ -54,6 +55,7 @@ cowboyEmote = ':cowboy:'
 tickEmote = '✔️'
 crossEmote = '❌'
 equipmentEmote = '⚔️'
+encounterEmote = '👹'
 # Embed Colour
 embedColour = discord.Colour.dark_blue()
 # Write to the prefix file
@@ -83,6 +85,7 @@ encClearID = 0
 encClearBool = False
 encClearLoot = []
 encClearUser = 0
+encounterChance = 0.015
 lootDropThresh = 0.33 
 lootChance = 0.0
 # Global variables for levelling
@@ -164,7 +167,7 @@ async def on_message(message):
         levelUp = bot.get_channel(levelUpChannel)
         global botID
         author = message.author
-        encounterChance = 0.05
+        global encounterChance
         encounterTypeChance = 0.3
         randFloat = random.random()
         encounterFloat = random.random()
@@ -279,7 +282,7 @@ async def on_reaction_add(reaction, user):
     if reaction.emoji == tickEmote and user.id != botID and reaction.message.id == encClearID and user.id == encClearUser:
         c.execute(f"UPDATE userData SET userMod = \"{encClearLoot[1]}\", userEquipment = \"{encClearLoot[0]}\" WHERE userID=?", (searchQuery, ))
         conn.commit()
-    elif reaction.emoji == crossEmote and user.id != botID and reaction.message.id == encClearID and user == encClearUser:
+    elif reaction.emoji == crossEmote and user.id != botID and reaction.message.id == encClearID and user.id == encClearUser:
         pass
 
 # ---------------------------------------------------------------------------
@@ -300,6 +303,7 @@ async def help(ctx):
     embed.add_field(name=f"{voiceEmote} Voice Chat:", value=f"To join voice chat, type: **{ReadCommandPrefix()}join** \nTo leave voice chat, type: **{ReadCommandPrefix()}leave**", inline=False)
     embed.add_field(name=f"{levelEmote} Rank:", value=f"To view your level stats, type: **{ReadCommandPrefix()}rank**", inline=False)
     embed.add_field(name=f"{equipmentEmote} Equipment:", value=f"To view your current equipment, type: **{ReadCommandPrefix()}equipment**", inline=False)
+    embed.add_field(name=f"{encounterEmote} Encounter Statistics:", value=f"To view the statistics for encounters, type: **{ReadCommandPrefix()}encounterstats**", inline=False)
     embed.add_field(name=f"{accountEmote} Account Info:", value=f"To view your account info, type: **{ReadCommandPrefix()}userinfo**", inline=False)
     embed.add_field(name=f"{prefixEmote} Command Prefixes:", value=f"To change the prefix, type: **{ReadCommandPrefix()}setprefix <prefix>** \nNote: you must be an administrator to do this", inline=False)
     await ctx.send(embed=embed)
@@ -462,6 +466,24 @@ async def req_userinfo(ctx):
     embed.add_field(name=f"Account Created {timeSinceAccCreated[0]} ago", value=f"**{accCreatedAt[0]}** {timeCreated[0]}", inline=True)
     embed.add_field(name=f"Server Joined {timeSinceAccJoined[0]} ago", value=f"**{accJoinedAt[0]}** {timeJoined[0]}", inline=True)    
     embed.set_footer(text=f"UserID: {authorID}")
+    await ctx.send(embed=embed)  
+
+# Retrieves user account info based on their public profile
+@bot.command(name='encounterstats')
+async def encounterStats(ctx):
+    authorName = ctx.author.name
+    authorAvatar = ctx.author.avatar_url
+    global encounterChance
+    eC = decimal.Decimal(encounterChance*100).normalize()
+    global lootDropThresh
+    lDT = decimal.Decimal(lootDropThresh*100).normalize()
+    embed = discord.Embed(
+        title = f"{encounterEmote} Encounter Statistics",
+        colour = embedColour
+    )
+    embed.set_author(name=f'{authorName}', icon_url=authorAvatar)  
+    embed.add_field(name=f"Encounter Spawn", value=f"{eC}%", inline=True)  
+    embed.add_field(name=f"Loot Drop", value=f"{lDT}%", inline=True) 
     await ctx.send(embed=embed)  
 
 # DO NOT USE THIS UNLESS YOU WANT TO WIPE ALL LEVEL DATA
