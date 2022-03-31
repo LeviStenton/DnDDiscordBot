@@ -16287,3 +16287,67 @@ User reacting.
 User reacting.
 User reacting.
 User reacting.
+python3: can't open file '/home/TheMoonCowboy/bot.py': [Errno 2] No such file or directory
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "/home/server/Discord_Bots/TheMoonCowboy/bot.py", line 189, in on_message
+    MsgExpSystem(message, expBool)
+  File "/home/server/Discord_Bots/TheMoonCowboy/bot.py", line 845, in MsgExpSystem
+    c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
+sqlite3.OperationalError: no such table: userData
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "/home/server/Discord_Bots/TheMoonCowboy/bot.py", line 189, in on_message
+    MsgExpSystem(message, expBool)
+  File "/home/server/Discord_Bots/TheMoonCowboy/bot.py", line 845, in MsgExpSystem
+    c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
+sqlite3.OperationalError: no such table: userData
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "/home/server/Discord_Bots/TheMoonCowboy/bot.py", line 189, in on_message
+    MsgExpSystem(message, expBool)
+  File "/home/server/Discord_Bots/TheMoonCowboy/bot.py", line 845, in MsgExpSystem
+    c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
+sqlite3.OperationalError: no such table: userData
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "/home/server/Discord_Bots/TheMoonCowboy/bot.py", line 189, in on_message
+    MsgExpSystem(message, expBool)
+  File "/home/server/Discord_Bots/TheMoonCowboy/bot.py", line 845, in MsgExpSystem
+    c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
+sqlite3.OperationalError: no such table: userData
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "/home/server/Discord_Bots/TheMoonCowboy/bot.py", line 189, in on_message
+    MsgExpSystem(message, expBool)
+  File "/home/server/Discord_Bots/TheMoonCowboy/bot.py", line 845, in MsgExpSystem
+    c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
+sqlite3.OperationalError: no such table: userData
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "/home/server/Discord_Bots/TheMoonCowboy/bot.py", line 189, in on_message
+    MsgExpSystem(message, expBool)
+  File "/home/server/Discord_Bots/TheMoonCowboy/bot.py", line 845, in MsgExpSystem
+    c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
+sqlite3.OperationalError: no such table: userData
+Ignoring exception in on_message
+Traceback (most recent call last):
+  File "/home/server/.local/lib/python3.8/site-packages/discord/client.py", line 343, in _run_event
+    await coro(*args, **kwargs)
+  File "/home/server/Discord_Bots/TheMoonCowboy/bot.py", line 189, in on_message
+    MsgExpSystem(message, expBool)
+  File "/home/server/Discord_Bots/TheMoonCowboy/bot.py", line 845, in MsgExpSystem
+    c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
+sqlite3.OperationalError: no such table: userData

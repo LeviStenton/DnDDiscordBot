@@ -41,7 +41,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 #GUILD = os.getenv('DISCORD_GUILD')
 
 # Initialize the database
-conn = sqlite3.connect('databases/levellingDB.db')
+conn = sqlite3.connect('levellingDB.db')
 c = conn.cursor()
 # Initialize the voice recognizer
 r = sr.Recognizer()
@@ -81,6 +81,7 @@ bot.remove_command("help")
 encounterID = 0
 encounterBool = False
 encounterType = []
+encounterUserID = 0
 encClearID = 0
 encClearBool = False
 encClearLoot = []
@@ -142,7 +143,7 @@ async def on_member_join(member):
     memberID = str(member.id)
     author = member.name
     authorAvatar = member.avatar_url
-    role = discord.utils.get(member.guild.roles, name='ｄｅｂｒｉｓ 𝓭𝓻𝓲𝓯𝓽𝓮𝓻𝓼')
+    role = discord.utils.get(member.guild.roles, id='272748337256726528')
     channel = bot.get_channel(generalChannel)
     embed = discord.Embed(
         title = f"{cowboyEmote} Eyes up",
@@ -150,7 +151,7 @@ async def on_member_join(member):
         colour = embedColour
     )
     embed.set_author(name=author, icon_url=authorAvatar)
-    c.execute(f"INSERT or IGNORE INTO userData VALUES(?,0,0,0)", (memberID, ))
+    c.execute(f"INSERT or IGNORE INTO userData VALUES(?,0,0,0,0,?)", (memberID, "Fists", ))
     conn.commit()           
     await member.add_roles(role)
     await channel.send(embed=embed)
@@ -174,19 +175,23 @@ async def on_message(message):
         channelID = message.channel.id
         channel = bot.get_channel(channelID)
         channelHistoryLength = 50
+        expBool = True
 
         # Rate limiting the exp users gain from messages
-        userMessages = []
-        channelMessages = await message.channel.history(limit=channelHistoryLength).flatten()
-        for chnlMsg in channelMessages:
-            if chnlMsg.author.id == message.author.id:
-                userMessages.append(chnlMsg)
-        timeDistance = message.created_at - userMessages[1].created_at
-        if timeDistance <= timedelta(seconds=rateLimit):
-            expBool = False      
-        else:
-            expBool = True
-        MsgExpSystem(message, expBool)  
+        try:
+            userMessages = []
+            channelMessages = await message.channel.history(limit=channelHistoryLength).flatten()
+            for chnlMsg in channelMessages:
+                if chnlMsg.author.id == message.author.id:
+                    userMessages.append(chnlMsg)
+            timeDistance = message.created_at - userMessages[1].created_at
+            if timeDistance <= timedelta(seconds=rateLimit):
+                expBool = False      
+            else:
+                expBool = True
+            MsgExpSystem(message, expBool)  
+        except:
+            print("Could not rate-limit.")
 
         # Issueing the levelup message on levelups
         if expBool and message.author.id != botID:
@@ -205,22 +210,23 @@ async def on_message(message):
                 await levelUp.send(embed=LevelUpMsg(int(float(splitRow[1])), author))
                 pass
             else:
-                pass
-                          
+                pass                          
 
         # Generating an encounter  
         if(randFloat < encounterChance and channelID == generalID and message.author.id != botID):
             global encounterType
             global encounterID 
             global encounterBool
+            global encounterUserID
+            encounterUserID = message.author.id
             if encounterFloat >= encounterTypeChance:
-                encounterType = SkillRandomEncounter()
+                encounterType = SkillRandomEncounter(author)
                 encounterMsg = await channel.send(embed=encounterType[0])        
                 encounterID = encounterMsg.id
                 encounterBool = True
                 await encounterMsg.add_reaction(rollEmote) 
             elif encounterFloat < encounterTypeChance:
-                encounterType = DNDMonRandomEncounter()
+                encounterType = DNDMonRandomEncounter(author)
                 encounterMsg = await channel.send(embed=encounterType[0])        
                 encounterID = encounterMsg.id
                 encounterBool = True
@@ -234,9 +240,11 @@ async def on_reaction_add(reaction, user):
     levelUp = bot.get_channel(levelUpChannel)  
     global encounterType
     global encounterID
-    global encClearID    
+    global encClearID 
+    global encClearUser   
     global lootChance
     global lootDropThresh
+    global encounterUserID
     searchQuery = user.id
     c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
     fetchedRow = c.fetchone()
@@ -257,33 +265,46 @@ async def on_reaction_add(reaction, user):
     except:
         print("No user reacting.")
         pass
-    
-    # Issueing the levelup message on levelups
-    if user.id != botID and rollNum+userMod >= encounterType[2]:        
-        encounterExp = int(encounterType[1])
-        userExp = int(splitRow[2])
-        userLevel = (levellingConstant * math.sqrt(userExp + encounterExp))        
-        expRemaining = round((math.ceil(float(splitRow[1])) ** 2) / (levellingConstant * levellingConstant) - userExp)
-        if expRemaining - encounterExp <= 0:
-            await levelUp.send(embed=LevelUpMsg(int(userLevel), user))
-            pass
-        else:
-            pass
 
-    if reaction.emoji == rollEmote and user.id != botID and reaction.message.id == encounterID:    
-        lootChance = random.random()    
-        embed = ClearEncounter(reaction, user, rollNum, userMod, equipment)                   
-        encClearMsg = await general.send(embed=embed)   
-        encClearID = encClearMsg.id          
-        if rollNum+userMod >= encounterType[2] and lootChance >= lootDropThresh:
-            await encClearMsg.add_reaction(tickEmote)
-            await encClearMsg.add_reaction(crossEmote)
+    print("Encounter user:", encounterUserID) 
+    # Only issue the level up or progress the encounter if the user is the one receiving the encounter message
+    if(encounterUserID == user.id):                
+        # Issue the encounter clear message if the user reacts with the roll emote
+        if reaction.emoji == rollEmote and user.id != botID and reaction.message.id == encounterID:                  
+            embed = ClearEncounter(reaction, user, rollNum, userMod, equipment)                   
+            encClearMsg = await general.send(embed=embed)   
+            encClearID = encClearMsg.id          
+            # Issueing the levelup message on levelups
+            try:
+                if rollNum+userMod >= encounterType[2]:        
+                    encounterExp = int(encounterType[1])
+                    userExp = int(splitRow[2])
+                    userLevel = (levellingConstant * math.sqrt(userExp + encounterExp))        
+                    expRemaining = round((math.ceil(float(splitRow[1])) ** 2) / (levellingConstant * levellingConstant) - userExp)
+                    if expRemaining - encounterExp <= 0:
+                        await levelUp.send(embed=LevelUpMsg(int(userLevel), user))
+                        pass
+                    else:
+                        pass
+                    # If the chance to get loot exceeds the threshhold, drop loot
+                    if lootChance >= lootDropThresh:
+                        await encClearMsg.add_reaction(tickEmote)
+                        await encClearMsg.add_reaction(crossEmote)
+            except:
+                print("Failed to level up.")
+                print("User roll + mod: ", rollNum+userMod)
+                print("Encountertype: ", encounterType[2])
 
-    if reaction.emoji == tickEmote and user.id != botID and reaction.message.id == encClearID and user.id == encClearUser:
-        c.execute(f"UPDATE userData SET userMod = \"{encClearLoot[1]}\", userEquipment = \"{encClearLoot[0]}\" WHERE userID=?", (searchQuery, ))
-        conn.commit()
-    elif reaction.emoji == crossEmote and user.id != botID and reaction.message.id == encClearID and user.id == encClearUser:
-        pass
+        print("Encounter clear user:", encClearUser)
+        print("Message user:", user.id)
+        # If the user reacts with the tick or cross emote, stop the encounter or retrieve the loot
+        if(user.id == encClearUser and user.id != botID and reaction.message.id == encClearID):
+            if reaction.emoji == tickEmote:
+                c.execute(f"UPDATE userData SET userMod = \"{encClearLoot[1]}\", userEquipment = \"{encClearLoot[0]}\" WHERE userID=?", (searchQuery, ))
+                conn.commit()
+            elif reaction.emoji == crossEmote:
+                ClearEncounterVariables() 
+            
 
 # ---------------------------------------------------------------------------
 # COMMAND METHODS
@@ -495,7 +516,7 @@ async def collectLevelData(ctx):
             c.execute("CREATE TABLE IF NOT EXISTS userData(userID TEXT, userLevel TEXT, userExp TEXT, userSentMsgs TEXT)")
             for member in ctx.guild.members:
                 memberID = str(member.id)             
-                c.execute(f"INSERT INTO userData VALUES (?,0,0,0)", (memberID, ))
+                c.execute(f"INSERT INTO userData VALUES (?,0,0,0,0,?)", (memberID, "Fists", ))
                 conn.commit()
             print("Storing fresh data successful.")
             await ctx.send("Storing fresh data successful.")
@@ -599,6 +620,7 @@ async def Spawn_Encounter(ctx):
     # Declaring variables to be used
     generalID = generalChannel
     global botID
+    global encounterUserID
     encounterTypeChance = 0.3
     encounterFloat = random.random()
     channelID = ctx.channel.id
@@ -607,6 +629,7 @@ async def Spawn_Encounter(ctx):
         global encounterType
         global encounterID 
         global encounterBool
+        encounterUserID = ctx.author.id
         if encounterFloat >= encounterTypeChance:
             encounterType = SkillRandomEncounter()
             encounterMsg = await channel.send(embed=encounterType[0])        
@@ -741,6 +764,7 @@ def ClearEncounter(reaction, user, rollNum, userMod, equipment):
     expReward = encounterType[1]    
     outcomeMsg = ''
     rollTotal = rollNum+userMod
+    lootChance = random.random() 
     if reaction.message.id == encounterID and user.id != botID and encounterBool:   
         if rollNum == 20:
             RctExpSystem(user, int(expReward)*2)
@@ -763,7 +787,9 @@ def ClearEncounter(reaction, user, rollNum, userMod, equipment):
             encClearLoot = EncounterLoot()
             embed.add_field(name=f"You got", value=f"*{encClearLoot[0]}*", inline=True)
             embed.add_field(name=f"It's modifier", value=f"+{encClearLoot[1]}", inline=True)
-            embed.add_field(name=f"Do you pick it up?", value="React to equip.", inline=False)            
+            embed.add_field(name=f"Do you pick it up?", value="React to equip.", inline=False)  
+        else:
+            ClearEncounterVariables()          
         embed.set_author(name=f'{author}', icon_url=authorAvatar)
         return embed
 
@@ -780,7 +806,7 @@ def EncounterLoot():
     return totalEquipment, totalEquipmentMod
 
 # Method to call to create a new monster encounter embedded message, stores monster data
-def DNDMonRandomEncounter():    
+def DNDMonRandomEncounter(user):    
     monsters = ["Wolf","Goblin","Bandit","Gorgon","Harpy","Green Dragon Wyrmling","Werewolf","Stone Giant"]
     experience = ["50","50","25","1800","200","450","700","2900"]
     challengeRating = ["1/4","1/4","1/8","5","1","2","3","7"]
@@ -805,10 +831,11 @@ def DNDMonRandomEncounter():
     embed.add_field(name=f"**AC**", value=f"{armourClass[randomInt]}", inline=True)
     embed.add_field(name=f"**CR**", value=f"{challengeRating[randomInt]}", inline=True)
     embed.add_field(name=f"**EXP**", value=f"{experience[randomInt]}", inline=True)    
+    embed.set_footer(text=user.name, icon_url=user.avatar_url)
     return embed, experience[randomInt], armourClass[randomInt] 
 
 # Method to call to create a new skill encounter embedded message, stores encounter data
-def SkillRandomEncounter():    
+def SkillRandomEncounter(user):    
     monsters = ["A Boulder Is Falling!","Lockpick The Chest!","Withstand The Storm!","You Are Lost In A Desert","Flee The Treant!","A Thief Approaches!", "Save Rogue Bear!"]
     experience = ["100","200","350","300","1000","50", "1250"]
     challengeRating = ["1","2","3","2 1/2","5","1/2", "7"]
@@ -831,7 +858,8 @@ def SkillRandomEncounter():
     embed.set_author(name=f'Skill Encounter!', icon_url="https://i.pinimg.com/originals/48/cb/53/48cb5349f515f6e59edc2a4de294f439.png")
     embed.add_field(name=f"**DC**", value=f"{armourClass[randomInt]}", inline=True)
     embed.add_field(name=f"**CR**", value=f"{challengeRating[randomInt]}", inline=True)
-    embed.add_field(name=f"**EXP**", value=f"{experience[randomInt]}", inline=True)    
+    embed.add_field(name=f"**EXP**", value=f"{experience[randomInt]}", inline=True)  
+    embed.set_footer(text=user.name, icon_url=user.avatar_url)  
     return embed, experience[randomInt], armourClass[randomInt] 
 
 # A method to promote users with exp when they message
@@ -903,6 +931,18 @@ def LevelUpMsg(level, user):
     )        
     embed.set_author(name=f'{author}', icon_url=authorAvatar)
     return embed
+
+def ClearEncounterVariables():
+    global encounterType
+    global encounterID
+    global encClearID    
+    global lootChance
+    global encounterUserID    
+    encounterType = 0
+    encounterID = 0
+    encClearID = 0
+    lootChance = 0
+    encounterUserID = 0    
 
 bot.run(TOKEN)
 
