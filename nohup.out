@@ -16351,3 +16351,7 @@ Traceback (most recent call last):
   File "/home/server/Discord_Bots/TheMoonCowboy/bot.py", line 845, in MsgExpSystem
     c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
 sqlite3.OperationalError: no such table: userData
+Traceback (most recent call last):
+  File "/home/server/Discord_Bots/TheMoonCowboy/bot.py", line 949, in <module>
+    bot.loop.create_task(update_log())
+NameError: name 'update_log' is not defined
