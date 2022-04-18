@@ -283,7 +283,7 @@ async def on_reaction_add(reaction, user):
     
     try:
         if(reaction.emoji == rollEmote):
-            await pvp.send(embed=FightPlayer(reaction.message, user))
+            await pvp.send(embed=await FightPlayer(reaction.message, user))
     except Exception as e:
         print(e)
 
@@ -503,7 +503,6 @@ async def req_leaderboard(ctx):
         row = []
         user = ctx.guild.get_member(int(splitRow[0]))
         if(user != None):
-            print(user.name)
             row.append(user.name)
             row.append(math.floor(float(splitRow[1])))
             row.append(splitRow[2])
@@ -511,7 +510,6 @@ async def req_leaderboard(ctx):
             leaderboardList.append(row)
     leaderboardList.sort(key=lambda member: int(member[2]), reverse=True)
     leaderboardList = leaderboardList[:10]
-    print(leaderboardList)
     for idx, item in enumerate(leaderboardList):   
         embed.add_field(name=str(idx+1)+". "+leaderboardList[idx][0], value=f"Level: {leaderboardList[idx][1]}, Exp: {leaderboardList[idx][2]}", inline=True)
     await ctx.send(embed=embed)
@@ -821,14 +819,16 @@ async def ChallengePlayer(ctx, opponent: discord.User, wager: str):
                 challengesDict[dictKeyName][2] = {'challengeID' : challenge.id, 'challengeWager' : wager}
                 await challenge.add_reaction(rollEmote)
 
-def FightPlayer(reactionMessage, reactingUser):
+async def FightPlayer(reactionMessage, reactingUser):
     try:
         global challengesDict
         dictKeyName = str(reactingUser.id)+'_'+str(reactionMessage.id)
+        levelUp = bot.get_channel(levelUpChannel)
         print(challengesDict)
         if(challengesDict[dictKeyName].get(1).get('opponentID') == reactingUser.id and challengesDict[dictKeyName].get(2).get('challengeID') == reactionMessage.id):
+            embedTitle = ""
             embed = discord.Embed(
-                title = "",
+                title = embedTitle,
                 colour = challengeColour
             )
             challenger = challengesDict[dictKeyName].get(0)
@@ -845,20 +845,35 @@ def FightPlayer(reactionMessage, reactingUser):
             opponentRollTotal = opponentRoll[3] if int(opponentMod) > 0 else opponentRoll[0]
             challengeWager = challengesDict[dictKeyName].get(2).get('challengeWager')
             outcome = int(challengerRollTotal) > int(opponentRollTotal)
-            RctExpSystem(challengerID if outcome else opponentID, int(challengeWager))
-            RctExpSystem(opponentID if outcome else challengerID, -int(challengeWager))
-            tie = challengerRoll == opponentRoll            
+            tie = challengerRoll == opponentRoll  
             embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767677300333477888/48cb5349f515f6e59edc2a4de294f439.png")
             embed.add_field(name=challengerName, value=f"**{challengerRollTotal}** (*{challengerRoll[0]}, +{challengerMod}*)", inline=True)
             if(tie):
                 embed.add_field(name='**Tie!**', value="No one wins.", inline=True)
             else:
-                embed.add_field(name="***WINS OVER***" if outcome else "***LOSES TO***", value=f"*Winning **{challengeWager}**xp*", inline=True)
+                embed.add_field(name="***WINS OVER***" if outcome else "***LOSES TO***", value=f"*Winning **{challengeWager}**xp*", inline=True)                
+                # Issue levelup to wager winner
+                c.execute(f'SELECT * FROM userData WHERE userID=?', (challengerID if outcome else opponentID, ))
+                fetchedRows = c.fetchall()
+                for item in fetchedRows:             
+                    splitRow = str(item).split(", ")        
+                    for idx, item in enumerate(splitRow):
+                        splitRow[idx] = splitRow[idx].replace('(', '')
+                        splitRow[idx] = splitRow[idx].replace(')', '')
+                        splitRow[idx] = splitRow[idx].replace('\'', '')     
+                    user = reactionMessage.guild.get_member(int(splitRow[0]))
+                    level = math.floor(float(splitRow[1]))
+                    exp = splitRow[2]
+                    expRemaining = round((math.ceil(float(splitRow[1])) ** 2) / (levellingConstant * levellingConstant) - int(exp))
+                    if expRemaining - int(challengeWager) <= 0:
+                        await levelUp.send(embed=LevelUpMsg(int(level), user))
+                RctExpSystem(challengerID if outcome else opponentID, int(challengeWager))
+                RctExpSystem(opponentID if outcome else challengerID, -int(challengeWager))
             embed.add_field(name=opponentName, value=f"**{opponentRollTotal}** (*{opponentRoll[0]}, +{opponentMod}*)", inline=True)
             challengesDict.pop(dictKeyName)  
             return embed
-    except:
-        raise Exception("Wrong user reacting to challenge.")
+    except Exception as e:
+        raise Exception(e)
 
 
 # Takes a string that is Regex'd to find specific dice rolling data
