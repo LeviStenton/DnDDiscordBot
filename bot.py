@@ -6,6 +6,7 @@
 # Operating System
 from cmath import e, log
 import os
+from posixpath import split
 import sys
 from os.path import splitdrive
 # Random
@@ -60,8 +61,10 @@ accountEmote = ':desktop:'
 cowboyEmote = ':cowboy:'
 tickEmote = '✔️'
 crossEmote = '❌'
-equipmentEmote = '⚔️'
+challengeEmote = '⚔️'
+equipmentEmote = '🗡️'
 encounterEmote = '👹'
+lbEmote = '💪'
 # Colours
 embedColour = discord.Colour.dark_blue()
 challengeColour = discord.Color.dark_orange()
@@ -277,8 +280,12 @@ async def on_reaction_add(reaction, user):
     except:
         print("No user reacting.")
         pass
-
-    await pvp.send(embed=FightPlayer(reaction.message, user))
+    
+    try:
+        if(reaction.emoji == rollEmote):
+            await pvp.send(embed=FightPlayer(reaction.message, user))
+    except Exception as e:
+        print(e)
 
     print("Encounter user:", encounterUserID) 
     # Only issue the level up or progress the encounter if the user is the one receiving the encounter message
@@ -335,7 +342,8 @@ async def help(ctx):
     )
     embed.set_author(name=f'{author}', icon_url=authorAvatar)
     embed.add_field(name=f"{rollEmote} Dice rolling:", value=f"To roll, type something like: **{ReadCommandPrefix()}roll 1d20**\nThe modifiers '+' or '-' may be added: **{ReadCommandPrefix()}roll 1d20+3**", inline=False)
-    embed.add_field(name=f"{voiceEmote} Voice Chat:", value=f"To join voice chat, type: **{ReadCommandPrefix()}join** \nTo leave voice chat, type: **{ReadCommandPrefix()}leave**", inline=False)
+    embed.add_field(name=f"{challengeEmote} PvP:", value=f"To challenge another player, type: **{ReadCommandPrefix()}challenge @<opponent> <expamount>**", inline=False)
+    embed.add_field(name=f"{lbEmote} Leaderboard:", value=f"To view the leaderboard, type: **{ReadCommandPrefix()}leaderboard**", inline=False)
     embed.add_field(name=f"{levelEmote} Rank:", value=f"To view your level stats, type: **{ReadCommandPrefix()}rank**", inline=False)
     embed.add_field(name=f"{equipmentEmote} Equipment:", value=f"To view your current equipment, type: **{ReadCommandPrefix()}equipment**", inline=False)
     embed.add_field(name=f"{encounterEmote} Encounter Statistics:", value=f"To view the statistics for encounters, type: **{ReadCommandPrefix()}encounterstats**", inline=False)
@@ -439,9 +447,9 @@ async def leave_voice(ctx):
 # Retrieves member, exp, and level data from levellingDB
 @bot.command(name='rank')
 async def req_rank(ctx):
-    # Open .csv that stores levelling data
-    author = ctx.author.name
-    authorAvatar = ctx.author.avatar_url
+    user = ctx.author
+    author = user.name
+    authorAvatar = user.avatar_url
     guild = ctx.guild
     embed = discord.Embed(
         title = f"{levelEmote} Your stats for {guild}",
@@ -467,6 +475,45 @@ async def req_rank(ctx):
         embed.add_field(name=f"Exp Until Next Level:", value=f"{expRemaining}", inline=False)
         embed.add_field(name=f"Messages Sent:", value=f"{msgsSent}", inline=False) 
         pass    
+    await ctx.send(embed=embed)
+
+# Retrieves member, exp, and level data from levellingDB
+@bot.command(name='leaderboard')
+async def req_leaderboard(ctx):
+    user = ctx.author
+    author = user.name
+    authorAvatar = user.avatar_url
+    guild = ctx.guild
+    leaderboardList = []
+    embed = discord.Embed(
+        title = f"{levelEmote} The leaderboard for {guild}",
+        colour = embedColour
+    )
+    embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767867171391930458/ApprovingElite.png")
+    embed.set_author(name=f'{author}', icon_url=authorAvatar)  
+    searchQuery = ctx.author.id
+    c.execute(f'SELECT * FROM userData')
+    fetchedRows = c.fetchall()
+    for idx, row in enumerate(fetchedRows):
+        splitRow = str(fetchedRows[idx]).split(", ")  
+        for idx3, item in enumerate(splitRow):
+            splitRow[idx3] = splitRow[idx3].replace('(', '')
+            splitRow[idx3] = splitRow[idx3].replace(')', '')
+            splitRow[idx3] = splitRow[idx3].replace('\'', '') 
+        row = []
+        user = ctx.guild.get_member(int(splitRow[0]))
+        if(user != None):
+            print(user.name)
+            row.append(user.name)
+            row.append(math.floor(float(splitRow[1])))
+            row.append(splitRow[2])
+            row.append(splitRow[3])
+            leaderboardList.append(row)
+    leaderboardList.sort(key=lambda member: int(member[2]), reverse=True)
+    leaderboardList = leaderboardList[:10]
+    print(leaderboardList)
+    for idx, item in enumerate(leaderboardList):   
+        embed.add_field(name=str(idx+1)+". "+leaderboardList[idx][0], value=f"Level: {leaderboardList[idx][1]}, Exp: {leaderboardList[idx][2]}", inline=True)
     await ctx.send(embed=embed)
 
 # Retrieves user account info based on their public profile
@@ -688,9 +735,15 @@ async def ShowEquipment(ctx):
 async def ChallengePlayer(ctx, opponent: discord.User, wager: str):
     if(ctx.channel.id == pvpChannel):
         global challengesDict
-        challengeCount = len(challengesDict)
+        challengerID = None
+        challengerName = None
+        challengerMod = None
+        challengerEquip = None
+        opponentID = None
+        opponentName = None
+        opponentMod = None
+        opponentEquip = None
         print(challengesDict)
-        print(challengeCount)
         embedTitle = ''
         embed = discord.Embed(
             title = embedTitle,
@@ -703,12 +756,14 @@ async def ChallengePlayer(ctx, opponent: discord.User, wager: str):
                     embedTitle = 'You cannot challenge yourself.'
                     embed.add_field(name='You cannot challenge yourself.', value="You must challenge another user.", inline=True)
                 else:
-                    challengerId = challenger.id
+                    embedTitle = 'A New Challenger Approaches!'
+                    challengerID = challenger.id
                     challengerName = challenger.name
                     challengerAvatar = challenger.avatar_url
+                    challengerExp = 0
                     challengerMod = ""
                     challengerEquip = ""                
-                    c.execute(f'SELECT * FROM userData WHERE userID=?', (challengerId, ))
+                    c.execute(f'SELECT * FROM userData WHERE userID=?', (challengerID, ))
                     fetchedRows = c.fetchall()
                     for item in fetchedRows:             
                         splitRow = str(item).split(", ")        
@@ -716,16 +771,17 @@ async def ChallengePlayer(ctx, opponent: discord.User, wager: str):
                             splitRow[idx] = splitRow[idx].replace('(', '')
                             splitRow[idx] = splitRow[idx].replace(')', '')
                             splitRow[idx] = splitRow[idx].replace('\'', '')   
+                        challengerExp = splitRow[2]
                         challengerMod = splitRow[4]
                         challengerEquip = splitRow[5]
-                    print(challengerId, challengerName, challengerMod, challengerEquip) 
 
-                    opponentId = opponent.id
+                    opponentID = opponent.id
                     opponentName = opponent.name
                     opponentAvatar = opponent.avatar_url
+                    opponentExp = 0
                     opponentMod = ""
                     opponentEquip = ""               
-                    c.execute(f'SELECT * FROM userData WHERE userID=?', (opponentId, ))
+                    c.execute(f'SELECT * FROM userData WHERE userID=?', (opponentID, ))
                     fetchedRows = c.fetchall()
                     for item in fetchedRows:             
                         splitRow = str(item).split(", ")        
@@ -733,79 +789,77 @@ async def ChallengePlayer(ctx, opponent: discord.User, wager: str):
                             splitRow[idx] = splitRow[idx].replace('(', '')
                             splitRow[idx] = splitRow[idx].replace(')', '')
                             splitRow[idx] = splitRow[idx].replace('\'', '')   
+                        opponentExp = splitRow[2]
                         opponentMod = splitRow[4]
-                        opponentEquip = splitRow[5]
-                    print(opponentId, opponentName, opponentMod, opponentEquip) 
-                
-                    print(challengeCount)
-                    challengesDict[challengeCount][0] = {'challengerID' : challengerId, 'challengerName' : challengerName, 'challengerEquip' : challengerEquip, 'challengerMod' : challengerMod}
-                    challengesDict[challengeCount][1] = {'opponentID' : opponentId, 'opponentName' : opponentName, 'opponentEquip' : opponentEquip, 'opponentMod' : opponentMod}
-
+                        opponentEquip = splitRow[5]     
+                    if(int(challengerExp) < int(wager) and int(opponentExp) < int(wager)):
+                        raise Exception(challengerName+' does not have enough exp.\n'+opponentName+' does not have enough exp.')
+                    elif(int(challengerExp) < int(wager)):
+                        raise Exception(challengerName+' does not have enough exp.')
+                    elif(int(opponentExp) < int(wager)):
+                        raise Exception(opponentName+' does not have enough exp.')
                     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767677300333477888/48cb5349f515f6e59edc2a4de294f439.png")
                     embed.set_author(name=f'{challengerName}', icon_url=challengerAvatar)    
                     embed.add_field(name=challengerName, value=f"{challengerEquip}, +{challengerMod}", inline=True)
-                    embed.add_field(name=f"***WAGERING {wager}xp AGAINST***", value=f"*Click the dice to fight!*", inline=True)
+                    embed.add_field(name=f"***WAGERING***", value=f"***{wager}xp AGAINST***", inline=True)
                     embed.add_field(name=opponentName, value=f"{opponentEquip}, +{opponentMod}", inline=True)
-                    embed.set_footer(text=opponentName, icon_url=opponentAvatar)            
-                    challengeCount += 1
+                    embed.add_field(name=f"TO ACCEPT,", value=f"*Click the dice to fight!*", inline=False)
+                    embed.set_footer(text=opponentName, icon_url=opponentAvatar)    
             except Exception as e:
                 embedTitle = 'Could not find player by that name.'
-                embed.add_field(name='Could not find player by that name.', value="Try using the @ command.", inline=True)
+                if 'does not have enough exp' in str(e):
+                    embed.add_field(name='NOT ENOUGH XP', value=e, inline=True)
+                else:
+                    embed.add_field(name='Could not find player by that name.', value="Try using the @ command.", inline=True)
                 print(e, "Could not find user by that name.")
 
             challenge = await ctx.send(embed=embed)
-            if(challengesDict[challengeCount] is not None):
-                if(challengesDict[challengeCount].get(0) is not None and challengesDict[challengeCount].get(1) is not None):
-                    challengesDict[challengeCount][2] = {'challengeID' : challenge.id, 'challengeWager' : wager}
-            await challenge.add_reaction(rollEmote)
+            if(embedTitle == 'A New Challenger Approaches!'):
+                dictKeyName = str(opponentID)+'_'+str(challenge.id)
+                challengesDict[dictKeyName][0] = {'challengerID' : challengerID, 'challengerName' : challengerName, 'challengerEquip' : challengerEquip, 'challengerMod' : challengerMod}
+                challengesDict[dictKeyName][1] = {'opponentID' : opponentID, 'opponentName' : opponentName, 'opponentEquip' : opponentEquip, 'opponentMod' : opponentMod}
+                challengesDict[dictKeyName][2] = {'challengeID' : challenge.id, 'challengeWager' : wager}
+                await challenge.add_reaction(rollEmote)
 
 def FightPlayer(reactionMessage, reactingUser):
-    global challengesDict
-    challengesDict = DictShuffleDown(challengesDict)
-    print(challengesDict)
-    for idx, challenge in enumerate(challengesDict):
-        print(reactingUser.id, challengesDict[idx].get(1).get('opponentID'))
-        print(reactionMessage.id, challengesDict[idx].get(2).get('challengeID'))
-        print('challenge = ', challenge)
-        if(challengesDict[idx].get(1).get('opponentID') == reactingUser.id and challengesDict[idx].get(2).get('challengeID') == reactionMessage.id):
+    try:
+        global challengesDict
+        dictKeyName = str(reactingUser.id)+'_'+str(reactionMessage.id)
+        print(challengesDict)
+        if(challengesDict[dictKeyName].get(1).get('opponentID') == reactingUser.id and challengesDict[dictKeyName].get(2).get('challengeID') == reactionMessage.id):
             embed = discord.Embed(
                 title = "",
                 colour = challengeColour
             )
-            challenger = challengesDict[idx].get(0)
+            challenger = challengesDict[dictKeyName].get(0)
+            challengerID = challenger.get('challengerID')
             challengerName = challenger.get('challengerName')
             challengerMod = challenger.get('challengerMod')
-            challengerEquip = challenger.get('challengerEquip')
             challengerRoll = QueryRoll(f'1d20+{challengerMod}')
-            opponent = challengesDict[idx].get(1)
+            challengerRollTotal = challengerRoll[3] if int(challengerMod) > 0 else challengerRoll[0]
+            opponent = challengesDict[dictKeyName].get(1)
+            opponentID = opponent.get('opponentID')
             opponentName = opponent.get('opponentName')
             opponentMod = opponent.get('opponentMod')
-            opponentEquip = opponent.get('opponentEquip')
             opponentRoll = QueryRoll(f'1d20+{opponentMod}')
-            print(challengerRoll[3], opponentRoll[3])
-            outcome = challengerRoll[3] > opponentRoll[3]
-            print(outcome, 'that challenger wins')
+            opponentRollTotal = opponentRoll[3] if int(opponentMod) > 0 else opponentRoll[0]
+            challengeWager = challengesDict[dictKeyName].get(2).get('challengeWager')
+            outcome = int(challengerRollTotal) > int(opponentRollTotal)
+            RctExpSystem(challengerID if outcome else opponentID, int(challengeWager))
+            RctExpSystem(opponentID if outcome else challengerID, -int(challengeWager))
             tie = challengerRoll == opponentRoll            
             embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767677300333477888/48cb5349f515f6e59edc2a4de294f439.png")
-            embed.add_field(name=challengerName, value=f"**{challengerRoll[3]}** (*{challengerRoll[0]}, +{challengerMod}*)", inline=True)
+            embed.add_field(name=challengerName, value=f"**{challengerRollTotal}** (*{challengerRoll[0]}, +{challengerMod}*)", inline=True)
             if(tie):
                 embed.add_field(name='**Tie!**', value="No one wins.", inline=True)
             else:
-                embed.add_field(name="***WINS OVER***" if outcome else "***LOSES TO***", value=f"*Winning **{challengesDict[idx].get(2).get('challengeWager')}**xp*", inline=True)
-            embed.add_field(name=opponentName, value=f"**{opponentRoll[3]}** (*{opponentRoll[0]}, +{opponentMod}*)", inline=True)
-            challengesDict.pop(idx)            
-            print(challengesDict)
+                embed.add_field(name="***WINS OVER***" if outcome else "***LOSES TO***", value=f"*Winning **{challengeWager}**xp*", inline=True)
+            embed.add_field(name=opponentName, value=f"**{opponentRollTotal}** (*{opponentRoll[0]}, +{opponentMod}*)", inline=True)
+            challengesDict.pop(dictKeyName)  
             return embed
+    except:
+        raise Exception("Wrong user reacting to challenge.")
 
-# Fix out of order dictionary
-def DictShuffleDown(dictionary):
-    newDict = {}
-    idx2 = 0
-    for idx, element in enumerate(dictionary):
-        if(dictionary[idx] != None):
-            newDict[idx2] = dictionary[idx]   
-            idx2 += 1         
-    return newDict
 
 # Takes a string that is Regex'd to find specific dice rolling data
 def QueryRoll(text):
@@ -903,13 +957,13 @@ def ClearEncounter(reaction, user, rollNum, userMod, equipment):
     lootChance = random.random() 
     if reaction.message.id == encounterID and user.id != botID and encounterBool:   
         if rollNum == 20:
-            RctExpSystem(user, int(expReward)*2)
+            RctExpSystem(user.id, int(expReward)*2)
             outcomeMsg = f'***Nat 20!*** You defeated the encounter with your {equipment}! ***{int(expReward)*2}*** Exp rewarded!'
         elif rollTotal >= encounterType[2]:
-            RctExpSystem(user, expReward)
+            RctExpSystem(user.id, expReward)
             outcomeMsg = f'You defeated the encounter with your {equipment}! **{expReward}** Exp rewarded!'  
         elif rollNum == 1:
-                RctExpSystem(user, -int(expReward))
+                RctExpSystem(user.id, -int(expReward))
                 outcomeMsg = f'***Nat 1!*** You were slain by the encounter! **{-int(expReward)}** Exp lost!'      
         else:
             outcomeMsg = 'You were defeated.'
@@ -1027,8 +1081,8 @@ def MsgExpSystem(message, expBool):
         break
 
 # A method to promote users with exp when they complete random events
-def RctExpSystem(rctUser, exp):
-    searchQuery = rctUser.id
+def RctExpSystem(rctUserID, exp):
+    searchQuery = rctUserID
     userID = ''
     userLevel = 0
     userExp = 0
