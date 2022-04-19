@@ -446,8 +446,12 @@ async def leave_voice(ctx):
        
 # Retrieves member, exp, and level data from levellingDB
 @bot.command(name='rank')
-async def req_rank(ctx):
-    user = ctx.author
+async def req_rank(ctx, userName = None):
+    if(userName != None):
+        userNameInt = int(str(userName).replace('<', '').replace('>', '').replace('@', ''))
+        user = bot.get_user(userNameInt)
+    else:
+        user = ctx.author
     author = user.name
     authorAvatar = user.avatar_url
     guild = ctx.guild
@@ -481,6 +485,8 @@ async def req_rank(ctx):
 @bot.command(name='leaderboard')
 async def req_leaderboard(ctx):
     user = ctx.author
+    userList = []
+    userIdx = 0
     author = user.name
     authorAvatar = user.avatar_url
     guild = ctx.guild
@@ -491,7 +497,6 @@ async def req_leaderboard(ctx):
     )
     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767867171391930458/ApprovingElite.png")
     embed.set_author(name=f'{author}', icon_url=authorAvatar)  
-    searchQuery = ctx.author.id
     c.execute(f'SELECT * FROM userData')
     fetchedRows = c.fetchall()
     for idx, row in enumerate(fetchedRows):
@@ -501,17 +506,24 @@ async def req_leaderboard(ctx):
             splitRow[idx3] = splitRow[idx3].replace(')', '')
             splitRow[idx3] = splitRow[idx3].replace('\'', '') 
         row = []
-        user = ctx.guild.get_member(int(splitRow[0]))
-        if(user != None):
-            row.append(user.name)
+        member = ctx.guild.get_member(int(splitRow[0]))
+        if(member != None):
+            row.append(member.name)
             row.append(math.floor(float(splitRow[1])))
             row.append(splitRow[2])
             row.append(splitRow[3])
+            row.append(splitRow[0])
             leaderboardList.append(row)
-    leaderboardList.sort(key=lambda member: int(member[2]), reverse=True)
+            if(int(splitRow[0]) == int(user.id)):
+                userList = row
+    leaderboardList.sort(key=lambda member: int(member[2]), reverse=True)    
+    for idx, item in enumerate(leaderboardList): 
+        if(int(leaderboardList[idx][4]) == int(user.id)):
+            userIdx = idx
     leaderboardList = leaderboardList[:10]
     for idx, item in enumerate(leaderboardList):   
         embed.add_field(name=str(idx+1)+". "+leaderboardList[idx][0], value=f"Level: {leaderboardList[idx][1]}, Exp: {leaderboardList[idx][2]}", inline=True)
+    embed.add_field(name=f"*{str(userIdx)}. {userList[0]}*", value=f"*Level: {userList[1]}, Exp: {userList[2]}*", inline=False)
     await ctx.send(embed=embed)
 
 # Retrieves user account info based on their public profile
