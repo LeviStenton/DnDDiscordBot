@@ -7,6 +7,7 @@
 from cmath import e, log
 import os
 from posixpath import split
+from socket import inet_ntop
 import sys
 from os.path import splitdrive
 # Random
@@ -57,6 +58,7 @@ rollEmote = '🎲'
 voiceEmote = ':microphone2:'
 prefixEmote = ':exclamation:'
 levelEmote = '🛡️'
+leaderboardEmote = '📜'
 accountEmote = ':desktop:'
 cowboyEmote = ':cowboy:'
 tickEmote = '✔️'
@@ -64,7 +66,6 @@ crossEmote = '❌'
 challengeEmote = '⚔️'
 equipmentEmote = '🗡️'
 encounterEmote = '👹'
-lbEmote = '💪'
 # Colours
 embedColour = discord.Colour.dark_blue()
 challengeColour = discord.Color.dark_orange()
@@ -343,7 +344,7 @@ async def help(ctx):
     embed.set_author(name=f'{author}', icon_url=authorAvatar)
     embed.add_field(name=f"{rollEmote} Dice rolling:", value=f"To roll, type something like: **{ReadCommandPrefix()}roll 1d20**\nThe modifiers '+' or '-' may be added: **{ReadCommandPrefix()}roll 1d20+3**", inline=False)
     embed.add_field(name=f"{challengeEmote} PvP:", value=f"To challenge another player, type: **{ReadCommandPrefix()}challenge @<opponent> <expamount>**", inline=False)
-    embed.add_field(name=f"{lbEmote} Leaderboard:", value=f"To view the leaderboard, type: **{ReadCommandPrefix()}leaderboard**", inline=False)
+    embed.add_field(name=f"{leaderboardEmote} Leaderboard:", value=f"To view the leaderboard, type: **{ReadCommandPrefix()}leaderboard**", inline=False)
     embed.add_field(name=f"{levelEmote} Rank:", value=f"To view your level stats, type: **{ReadCommandPrefix()}rank**", inline=False)
     embed.add_field(name=f"{equipmentEmote} Equipment:", value=f"To view your current equipment, type: **{ReadCommandPrefix()}equipment**", inline=False)
     embed.add_field(name=f"{encounterEmote} Encounter Statistics:", value=f"To view the statistics for encounters, type: **{ReadCommandPrefix()}encounterstats**", inline=False)
@@ -492,7 +493,7 @@ async def req_leaderboard(ctx):
     guild = ctx.guild
     leaderboardList = []
     embed = discord.Embed(
-        title = f"{levelEmote} The leaderboard for {guild}",
+        title = f"{leaderboardEmote} The leaderboard for {guild}",
         colour = embedColour
     )
     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767867171391930458/ApprovingElite.png")
@@ -517,13 +518,18 @@ async def req_leaderboard(ctx):
             if(int(splitRow[0]) == int(user.id)):
                 userList = row
     leaderboardList.sort(key=lambda member: int(member[2]), reverse=True)    
+    inTopTen = False
     for idx, item in enumerate(leaderboardList): 
         if(int(leaderboardList[idx][4]) == int(user.id)):
+            if(idx < 10):
+                inTopTen = True
             userIdx = idx
+            break
     leaderboardList = leaderboardList[:10]
     for idx, item in enumerate(leaderboardList):   
         embed.add_field(name=str(idx+1)+". "+leaderboardList[idx][0], value=f"Level: {leaderboardList[idx][1]}, Exp: {leaderboardList[idx][2]}", inline=True)
-    embed.add_field(name=f"*{str(userIdx)}. {userList[0]}*", value=f"*Level: {userList[1]}, Exp: {userList[2]}*", inline=False)
+    if(not inTopTen):
+        embed.add_field(name=f"*{str(userIdx)}. {userList[0]}*", value=f"*Level: {userList[1]}, Exp: {userList[2]}*", inline=False)
     await ctx.send(embed=embed)
 
 # Retrieves user account info based on their public profile
