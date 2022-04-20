@@ -345,10 +345,10 @@ async def help(ctx):
     embed.add_field(name=f"{rollEmote} Dice rolling:", value=f"To roll, type something like: **{ReadCommandPrefix()}roll 1d20**\nThe modifiers '+' or '-' may be added: **{ReadCommandPrefix()}roll 1d20+3**", inline=False)
     embed.add_field(name=f"{challengeEmote} PvP:", value=f"To challenge another player, type: **{ReadCommandPrefix()}challenge @<opponent> <expamount>**", inline=False)
     embed.add_field(name=f"{leaderboardEmote} Leaderboard:", value=f"To view the leaderboard, type: **{ReadCommandPrefix()}leaderboard**", inline=False)
-    embed.add_field(name=f"{levelEmote} Rank:", value=f"To view your level stats, type: **{ReadCommandPrefix()}rank**", inline=False)
-    embed.add_field(name=f"{equipmentEmote} Equipment:", value=f"To view your current equipment, type: **{ReadCommandPrefix()}equipment**", inline=False)
+    embed.add_field(name=f"{levelEmote} Rank:", value=f"To view your or another user's level stats, type: **{ReadCommandPrefix()}rank <otheruser>**", inline=False)
+    embed.add_field(name=f"{equipmentEmote} Equipment:", value=f"To view your or another user's current equipment, type: **{ReadCommandPrefix()}equipment <otheruser>**", inline=False)
     embed.add_field(name=f"{encounterEmote} Encounter Statistics:", value=f"To view the statistics for encounters, type: **{ReadCommandPrefix()}encounterstats**", inline=False)
-    embed.add_field(name=f"{accountEmote} Account Info:", value=f"To view your account info, type: **{ReadCommandPrefix()}userinfo**", inline=False)
+    embed.add_field(name=f"{accountEmote} Account Info:", value=f"To view your or another user's account info, type: **{ReadCommandPrefix()}userinfo <otheruser>**", inline=False)
     embed.add_field(name=f"{prefixEmote} Command Prefixes:", value=f"To change the prefix, type: **{ReadCommandPrefix()}setprefix <prefix>** \nNote: you must be an administrator to do this", inline=False)
     await ctx.send(embed=embed)
 
@@ -462,7 +462,7 @@ async def req_rank(ctx, userName = None):
     )
     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767867171391930458/ApprovingElite.png")
     embed.set_author(name=f'{author}', icon_url=authorAvatar)  
-    searchQuery = ctx.author.id
+    searchQuery = user.id
     c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
     fetchedRows = c.fetchall()
     for item in fetchedRows:             
@@ -534,24 +534,28 @@ async def req_leaderboard(ctx):
 
 # Retrieves user account info based on their public profile
 @bot.command(name='userinfo')
-async def req_userinfo(ctx):
-    authorName = ctx.author.name
-    authorAvatar = ctx.author.avatar_url
+async def req_userinfo(ctx, userName = None):
+    if(userName != None):
+        userNameInt = int(str(userName).replace('<', '').replace('>', '').replace('@', ''))
+        user = ctx.guild.get_member(userNameInt)
+    else:
+        user = ctx.author
+    authorName = user.name
+    authorAvatar = user.avatar_url
     currentTime = datetime.now()
-    accCreatedAt = str(ctx.author.created_at).split(" ")
-    accJoinedAt = str(ctx.author.joined_at).split(" ")
+    accCreatedAt = str(user.created_at).split(" ")
+    accJoinedAt = str(user.joined_at).split(" ")
     timeCreated = accCreatedAt[1].split(".")
     timeJoined = accJoinedAt[1].split(".")
-    timeSinceAccCreated = str(currentTime - ctx.author.created_at).split(",")
-    timeSinceAccJoined = str(currentTime - ctx.author.joined_at).split(",")
-    authorNick = ctx.author.nick
-    authorID = ctx.author.id
+    timeSinceAccCreated = str(currentTime - user.created_at).split(",")
+    timeSinceAccJoined = str(currentTime - user.joined_at).split(",")
+    authorNick = user.nick
+    authorID = user.id
     authorRoles = ""
-    for idx, role in enumerate(ctx.author.roles):
-        if idx > 0:
+    if(len(user.roles) != 0):
+        for idx, role in enumerate(user.roles):
             authorRoles = authorRoles+"<@&"+str(role.id)+"> "
-        else:
-            authorRoles = "No roles!"
+            
     embed = discord.Embed(
         title = f"{accountEmote} Your Account Details",
         colour = embedColour
@@ -720,10 +724,15 @@ async def Spawn_Encounter(ctx):
 
 # Display the current equipment and modifier for a user that calls this command
 @bot.command(name='equipment')
-async def ShowEquipment(ctx):
-    searchQuery = ctx.author.id
-    authorName = ctx.author.name
-    authorAvatar = ctx.author.avatar_url
+async def ShowEquipment(ctx, userName = None):
+    if(userName != None):
+        userNameInt = int(str(userName).replace('<', '').replace('>', '').replace('@', ''))
+        user = bot.get_user(userNameInt)
+    else:
+        user = ctx.author
+    searchQuery = user.id
+    authorName = user.name
+    authorAvatar = user.avatar_url
     authorMod = ""
     authorEquip = ""
     c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
