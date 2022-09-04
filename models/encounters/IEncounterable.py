@@ -1,10 +1,11 @@
 class IEncounterable():
-    def __init__(self, name, experience, challengeRating, armourClass, picturePath):
+    def __init__(self, name, experience, challengeRating, armourClass, picturePath, rarity):
         self._name = name
         self._experience = experience
         self._challengeRating = challengeRating
         self._armourClass = armourClass
         self._picturePath = picturePath
+        self._rarity = rarity
 
     @property
     def name(self):
@@ -40,3 +41,10 @@ class IEncounterable():
     @picturePath.setter
     def picturePath(self, value):
         self._picturePath = value
+        
+    @property
+    def rarity(self):
+        return self._rarity
+    @rarity.setter
+    def rarity(self, value):
+        self._rarity = value

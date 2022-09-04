@@ -22,8 +22,8 @@ class EncounterController():
     encClearSuccess = False
     encounterDropChance = 1
     encounterTypeChance = 0.5
-    lootDropThresh = 1 
-    lootDropChance = 0.0
+    lootDropChance = 0.33
+    lootDropFloat = 0.0
 
     def __init__(self):
         pass
@@ -53,7 +53,7 @@ class EncounterController():
         userEquipment = userDB[5]
         expReward = self.encounter.experience
         rollTotal = rollNum+userMod
-        self.lootDropChance = random.random() 
+        self.lootDropFloat = random.random() 
         if rollNum == 20:
             DatabaseController().StoreUserExp(author.id, True, levelUpChannel, int(expReward)*2)
             outcomeMsg = f'***Nat 20!*** You defeated the encounter with your {userEquipment}! ***{int(expReward)*2}*** Exp rewarded!'
@@ -74,7 +74,7 @@ class EncounterController():
             description = outcomeMsg,
             colour = discord.Colour.red()
         )                       
-        if self.lootDropChance <= self.lootDropThresh and rollTotal >= self.encounter.armourClass:
+        if self.lootDropFloat <= self.lootDropChance and rollTotal >= self.encounter.armourClass:
             self.encClearLoot = EquipmentController().RollEquipment()
             embed.add_field(name=f"You got", value=f"*{self.encClearLoot.name}*", inline=True)
             embed.add_field(name=f"It's modifier", value=f"+{self.encClearLoot.modifier}", inline=True)

@@ -30,22 +30,23 @@ class IEncounter(discord.Embed):
         self._tableName = value
 
     def GenerateEncounter(self) -> IEncounterable:
+        rarity = self.GetRarity()
         conn = sqlite3.connect('databases/encountersdb.db')
         c = conn.cursor()
         c.execute("SELECT name, experience, challengeRating, armourClass, picturePath " +
            f"FROM {self.tableName} " + 
             "WHERE rarity=?; ", 
-            (self.GetRarity(),))
+            (rarity,))
         encounters = []
         for row in c.fetchall():
-            encounters.append(IEncounterable(row[0], row[1], row[2], row[3], row[4])) 
-        self._encounter = encounters[random.randint(0, 0)]
+            encounters.append(IEncounterable(row[0], row[1], row[2], row[3], row[4], rarity)) 
+        self.encounter = encounters[random.randint(0, len(encounters) - 1)]
 
     def GetRarity(self) -> str:
-        uncommonChance = 0.6
-        rareChance = 0.3
-        veryrareChance = 0.15
-        legendaryChance = 0.05
+        uncommonChance = 0.5
+        rareChance = 0.2
+        veryrareChance = 0.05
+        legendaryChance = 0.01
         randomInt = random.random()
         match randomInt:
             case _ if randomInt > uncommonChance:

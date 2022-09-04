@@ -4,46 +4,23 @@
 # IMPORT ALL NECESSARY ASSETS TO RUN THE PROGRAMS
 
 # Operating System
-from cmath import e, log
 import os
-from posixpath import split
-from socket import inet_ntop
-import sys
-from os.path import splitdrive
-import threading
-# Random
-import random
-# Math
-import math
-import decimal
-from time import time
-from unicodedata import name
 # Discord
 import discord
-from discord import reaction
-from discord import user
-from discord.ext import commands
-from discord.ext.commands import has_permissions, CheckFailure
+from discord import app_commands
+from discord.ext.commands import has_permissions
 # Speech Recognition
 #import speech_recognition as sr
-# Regex
-import re
-from re import I
 # .env 
 from dotenv import load_dotenv
-# SQLite
-import sqlite3
 # Datetime
 from datetime import datetime
 from datetime import timedelta
 # Dictionary
-from collections import UserList, defaultdict
+from collections import defaultdict
 from controllers.DatabaseController import DatabaseController
 from controllers.DiceController import DiceController
 from controllers.EncounterController import EncounterController
-# Encounter classes
-from models.encounters.MonsterEncounter import MonsterEncounter
-from models.encounters.SkillCheckEncounter import SkillCheckEncounter
 # User class
 from models.user.UserRank import UserRank
 
@@ -55,7 +32,13 @@ from models.user.UserRank import UserRank
 # This file is in the .gitignore and you will need to create your own
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
-#GUILD = os.getenv('DISCORD_GUILD')
+
+class client(discord.Client):
+    def __init__(self):
+        super().__init__(intents=discord.Intents.all())       
+
+bot = client()
+tree = app_commands.CommandTree(bot)
 
 # Initialize the voice recognizer
 #r = sr.Recognizer()
@@ -75,25 +58,6 @@ encounterEmote = '👹'
 # Colours
 embedColour = discord.Colour.dark_blue()
 challengeColour = discord.Color.dark_orange()
-# Write to the prefix file
-prefixPath = "prefixes/defaultprefix.txt"
-def WriteCommandPrefix(prefix, guild):
-    global prefixPath
-    prefixPath = f"prefixes/{guild}-prefix.txt"
-    commandPrefix = open(prefixPath, "w")
-    commandPrefix.write(prefix)
-    commandPrefix.close()
-# Read from the prefix file
-def ReadCommandPrefix():
-    commandPrefix = open(prefixPath, "r")
-    return commandPrefix.read()
-intents = discord.Intents.all()
-intents.members = True
-intents.reactions = True
-# Sets the bot's command prefix to the prefix in prefix.txt
-bot = commands.Bot(command_prefix=ReadCommandPrefix(), intents=intents, activity = discord.Activity(type = discord.ActivityType.listening, name = f"{ReadCommandPrefix()}help"))  
-# Remove the in-built help command to write my own
-bot.remove_command("help")
 # PvP variables for Challenges
 challengesDict = defaultdict(dict)
 challengeCount = 0
@@ -103,6 +67,7 @@ levelUpChannel = 0
 pvpChannel = 0
 # Global ID variables
 botID = 0
+guildID = 809668166984531968
 # Controllers
 encounterCont: EncounterController = None
 
@@ -114,12 +79,12 @@ encounterCont: EncounterController = None
 async def on_guild_join(guild):
     channels = bot.get_all_channels()
     general = discord.utils.get(channels, name="general")
-    await general.send(f":cowboy: Eyes up Moon Cowboys, I'm connected! Type **{ReadCommandPrefix()}help** to get started.")
+    await general.send(f":cowboy: Eyes up Moon Cowboys, I'm connected!") # Type **{ReadCommandPrefix()}help** to get started.")
 
 # On ready, get channel IDs
 @bot.event
 async def on_ready():
-    await bot.wait_until_ready()
+    await tree.sync(guild=discord.Object(id=guildID))
     channels = bot.get_all_channels()
     for channel in channels:
         if(channel.name == "general"):
@@ -135,6 +100,7 @@ async def on_ready():
     botID = bot.user.id
     global encounterCont
     encounterCont = EncounterController()
+    print("Connected and ready to go.")
 
 
 # On disconnecting, send a message
@@ -147,143 +113,92 @@ async def close():
 # When a member joins the server, send a welcoming message
 @bot.event
 async def on_member_join(member, role):
-    global generalChannel
-    print(f"{member.id} joined!")
-    role = discord.utils.get(member.guild.roles, id='272748337256726528')
-    embed = discord.Embed(
-        title = f"{cowboyEmote} Eyes up",
-        description = "You're a ｍｏｏｎ 𝒸𝑜𝓌𝒷𝑜𝓎 now.",
-        colour = embedColour
-    )
-    embed.set_author(name=member.name, icon_url=member.display_avatar)
-    DatabaseController().StoreNewUser(member, role)       
-    await generalChannel.send(embed=embed)
+    if (bot.is_ready()):
+        global generalChannel
+        print(f"{member.id} joined!")
+        role = discord.utils.get(member.guild.roles, id='272748337256726528')
+        embed = discord.Embed(
+            title = f"{cowboyEmote} Eyes up",
+            description = "You're a ｍｏｏｎ 𝒸𝑜𝓌𝒷𝑜𝓎 now.",
+            colour = embedColour
+        )
+        embed.set_author(name=member.name, icon_url=member.display_avatar)
+        DatabaseController().StoreNewUser(member, role)       
+        await generalChannel.send(embed=embed)
 
 # Method to do things when a message is sent
 @bot.event
 async def on_message(message):
-    # If messages are sent to the bot through DMs, do not count for anything
-    if (isinstance(message.channel, discord.channel.DMChannel)):
-        pass
-    else:
-        # Declaring variables to be used
-        global generalChannel
-        global levelUpChannel
-        messageChannel = bot.get_channel(message.channel.id)
-        channelHistoryLength = 50
-        expBool = True
+    if (bot.is_ready()):
+        # If messages are sent to the bot through DMs, do not count for anything
+        if (isinstance(message.channel, discord.channel.DMChannel)):
+            pass
+        else:
+            # Declaring variables to be used
+            global generalChannel
+            global levelUpChannel
+            messageChannel = bot.get_channel(message.channel.id)
+            channelHistoryLength = 50
+            expBool = True
 
-        # Rate limiting the exp users gain from messages
-        if(message.author.id != botID):
-            channelMessages = [message async for message in message.channel.history(limit=channelHistoryLength, after=(datetime.now() + timedelta(seconds=3)))]   
-            for chnlMsg in channelMessages:
-                if chnlMsg.author.id == message.author.id:
-                    expBool = False 
-            DatabaseController().StoreUserExp(message.author.id, expBool, levelUpChannel)                    
+            # Rate limiting the exp users gain from messages
+            if(message.author.id != botID):
+                channelMessages = [message async for message in message.channel.history(limit=channelHistoryLength, after=(datetime.now() - timedelta(seconds=3)))]   
+                for chnlMsg in channelMessages:
+                    if chnlMsg.author.id == message.author.id and message.id != chnlMsg.id:                    
+                        expBool = False 
+                if(not expBool):
+                    print(chnlMsg.author.display_name + " is being rate limited.")
+                DatabaseController().StoreUserExp(message.author.id, expBool, levelUpChannel)                    
 
-        # Generating an encounter 
-        global encounterCont    
-        if(messageChannel.id == generalChannel.id and message.author.id != botID): 
-            try:   
+            # Generating an encounter 
+            global encounterCont    
+            if(messageChannel.id == generalChannel.id and message.author.id != botID): 
                 encounterMsg = await messageChannel.send(embed=encounterCont.RollEncounter(message.author))
                 encounterCont.encounterID = encounterMsg.id
                 await encounterMsg.add_reaction(rollEmote) 
-            except Exception:
-                pass
-        await bot.process_commands(message) 
-
 # Method to do things when a reaction is added
 @bot.event
 async def on_reaction_add(reaction, user):
-    global generalChannel
-    global levelUpChannel
-    global pvpChannel
-    global encounterCont
+    if (bot.is_ready()):
+        global generalChannel
+        global levelUpChannel
+        global pvpChannel
+        global encounterCont
 
-    if(reaction.emoji == rollEmote and user.id != botID):
-        await pvpChannel.send(embed=await FightPlayer(reaction.message, user))
-
-    if encounterCont.encounterUserID == user.id and reaction.emoji == encounterCont.rollEmote and user.id != botID and reaction.message.id == encounterCont.encounterID and encounterCont.encounterActive:
-        encClearMsg = await generalChannel.send(embed=encounterCont.ClearEncounter(user, levelUpChannel))
-        encounterCont.encClearID = encClearMsg.id 
-        if encounterCont.lootDropChance <= encounterCont.lootDropThresh and encounterCont.encClearSuccess:
-            await encClearMsg.add_reaction(encounterCont.tickEmote)
-    if user.id == encounterCont.encounterUserID and user.id != botID and reaction.message.id == encounterCont.encClearID and reaction.emoji == encounterCont.tickEmote:
-        DatabaseController().StoreUserEquipment(user.id, encounterCont.encClearLoot)           
+        if(reaction.emoji == challengeEmote and user.id != botID):
+            await pvpChannel.send(embed=await FightPlayer(reaction.message, user))
+        if encounterCont.encounterUserID == user.id and reaction.emoji == encounterCont.rollEmote and user.id != botID and reaction.message.id == encounterCont.encounterID and encounterCont.encounterActive:
+            encClearMsg = await generalChannel.send(embed=encounterCont.ClearEncounter(user, levelUpChannel))
+            encounterCont.encClearID = encClearMsg.id 
+            if encounterCont.lootDropFloat <= encounterCont.lootDropChance and encounterCont.encClearSuccess:
+                await encClearMsg.add_reaction(encounterCont.tickEmote)
+        if user.id == encounterCont.encounterUserID and user.id != botID and reaction.message.id == encounterCont.encClearID and reaction.emoji == encounterCont.tickEmote:
+            DatabaseController().StoreUserEquipment(user.id, encounterCont.encClearLoot)           
 
 # ---------------------------------------------------------------------------
 # COMMAND METHODS
 
 # If the command is sent with 'help', send a message showing ways to use the bot
-@bot.command(name='help')
-async def help(ctx):
-    author = ctx.author.name
-    authorAvatar = ctx.author.display_avatar
+@tree.command(name="help", description="Displays a user's rank data.", guild=discord.Object(id=guildID))
+async def help(interaction: discord.Interaction):
+    author = interaction.user.name
+    authorAvatar = interaction.user.display_avatar
     embed = discord.Embed(
         title = "Help Commands",
         description = "A list of how to use each command available:",
         colour = embedColour
     )
     embed.set_author(name=f'{author}', icon_url=authorAvatar)
-    embed.add_field(name=f"{rollEmote} Dice rolling:", value=f"To roll, type something like: **{ReadCommandPrefix()}roll 1d20**\nThe modifiers '+' or '-' may be added: **{ReadCommandPrefix()}roll 1d20+3**", inline=False)
-    embed.add_field(name=f"{challengeEmote} PvP:", value=f"To challenge another player, type: **{ReadCommandPrefix()}challenge @<opponent> <expamount>**", inline=False)
-    embed.add_field(name=f"{leaderboardEmote} Leaderboard:", value=f"To view the leaderboard, type: **{ReadCommandPrefix()}leaderboard**", inline=False)
-    embed.add_field(name=f"{levelEmote} Rank:", value=f"To view your or another user's level stats, type: **{ReadCommandPrefix()}rank <otheruser>**", inline=False)
-    embed.add_field(name=f"{equipmentEmote} Equipment:", value=f"To view your or another user's current equipment, type: **{ReadCommandPrefix()}equipment <otheruser>**", inline=False)
-    embed.add_field(name=f"{encounterEmote} Encounter Statistics:", value=f"To view the statistics for encounters, type: **{ReadCommandPrefix()}encounterstats**", inline=False)
-    embed.add_field(name=f"{accountEmote} Account Info:", value=f"To view your or another user's account info, type: **{ReadCommandPrefix()}userinfo <otheruser>**", inline=False)
-    embed.add_field(name=f"{prefixEmote} Command Prefixes:", value=f"To change the prefix, type: **{ReadCommandPrefix()}setprefix <prefix>** \nNote: you must be an administrator to do this", inline=False)
-    await ctx.send(embed=embed)
-
-# Sets a new prefix
-@bot.command(name='setprefix')
-@has_permissions(administrator=True, manage_messages=True, manage_roles=True)
-async def set_prefix(ctx, newPrefix):    
-    acceptablePrefixes = ['!' ,'@' ,'#' ,'$' ,'%' ,'^' ,'&' ,'*' ,'(' ,')' ,'-' ,'=' ,'_' ,'+']
-    authorName = ctx.author.name
-    authorAvatar = ctx.author.display_avatar
-    guild = ctx.guild
-    embedMessage = ''
-    if newPrefix == ReadCommandPrefix():
-        embedMessage = f"The command prefix is already: **{ReadCommandPrefix()}**!"
-    else:
-        for prefix in acceptablePrefixes:
-            if str(newPrefix) == prefix:            
-                WriteCommandPrefix(newPrefix, guild)
-                bot.command_prefix = ReadCommandPrefix()
-                embedMessage = f"You changed the command prefix to: **{ReadCommandPrefix()}**"
-                await bot.change_presence(activity = discord.Activity(type = discord.ActivityType.listening, name = f"{ReadCommandPrefix()}help"))
-                break
-            
-            else:
-                embedMessage = f"You must use one of the following symbols: **` ~ ! @ # $ % ^ & * ( ) _ + - =**"
-    embed = discord.Embed(
-        title = f"{prefixEmote} Setting Prefix...",
-        description = embedMessage,
-        colour = embedColour
-    )
-    embed.set_author(name=f'{authorName}', icon_url=authorAvatar)
-    await ctx.send(embed=embed)
-
-# Loads your guild's prefix
-@bot.command(name='loadprefix')
-@has_permissions(administrator=True, manage_messages=True, manage_roles=True)
-async def load_prefix(ctx):    
-    guild = ctx.guild
-    authorName = ctx.author.name
-    authorAvatar = ctx.author.display_avatar
-    global prefixPath
-    prefixPath = f"prefixes/{guild}-prefix.txt"
-    tempPrefix = ReadCommandPrefix()
-    WriteCommandPrefix(tempPrefix, guild)
-    await bot.change_presence(activity = discord.Activity(type = discord.ActivityType.listening, name = f"{ReadCommandPrefix()}help"))
-    embed = discord.Embed(
-        title = f"{prefixEmote} Loading Prefix...",
-        description = "Prefix loaded!",
-        colour = embedColour
-    )
-    embed.set_author(name=f'{authorName}', icon_url=authorAvatar)
-    await ctx.send(embed=embed)
+    embed.add_field(name=f"{rollEmote} Dice rolling:", value=f"To roll, type something like: **/roll 1d20**\nThe modifiers '+' or '-' may be added: **/roll 1d20+3**", inline=False)
+    embed.add_field(name=f"{challengeEmote} PvP:", value=f"To challenge another player, type: **/challenge @<opponent> <expamount>**", inline=False)
+    embed.add_field(name=f"{leaderboardEmote} Leaderboard:", value=f"To view the leaderboard, type: **/leaderboard**", inline=False)
+    embed.add_field(name=f"{levelEmote} Rank:", value=f"To view your or another user's level stats, type: **/rank <otheruser>**", inline=False)
+    embed.add_field(name=f"{equipmentEmote} Equipment:", value=f"To view your or another user's current equipment, type: **/equipment <otheruser>**", inline=False)
+    embed.add_field(name=f"{encounterEmote} Encounter Statistics:", value=f"To view the statistics for encounters, type: **/encounterstats**", inline=False)
+    embed.add_field(name=f"{accountEmote} Account Info:", value=f"To view your or another user's account info, type: **/userinfo <otheruser>**", inline=False)
+    embed.add_field(name=f"{prefixEmote} Command Prefixes:", value=f"To change the prefix, type: **/setprefix <prefix>** \nNote: you must be an administrator to do this", inline=False)
+    await interaction.response.send_message(embed=embed)
 
 # If the command is sent with 'join', join the voice channel that the author is in
 # @bot.command(name='join')
@@ -329,12 +244,12 @@ async def load_prefix(ctx):
 #             await ctx.send(embed=joinEmbed)
        
 # Retrieves member, exp, and level data from levellingDB
-@bot.command(name='rank')
-async def req_rank(ctx, userName = None):
+@tree.command(name="rank", description="Displays a user's rank data.", guild=discord.Object(id=guildID))
+async def req_rank(interaction: discord.Interaction):
     dbCont = DatabaseController()
-    user = FixUser(ctx, userName)
+    user = interaction.user
     embed = discord.Embed(
-        title = f"{levelEmote} Your stats for {ctx.guild}",
+        title = f"{levelEmote} Your stats for {interaction.guild}",
         colour = embedColour
     )
     userRankRaw = dbCont.RetrieveUserRank(user.id)
@@ -345,23 +260,23 @@ async def req_rank(ctx, userName = None):
     embed.add_field(name=f"Exp:", value=f"{userRank.exp}", inline=False)
     embed.add_field(name=f"Exp Until Next Level:", value=f"{userRank.expRemaining}", inline=False)
     embed.add_field(name=f"Messages Sent:", value=f"{userRank.msgSent}", inline=False)   
-    await ctx.send(embed=embed)
+    await interaction.response.send_message(embed=embed)
 
 # Retrieves member, exp, and level data from levellingDB
-@bot.command(name='leaderboard')
-async def req_leaderboard(ctx):
-    user = ctx.author
+@tree.command(name="leaderboard", description="Displays the top 10 users sorted by exp.", guild=discord.Object(id=guildID))
+async def req_leaderboard(interaction: discord.Interaction):
+    user = interaction.user
     userIdx = None
     author = user.name
     authorAvatar = user.display_avatar
-    guild = ctx.guild
+    guild = interaction.guild
     embed = discord.Embed(
         title = f"{leaderboardEmote} The leaderboard for {guild}",
         colour = embedColour
     )
     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767867171391930458/ApprovingElite.png")
     embed.set_author(name=f'{author}', icon_url=authorAvatar)  
-    leaderboardList = DatabaseController().RetrieveAllUsers(ctx)
+    leaderboardList = DatabaseController().RetrieveAllUsers(interaction)
     leaderboardList.sort(key=lambda member: int(member[2]), reverse=True)    
     userInTopTen = False
     for idx, item in enumerate(leaderboardList): 
@@ -374,14 +289,14 @@ async def req_leaderboard(ctx):
     for idx, item in enumerate(leaderboardList):   
         embed.add_field(name=str(idx+1)+". "+leaderboardList[idx][0], value=f"Level: {leaderboardList[idx][1]}, Exp: {leaderboardList[idx][2]}", inline=True)
     if(not userInTopTen):
-        userList = DatabaseController().RetrieveUserRank(user.id)
+        userList = DatabaseController().RetrieveUserRank(interaction.user.id)
         embed.add_field(name=f"*{str(userIdx)}. {userList[0]}*", value=f"*Level: {userList[1]}, Exp: {userList[2]}*", inline=False)
-    await ctx.send(embed=embed)
+    await interaction.response.send_message(embed=embed)
 
 # Retrieves user account info based on their public profile
-@bot.command(name='userinfo')
-async def req_userinfo(ctx, userName = None):
-    user = FixUser(ctx, userName)
+@tree.command(name="userinfo", description="Displays miscellaneous discord info.", guild=discord.Object(id=guildID))
+async def req_userinfo(interaction: discord.Interaction):
+    user = interaction.user
     authorName = user.name
     authorAvatar = user.display_avatar
     currentTime = datetime.now()
@@ -389,15 +304,14 @@ async def req_userinfo(ctx, userName = None):
     accJoinedAt = str(user.joined_at).split(" ")
     timeCreated = accCreatedAt[1].split(".")
     timeJoined = accJoinedAt[1].split(".")
-    timeSinceAccCreated = str(currentTime - user.created_at).split(",")
-    timeSinceAccJoined = str(currentTime - user.joined_at).split(",")
+    timeSinceAccCreated = str(currentTime.replace(tzinfo=None) - user.created_at.replace(tzinfo=None)).split(",")
+    timeSinceAccJoined = str(currentTime.replace(tzinfo=None) - user.joined_at.replace(tzinfo=None)).split(",")
     authorNick = user.nick
     authorID = user.id
     authorRoles = ""
     if(len(user.roles) != 0):
         for idx, role in enumerate(user.roles):
-            authorRoles = authorRoles+"<@&"+str(role.id)+"> "
-            
+            authorRoles = authorRoles+"<@&"+str(role.id)+"> "            
     embed = discord.Embed(
         title = f"{accountEmote} Your Account Details",
         colour = embedColour
@@ -407,81 +321,56 @@ async def req_userinfo(ctx, userName = None):
     embed.add_field(name=f"Current Nickname:", value=f"{authorNick}", inline=True)
     embed.add_field(name=f"Account Name:", value=f"{authorName}", inline=True)
     embed.add_field(name=f"Roles:", value=f"{authorRoles}", inline=False)
-    embed.add_field(name=f"Account Created {timeSinceAccCreated[0]} ago", value=f"**{accCreatedAt[0]}** {timeCreated[0]}", inline=True)
-    embed.add_field(name=f"Server Joined {timeSinceAccJoined[0]} ago", value=f"**{accJoinedAt[0]}** {timeJoined[0]}", inline=True)    
+    embed.add_field(name=f"Account Created {timeSinceAccCreated[0]} ago", value=f"**{accCreatedAt[0]}** {timeCreated[0]} UTC", inline=True)
+    embed.add_field(name=f"Server Joined {timeSinceAccJoined[0]} ago", value=f"**{accJoinedAt[0]}** {timeJoined[0]} UTC", inline=True)    
     embed.set_footer(text=f"UserID: {authorID}")
-    await ctx.send(embed=embed)  
+    await interaction.response.send_message(embed=embed)  
 
 # Retrieves user account info based on their public profile
-@bot.command(name='encounterstats')
-async def encounterStats(ctx):
+@tree.command(name="encounterstats", description="Displays encounter and equipment droprates.", guild=discord.Object(id=guildID))
+async def encounterStats(interaction: discord.Interaction):
     global encounterCont
     embed = discord.Embed(
         title = f"{encounterEmote} Encounter Statistics",
         colour = embedColour
     )
-    embed.set_author(name=f'{ctx.author.name}', icon_url=ctx.author.display_avatar)  
-    embed.add_field(name=f"Encounter Spawn", value=f"{decimal.Decimal(encounterCont.encounterDropChance*100).normalize()}%", inline=True)  
-    embed.add_field(name=f"Loot Drop", value=f"{decimal.Decimal(encounterCont.lootDropThresh*100).normalize()}%", inline=True) 
-    await ctx.send(embed=embed)  
+    embed.set_author(name=f'{interaction.user.name}', icon_url=interaction.user.display_avatar)  
+    embed.add_field(name=f"Encounter Spawn", value=f"{(encounterCont.encounterDropChance * 100)}%", inline=True)  
+    embed.add_field(name=f"Loot Drop", value=f"{(encounterCont.lootDropChance * 100)}%", inline=True) 
+    await interaction.response.send_message(embed=embed)  
 
 # DO NOT USE THIS UNLESS YOU WANT TO WIPE ALL LEVEL DATA
-@bot.command(name='ResetServerRankData')
-@has_permissions(administrator=True, manage_messages=True, manage_roles=True)
-async def collectLevelData(ctx):
-    try:
-        if(ctx.message.author.id == 218890729550774282):
-            DatabaseController().ResetServerRankData(ctx)
-            print("Storing fresh data successful.")
-            await ctx.send("Storing fresh data successful.")
-    except:
-        print("Error resetting database.")
-        await ctx.send("Error resetting database.")
+# @tree.command(name="resetserverranks", description="Reset all users' rank and equipment in the database.", guild=discord.Object(id=guildID))
+# @has_permissions(administrator=True, manage_messages=True, manage_roles=True)
+# async def collectLevelData(interaction: discord.Interaction):
+#     try:
+#         if(interaction.message.author.id == 218890729550774282):
+#             DatabaseController().ResetServerRankData(interaction)
+#             print("Storing fresh data successful.")
+#             await interaction.response.send_message("Storing fresh data successful.")
+#     except:
+#         print("Error resetting database.")
+#         await interaction.response.send_message("Error resetting database.")
 
 # WILL WIPE A USER'S DATA
-@bot.command(name='ResetMyData')
-async def resetUserData(ctx):
-    authorID = str(ctx.author.id)
+@tree.command(name="resetmydata", description="Reset your rank and equipment in the database.", guild=discord.Object(id=guildID))
+async def resetUserData(interaction: discord.Interaction):
+    authorID = str(interaction.user.id)
     try:
         DatabaseController().ResetUserData(authorID)
         print(authorID+"'s data has been reset.")
-        await ctx.send("Resetting level successful.") 
+        await interaction.response.send_message("Resetting level successful.") 
     except:
         print("Error resetting user data.")
-        await ctx.send("Error resetting level.")
-
-# Give yourself as much EXP as specified
-# @bot.command(name='giveexp')
-# @has_permissions(administrator=True, manage_messages=True, manage_roles=True)
-# async def giveExp(ctx, exp):
-#     searchQuery = ctx.author.id
-#     userID = ''
-#     userLevel = 0.00
-#     userExp = 0
-#     userMessagesSent = 0
-#     c.execute(f'SELECT * FROM userData WHERE userID=?', (searchQuery, ))
-#     fetchedRows = c.fetchall()
-#     for item in fetchedRows:             
-#         splitRow = str(item).split(", ")        
-#         for idx, item in enumerate(splitRow):
-#             splitRow[idx] = splitRow[idx].replace('(', '')
-#             splitRow[idx] = splitRow[idx].replace(')', '')
-#             splitRow[idx] = splitRow[idx].replace('\'', '')
-#         userID = splitRow[0]     
-#         userExp = int(splitRow[2]) + int(exp)
-#         userLevel = (levellingConstant * math.sqrt(userExp))
-#         userMessagesSent = int(splitRow[3]) + 1
-#         c.execute(f"UPDATE userData SET userID = {userID}, userLevel = {userLevel}, userExp = {ExpReward(userExp)}, userSentMsgs = {userMessagesSent} WHERE userID=?", (searchQuery, ))
-#         conn.commit()           
-#         break
+        await interaction.response.send_message("Error resetting level.")
 
 # If the command is sent with 'rollhelp', query a roll from the sent dice rolling data
-@bot.command(name='roll')
-async def Roll(ctx, text: str):
-    author = ctx.author.id
-    author = ctx.author.name
-    authorAvatar = ctx.author.display_avatar
-    outcome = DiceController().QueryRoll(text)
+@tree.command(name="roll", description="To roll, type something like: 1d20. The modifiers '+' or '-' may be added: 1d20+3.", guild=discord.Object(id=guildID))
+async def Roll(interaction: discord.Interaction, dice: str):
+    author = interaction.user.id
+    author = interaction.user.display_name
+    authorAvatar = interaction.user.display_avatar
+    outcome = DiceController().QueryRoll(dice)
     embed = discord.Embed(
         title = f"{rollEmote} Rolling!",
         colour = embedColour
@@ -492,7 +381,7 @@ async def Roll(ctx, text: str):
     embed.add_field(name="Modifier", value=f"{outcome[1]}", inline=True)
     if len(outcome) > 3:
         embed.add_field(name="Total With Mod", value=f"{outcome[3]}", inline=True)    
-    await ctx.send(embed=embed)
+    await interaction.response.send_message(embed=embed)
 
 # When a voice command asking to roll dice is said, convert it to text and query a roll from it
 # @bot.command(name='test')
@@ -523,21 +412,25 @@ async def Roll(ctx, text: str):
 #     await ctx.send(embed=embed)
 
 # Spawns an encounter
-@bot.command(name='encounter')
+@tree.command(name="spawnencounter", description="Manually spawn an encounter.", guild=discord.Object(id=guildID))
 @has_permissions(administrator=True, manage_messages=True, manage_roles=True)
-async def Spawn_Encounter(ctx):
+async def Spawn_Encounter(interaction: discord.Interaction):
     # Generating an encounter  
     global encounterCont
     global generalChannel
-    if(ctx.channel.id == generalChannel.id and ctx.author.id != botID and encounterCont.encounterProcFloat < encounterCont.encounterChance):
-        encounterMsg = await generalChannel.send(embed=encounterCont.RollEncounter(ctx.author, 1))
-        encounterCont.encounterID = encounterMsg.id
-        await encounterMsg.add_reaction(rollEmote)  
+    try:
+        if(interaction.channel.id == generalChannel.id and interaction.user.id != botID):
+            await interaction.response.send_message(content="Encounter manually spawned.")
+            encounterMsg: discord.abc.Messageable = await generalChannel.send(embed=encounterCont.RollEncounter(interaction.user, 1))
+            encounterCont.encounterID = encounterMsg.id
+            await encounterMsg.add_reaction(rollEmote)  
+    except Exception:
+        pass
 
 # Display the current equipment and modifier for a user that calls this command
-@bot.command(name='equipment')
-async def ShowEquipment(ctx, userName = None):
-    user = FixUser(ctx, userName)
+@tree.command(name="equipment", description="Displays your equipment name and modifier.", guild=discord.Object(id=guildID))
+async def ShowEquipment(interaction: discord.Interaction):
+    user = interaction.user
     userData = DatabaseController().RetrieveUser(user.id)
     embed = discord.Embed(
         title = f"Your Equipment",
@@ -545,15 +438,15 @@ async def ShowEquipment(ctx, userName = None):
     )
     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767677300333477888/48cb5349f515f6e59edc2a4de294f439.png")
     embed.set_author(name=f'{user.display_name}', icon_url=user.display_avatar)    
-    embed.add_field(name="Item", value=f"{userData[4]}", inline=True)
-    embed.add_field(name="Modifier", value=f"{userData[5]}", inline=True)
-    await ctx.send(embed=embed)
+    embed.add_field(name="Item", value=f"*{userData[5]}*", inline=True)
+    embed.add_field(name="Modifier", value=f"*+{userData[4]}*", inline=True)
+    await interaction.response.send_message(embed=embed)
 
 # Ping another player to fight
-@bot.command(name='challenge')
-async def ChallengePlayer(ctx, opponent: discord.User, wager: str):
+@tree.command(name="challenge", description="To challenge another player, type: @<opponent> <expamount>", guild=discord.Object(id=guildID))
+async def ChallengePlayer(interaction: discord.Interaction, opponent: discord.User, wager: str):
     global pvpChannel
-    if(ctx.channel.id == pvpChannel.id):
+    if(interaction.channel.id == pvpChannel.id):
         global challengesDict
         challengerID = None
         challengerName = None
@@ -570,7 +463,7 @@ async def ChallengePlayer(ctx, opponent: discord.User, wager: str):
             colour = challengeColour
         )
         if(int(wager) >= 0):                
-            challenger = ctx.author  
+            challenger = interaction.user  
             if(challenger.id == opponent.id):
                 embedTitle = 'You cannot challenge yourself.'
                 embed.add_field(name='You cannot challenge yourself.', value="You must challenge another user.", inline=True)
@@ -611,14 +504,14 @@ async def ChallengePlayer(ctx, opponent: discord.User, wager: str):
                 embed.add_field(name=opponentName, value=f"{opponentEquip}, +{opponentMod}", inline=True)
                 embed.add_field(name=f"TO ACCEPT,", value=f"*Click the dice to fight!*", inline=False)
                 embed.set_footer(text=opponentName, icon_url=opponentAvatar)    
-
-            challenge = await ctx.send(embed=embed)
+            await interaction.response.send_message(content="<@"+str(opponentID)+">")
+            challenge = await pvpChannel.send(embed=embed)
             if(embedTitle == 'A New Challenger Approaches!'):
                 dictKeyName = str(opponentID)+'_'+str(challenge.id)
                 challengesDict[dictKeyName][0] = {'challengerID' : challengerID, 'challengerName' : challengerName, 'challengerEquip' : challengerEquip, 'challengerMod' : challengerMod}
                 challengesDict[dictKeyName][1] = {'opponentID' : opponentID, 'opponentName' : opponentName, 'opponentEquip' : opponentEquip, 'opponentMod' : opponentMod}
                 challengesDict[dictKeyName][2] = {'challengeID' : challenge.id, 'challengeWager' : wager}
-                await challenge.add_reaction(rollEmote)
+                await challenge.add_reaction(challengeEmote)
 
 async def FightPlayer(reactionMessage, reactingUser):
     global challengesDict
@@ -659,12 +552,12 @@ async def FightPlayer(reactionMessage, reactingUser):
         challengesDict.pop(dictKeyName)  
         return embed
 
-def FixUser(ctx, userName):
-    if(userName != None):
-        userNameInt = int(str(userName).replace('<', '').replace('>', '').replace('@', ''))
+def FixUser(interaction):
+    if(interaction.user.id != None):
+        userNameInt = int(str(interaction.user.id).replace('<', '').replace('>', '').replace('@', ''))
         return bot.get_user(userNameInt)
     else:
-        return ctx.author
+        return interaction.user.id
 
 bot.run(TOKEN)
 

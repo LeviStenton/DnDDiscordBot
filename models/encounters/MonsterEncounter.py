@@ -15,4 +15,4 @@ class MonsterEncounter(IEncounter):
         self.add_field(name=f"**AC**", value=f"{self.encounter.armourClass}", inline=True)
         self.add_field(name=f"**CR**", value=f"{self.encounter.challengeRating}", inline=True)
         self.add_field(name=f"**EXP**", value=f"{self.encounter.experience}", inline=True)    
-        self.set_footer(text=user.display_name, icon_url=user.display_avatar)
+        self.set_footer(text=user.display_name + " - Rarity: " + self.encounter.rarity, icon_url=user.display_avatar)
