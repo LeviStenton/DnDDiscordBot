@@ -20,9 +20,9 @@ class EncounterController():
     encClearID = 0
     encClearLoot = None
     encClearSuccess = False
-    encounterDropChance = 1
+    encounterDropChance = 0.1
     encounterTypeChance = 0.5
-    lootDropChance = 0.33
+    lootDropChance = 0.5
     lootDropFloat = 0.0
 
     def __init__(self):
@@ -44,9 +44,10 @@ class EncounterController():
             self.encounterActive = True
             return encounterEmbed    
         else:
-            return None     
+            pass    
 
-    def ClearEncounter(self, author, levelUpChannel) -> discord.Embed:       
+    def ClearEncounter(self, bot: discord.Client, author) -> list:       
+        embedList = []
         userDB = DatabaseController().RetrieveUser(author.id)
         rollNum = int(DiceController().QueryRoll("1d20")[2])
         userMod =  int(userDB[4])
@@ -55,15 +56,21 @@ class EncounterController():
         rollTotal = rollNum+userMod
         self.lootDropFloat = random.random() 
         if rollNum == 20:
-            DatabaseController().StoreUserExp(author.id, True, levelUpChannel, int(expReward)*2)
+            encExpEmbed = DatabaseController().StoreUserExp(bot, author.id, True, int(expReward)*2)
+            if(encExpEmbed != None):
+                embedList.append(encExpEmbed) 
             outcomeMsg = f'***Nat 20!*** You defeated the encounter with your {userEquipment}! ***{int(expReward)*2}*** Exp rewarded!'
             self.encClearSuccess = True 
         elif rollTotal >= self.encounter.armourClass:
-            DatabaseController().StoreUserExp(author.id, True, levelUpChannel, expReward)
+            encExpEmbed = DatabaseController().StoreUserExp(bot, author.id, True, expReward)
+            if(encExpEmbed != None):
+                embedList.append(encExpEmbed) 
             outcomeMsg = f'You defeated the encounter with your {userEquipment}! **{expReward}** Exp rewarded!'
             self.encClearSuccess = True  
         elif rollNum == 1:
-            DatabaseController().StoreUserExp(author.id, True, levelUpChannel, -int(expReward))
+            encExpEmbed = DatabaseController().StoreUserExp(bot, author.id, True, -int(expReward))
+            if(encExpEmbed != None):
+                embedList.append(encExpEmbed) 
             outcomeMsg = f'***Nat 1!*** You were slain by the encounter! **{-int(expReward)}** Exp lost!'
             self.encClearSuccess = False    
         else:
@@ -75,14 +82,16 @@ class EncounterController():
             colour = discord.Colour.red()
         )                       
         if self.lootDropFloat <= self.lootDropChance and rollTotal >= self.encounter.armourClass:
-            self.encClearLoot = EquipmentController().RollEquipment()
+            self.encClearLoot = EquipmentController().RollEquipment(self.encounter.rarity)
             embed.add_field(name=f"You got", value=f"*{self.encClearLoot.name}*", inline=True)
             embed.add_field(name=f"It's modifier", value=f"+{self.encClearLoot.modifier}", inline=True)
             embed.add_field(name=f"Do you pick it up?", value="React to equip.", inline=False)  
+            embed.set_footer(text="Rarity: " + str(self.encClearLoot.rarity))
         else:
             self.ClearEncounterVariables()          
         embed.set_author(name=f'{author.display_name }', icon_url=author.display_avatar)
-        return embed                       
+        embedList.append(embed)
+        return embedList                      
     
     def ClearEncounterVariables(self):   
         self.encounterType = 0

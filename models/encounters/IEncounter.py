@@ -5,6 +5,7 @@ import sqlite3
 from models.encounters.IEncounterable import IEncounterable
 
 class IEncounter(discord.Embed):
+    
     def __init__(self, title, description, colour):            
         self._tableName = None
         super().__init__(
@@ -43,21 +44,17 @@ class IEncounter(discord.Embed):
         self.encounter = encounters[random.randint(0, len(encounters) - 1)]
 
     def GetRarity(self) -> str:
-        uncommonChance = 0.5
-        rareChance = 0.2
-        veryrareChance = 0.05
-        legendaryChance = 0.01
         randomInt = random.random()
         match randomInt:
-            case _ if randomInt > uncommonChance:
+            case _ if randomInt > IEncounterable.uncommonChance:
                 return "common"
-            case _ if randomInt > rareChance and randomInt < uncommonChance:
+            case _ if randomInt > IEncounterable.rareChance and randomInt < IEncounterable.uncommonChance:
                 return "uncommon"
-            case _ if randomInt > veryrareChance and randomInt < rareChance:
+            case _ if randomInt > IEncounterable.veryrareChance and randomInt < IEncounterable.rareChance:
                 return "rare"
-            case _ if randomInt > legendaryChance and randomInt < veryrareChance:
+            case _ if randomInt > IEncounterable.legendaryChance and randomInt < IEncounterable.veryrareChance:
                 return "veryrare"
-            case _ if randomInt < legendaryChance:
+            case _ if randomInt < IEncounterable.legendaryChance:
                 return "legendary"
 
 

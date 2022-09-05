@@ -1,4 +1,14 @@
 class IEncounterable():
+    uncommonChance = 0.4
+    rareChance = 0.15
+    veryrareChance = 0.05
+    legendaryChance = 0.01
+    commonDropChance = 1 - uncommonChance
+    uncommonDropChance = uncommonChance - rareChance
+    rareDropChance = rareChance - veryrareChance
+    veryrareDropChance = veryrareChance - legendaryChance
+    legendaryDropChance = legendaryChance   
+
     def __init__(self, name, experience, challengeRating, armourClass, picturePath, rarity):
         self._name = name
         self._experience = experience

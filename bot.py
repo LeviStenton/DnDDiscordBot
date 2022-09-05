@@ -5,6 +5,7 @@
 
 # Operating System
 import os
+from unicodedata import name
 # Discord
 import discord
 from discord import app_commands
@@ -18,9 +19,11 @@ from datetime import datetime
 from datetime import timedelta
 # Dictionary
 from collections import defaultdict
+# Controllers
 from controllers.DatabaseController import DatabaseController
 from controllers.DiceController import DiceController
 from controllers.EncounterController import EncounterController
+from models.encounters.IEncounterable import IEncounterable
 # User class
 from models.user.UserRank import UserRank
 
@@ -37,7 +40,7 @@ class client(discord.Client):
     def __init__(self):
         super().__init__(intents=discord.Intents.all())       
 
-bot = client()
+bot: discord.Client = client()
 tree = app_commands.CommandTree(bot)
 
 # Initialize the voice recognizer
@@ -62,12 +65,12 @@ challengeColour = discord.Color.dark_orange()
 challengesDict = defaultdict(dict)
 challengeCount = 0
 # Global channel variables
-generalChannel = 0
-levelUpChannel = 0
-pvpChannel = 0
+generalChannel: discord.channel = None
+levelUpChannel: discord.channel = None
+pvpChannel: discord.channel = None
 # Global ID variables
 botID = 0
-guildID = 809668166984531968
+guildID = 249391493880479744
 # Controllers
 encounterCont: EncounterController = None
 
@@ -112,18 +115,19 @@ async def close():
     
 # When a member joins the server, send a welcoming message
 @bot.event
-async def on_member_join(member, role):
+async def on_member_join(member: discord.Member):
     if (bot.is_ready()):
         global generalChannel
         print(f"{member.id} joined!")
-        role = discord.utils.get(member.guild.roles, id='272748337256726528')
+        DatabaseController().StoreNewUser(member) 
+        role = discord.utils.get(member.guild.roles, name='ｄｅｂｒｉｓ 𝓭𝓻𝓲𝓯𝓽𝓮𝓻𝓼')
         embed = discord.Embed(
             title = f"{cowboyEmote} Eyes up",
             description = "You're a ｍｏｏｎ 𝒸𝑜𝓌𝒷𝑜𝓎 now.",
             colour = embedColour
         )
-        embed.set_author(name=member.name, icon_url=member.display_avatar)
-        DatabaseController().StoreNewUser(member, role)       
+        embed.set_author(name=member.name, icon_url=member.display_avatar)          
+        await member.add_roles(role)    
         await generalChannel.send(embed=embed)
 
 # Method to do things when a message is sent
@@ -133,30 +137,39 @@ async def on_message(message):
         # If messages are sent to the bot through DMs, do not count for anything
         if (isinstance(message.channel, discord.channel.DMChannel)):
             pass
-        else:
-            # Declaring variables to be used
-            global generalChannel
-            global levelUpChannel
-            messageChannel = bot.get_channel(message.channel.id)
-            channelHistoryLength = 50
-            expBool = True
-
+        else:            
             # Rate limiting the exp users gain from messages
             if(message.author.id != botID):
+                # Declaring variables to be used
+                global generalChannel
+                global levelUpChannel
+                messageChannel = bot.get_channel(message.channel.id)
+                channelHistoryLength = 50
+                rateLimitBool = True
+
                 channelMessages = [message async for message in message.channel.history(limit=channelHistoryLength, after=(datetime.now() - timedelta(seconds=3)))]   
                 for chnlMsg in channelMessages:
                     if chnlMsg.author.id == message.author.id and message.id != chnlMsg.id:                    
-                        expBool = False 
-                if(not expBool):
-                    print(chnlMsg.author.display_name + " is being rate limited.")
-                DatabaseController().StoreUserExp(message.author.id, expBool, levelUpChannel)                    
+                        rateLimitBool = False 
+                if(not rateLimitBool):
+                    print(chnlMsg.author.display_name + " is being exp rate limited.")
+                try:
+                    msgExpEmbed = DatabaseController().StoreUserExp(bot, message.author.id, rateLimitBool)
+                    if(msgExpEmbed != None):
+                        await levelUpChannel.send(embed=msgExpEmbed)    
+                except Exception as e:    
+                    print(e.with_traceback())    
+                # Generating an encounter                    
+                if(messageChannel.id == generalChannel.id): 
+                    if(rateLimitBool):
+                        global encounterCont 
+                        encounterEmbed = encounterCont.RollEncounter(message.author)
+                        if(encounterEmbed != None):
+                            encounterMsg = await messageChannel.send(embed=encounterEmbed)                        
+                            encounterCont.encounterID = encounterMsg.id
+                            await encounterMsg.add_reaction(rollEmote)   
+                        
 
-            # Generating an encounter 
-            global encounterCont    
-            if(messageChannel.id == generalChannel.id and message.author.id != botID): 
-                encounterMsg = await messageChannel.send(embed=encounterCont.RollEncounter(message.author))
-                encounterCont.encounterID = encounterMsg.id
-                await encounterMsg.add_reaction(rollEmote) 
 # Method to do things when a reaction is added
 @bot.event
 async def on_reaction_add(reaction, user):
@@ -168,8 +181,14 @@ async def on_reaction_add(reaction, user):
 
         if(reaction.emoji == challengeEmote and user.id != botID):
             await pvpChannel.send(embed=await FightPlayer(reaction.message, user))
+
         if encounterCont.encounterUserID == user.id and reaction.emoji == encounterCont.rollEmote and user.id != botID and reaction.message.id == encounterCont.encounterID and encounterCont.encounterActive:
-            encClearMsg = await generalChannel.send(embed=encounterCont.ClearEncounter(user, levelUpChannel))
+            embeds = encounterCont.ClearEncounter(bot, user)
+            if (len(embeds) == 1):
+                encClearMsg = await generalChannel.send(embed=embeds[0])
+            else:
+                encClearMsg = await generalChannel.send(embed=embeds[1])
+                await levelUpChannel.send(embed=embeds[0])
             encounterCont.encClearID = encClearMsg.id 
             if encounterCont.lootDropFloat <= encounterCont.lootDropChance and encounterCont.encClearSuccess:
                 await encClearMsg.add_reaction(encounterCont.tickEmote)
@@ -337,6 +356,7 @@ async def encounterStats(interaction: discord.Interaction):
     embed.set_author(name=f'{interaction.user.name}', icon_url=interaction.user.display_avatar)  
     embed.add_field(name=f"Encounter Spawn", value=f"{(encounterCont.encounterDropChance * 100)}%", inline=True)  
     embed.add_field(name=f"Loot Drop", value=f"{(encounterCont.lootDropChance * 100)}%", inline=True) 
+    embed.add_field(name=f"Encounter Rarity", value=f"Common: {(IEncounterable.commonDropChance * 100)}% \nUncommon: {(IEncounterable.uncommonDropChance * 100)}% \nRare: {(IEncounterable.rareDropChance * 100)}% \nVery Rare: {(IEncounterable.veryrareDropChance * 100)}% \nLegendary: {(IEncounterable.legendaryDropChance * 100)}% \n", inline=False) 
     await interaction.response.send_message(embed=embed)  
 
 # DO NOT USE THIS UNLESS YOU WANT TO WIPE ALL LEVEL DATA
@@ -344,9 +364,8 @@ async def encounterStats(interaction: discord.Interaction):
 # @has_permissions(administrator=True, manage_messages=True, manage_roles=True)
 # async def collectLevelData(interaction: discord.Interaction):
 #     try:
-#         if(interaction.message.author.id == 218890729550774282):
+#         if(interaction.user.id == 218890729550774282):
 #             DatabaseController().ResetServerRankData(interaction)
-#             print("Storing fresh data successful.")
 #             await interaction.response.send_message("Storing fresh data successful.")
 #     except:
 #         print("Error resetting database.")
@@ -412,20 +431,20 @@ async def Roll(interaction: discord.Interaction, dice: str):
 #     await ctx.send(embed=embed)
 
 # Spawns an encounter
-@tree.command(name="spawnencounter", description="Manually spawn an encounter.", guild=discord.Object(id=guildID))
-@has_permissions(administrator=True, manage_messages=True, manage_roles=True)
-async def Spawn_Encounter(interaction: discord.Interaction):
-    # Generating an encounter  
-    global encounterCont
-    global generalChannel
-    try:
-        if(interaction.channel.id == generalChannel.id and interaction.user.id != botID):
-            await interaction.response.send_message(content="Encounter manually spawned.")
-            encounterMsg: discord.abc.Messageable = await generalChannel.send(embed=encounterCont.RollEncounter(interaction.user, 1))
-            encounterCont.encounterID = encounterMsg.id
-            await encounterMsg.add_reaction(rollEmote)  
-    except Exception:
-        pass
+# @tree.command(name="spawnencounter", description="Manually spawn an encounter.", guild=discord.Object(id=guildID))
+# @has_permissions(administrator=True, manage_messages=True, manage_roles=True)
+# async def Spawn_Encounter(interaction: discord.Interaction):
+#     # Generating an encounter  
+#     global encounterCont
+#     global generalChannel
+#     try:
+#         if(interaction.channel.id == generalChannel.id and interaction.user.id != botID):
+#             await interaction.response.send_message(content="Encounter manually spawned.")
+#             encounterMsg: discord.abc.Messageable = await generalChannel.send(embed=encounterCont.RollEncounter(interaction.user, 1))
+#             encounterCont.encounterID = encounterMsg.id
+#             await encounterMsg.add_reaction(rollEmote)  
+#     except Exception:
+#         pass
 
 # Display the current equipment and modifier for a user that calls this command
 @tree.command(name="equipment", description="Displays your equipment name and modifier.", guild=discord.Object(id=guildID))
@@ -546,8 +565,12 @@ async def FightPlayer(reactionMessage, reactingUser):
             embed.add_field(name='**Tie!**', value="No one wins.", inline=True)
         else:
             embed.add_field(name="***WINS OVER***" if outcome else "***LOSES TO***", value=f"*Winning **{challengeWager}**xp*", inline=True)             
-            DatabaseController().StoreUserExp(challengerID if outcome else opponentID, True, levelUpChannel, int(challengeWager))
-            DatabaseController().StoreUserExp(opponentID if outcome else challengerID, True, levelUpChannel, -int(challengeWager))
+            storeExpEmbed = DatabaseController().StoreUserExp(bot, challengerID if outcome else opponentID, True, int(challengeWager))
+            removeExpEmbed = DatabaseController().StoreUserExp(bot, opponentID if outcome else challengerID, True, -int(challengeWager))
+            if(storeExpEmbed != None):
+                await levelUpChannel.send(embed=storeExpEmbed)
+            if(removeExpEmbed != None):
+                await levelUpChannel.send(embed=removeExpEmbed)
         embed.add_field(name=opponentName, value=f"**{opponentRollTotal}** (*{opponentRoll[0]}, +{opponentMod}*)", inline=True)
         challengesDict.pop(dictKeyName)  
         return embed

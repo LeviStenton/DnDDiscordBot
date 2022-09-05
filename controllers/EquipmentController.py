@@ -1,17 +1,33 @@
 from models.equipment.Equipment import Equipment
-import discord
+import sqlite3
 
 import random
 
 class EquipmentController:
-    _condition = ["Worthless ", "Rusty ", "Damascus ", "Overdriven ", "Astral ", "Eldritch "]
-    _equipment = ["Limp Noodle", "Boot Knife", "Lasso", "Six Shooter", "Gatling Laser", "Cow"]
-    _enchantment = [" of Garbage", " of Mediocrity", " of Moondust", " of Unfallible Accuracy", " of Starfire",  " of Cosmic Knowledge"]
+    __descriptorTableName = "equipmentDescriptors"
+    __materialTableName = "equipmentMaterials"
+    __objectTableName = "equipmentObjects"
 
-    def RollEquipment(self) -> Equipment:        
-        ranCond = random.randint(0,len(self._condition)-1)        
-        ranEquip = random.randint(0,len(self._equipment)-1)        
-        ranEnchant = random.randint(0,len(self._enchantment)-1)
-        totalEquipmentName = self._condition[ranCond]+self._equipment[ranEquip]+self._enchantment[ranEnchant]
-        totalEquipmentMod = str(ranCond+ranEquip+ranEnchant)
-        return Equipment(totalEquipmentName, totalEquipmentMod)
+    def RollEquipment(self, rarity) -> Equipment:  
+        descriptors = self.__RetrieveEquipmentPiece(self.__descriptorTableName, rarity)        
+        materials = self.__RetrieveEquipmentPiece(self.__materialTableName, rarity) 
+        objects = self.__RetrieveEquipmentPiece(self.__objectTableName, rarity) 
+        ranDesc = random.randint(0,len(descriptors)-1)        
+        ranMat = random.randint(0,len(materials)-1)        
+        ranObj = random.randint(0,len(objects)-1)
+        totalEquipmentName = descriptors[ranDesc][0]+ " " + materials[ranMat][0] + " " + objects[ranObj][0]
+        totalEquipmentMod = descriptors[ranDesc][1] + materials[ranMat][1] + objects[ranObj][1]
+
+        return Equipment(totalEquipmentName, totalEquipmentMod, rarity)
+
+    def __RetrieveEquipmentPiece(self, tableName, rarity) -> list:
+        conn = sqlite3.connect("databases/equipmentdb.db")
+        c = conn.cursor()
+        c.execute("SELECT name, weight " +
+           f"FROM {tableName} " + 
+            "WHERE rarity=?; ", 
+            (rarity,))
+        retrieved = []
+        for row in c.fetchall():
+            retrieved.append([row[0], row[1]])
+        return retrieved

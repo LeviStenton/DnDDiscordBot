@@ -1,16 +1,15 @@
 import sqlite3
 import discord
 import math
-
+from webbrowser import get
 from models.equipment.Equipment import Equipment
 
-class DatabaseController: 
+class DatabaseController(): 
     __levellingConstant = 0.1
     __expPerMessage = 1
     # Initialize the database
     __conn = sqlite3.connect('databases/levellingDB.db')
     __c = __conn.cursor()
-
 
     def __init__(self):
         pass
@@ -18,11 +17,9 @@ class DatabaseController:
     def CloseDatabase(self):
         self.__conn.close()
 
-    async def StoreNewUser(self, member, role):
-        self.__c.execute(f"INSERT or IGNORE INTO userData VALUES(?,0,0,0,0,?)", (member.id, "Fists", ))
+    def StoreNewUser(self, member):
+        self.__c.execute("INSERT or IGNORE INTO userData VALUES(?,0,0,0,0,?)", (member.id, "Fists", ))
         self.__conn.commit()  
-        await member.add_roles(role)
-
         
     def RetrieveUser(self, userId: int) -> tuple:
         self.__c.execute(f'SELECT * FROM userData WHERE userID=?', (userId, ))
@@ -63,27 +60,27 @@ class DatabaseController:
                 row.append(splitRow[0])
                 leaderboardList.append(row)
         return leaderboardList
-                    
 
+    def CheckUserLevelUp(self, bot: discord.Client, authorId, userData, experience):
+        if(bot != None):
+            author: discord.Member = bot.get_user(authorId)
+            userExp = userData[2]
+            expRemaining = round((math.ceil(float(userData[1])) ** 2) / (self.__levellingConstant * self.__levellingConstant) - int(userExp))
+            if expRemaining - experience <= 0:
+                embed = discord.Embed(
+                    title = f"You Leveled Up!",
+                    description = f"You are now *{str(int(float(userData[1]))+1)}* steps closer to the cosmos!",
+                    colour = discord.Colour.purple()
+                )        
+                embed.set_author(name=f'@'+author.display_name, icon_url=author.display_avatar)
+                return embed
+            else:
+                pass 
 
-    async def CheckUserLevelUp(self, author, userData, levelUpChannel, experience):
-        userExp = userData[2]
-        expRemaining = round((math.ceil(float(userData[1])) ** 2) / (self.__levellingConstant * self.__levellingConstant) - int(userExp))
-        if expRemaining - experience <= 0:
-            embed = discord.Embed(
-                title = f"You Leveled Up!",
-                description = f"You are now *{int(float(userData[1]))}* steps closer to the cosmos!",
-                colour = discord.Colour.purple()
-            )        
-            embed.set_author(name=f'@'+author.display_name, icon_url=author.display_avatar)
-            await levelUpChannel.send(embed=embed)
-        else:
-            pass 
-
-    def StoreUserExp(self, authorId, getExp: bool, levelUpChannel, expAmount: int = __expPerMessage):
+    def StoreUserExp(self, bot: discord.Client, authorId, getExp: bool, expAmount: int = __expPerMessage):
         userData = self.RetrieveUser(authorId)  
-        if getExp:
-            #self.CheckUserLevelUp(author, userData, levelUpChannel, expAmount)
+        levelUpEmbed = None
+        if getExp:            
             userExp = int(userData[2]) + expAmount
             userLevel = (self.__levellingConstant * math.sqrt(userExp))
         else:
@@ -92,19 +89,23 @@ class DatabaseController:
         userMessagesSent = int(userData[3]) + 1
         self.__c.execute(f"UPDATE userData SET userID = {authorId}, userLevel = {userLevel}, userExp = {int(userExp)}, userSentMsgs = {userMessagesSent} WHERE userID=?", (authorId, ))
         self.__conn.commit()  
+        if(getExp):
+            levelUpEmbed = self.CheckUserLevelUp(bot, authorId, userData, expAmount)
+            return levelUpEmbed
 
     def StoreUserEquipment(self, userId, equipment: Equipment):
         self.__c.execute(f"UPDATE userData SET userMod = \"{equipment.modifier}\", userEquipment = \"{equipment.name}\" WHERE userID=?", (userId, ))
         self.__conn.commit()
 
-    def ResetServerRankData(self, ctx):
+    def ResetServerRankData(self, interaction: discord.Interaction):
+        self.__c.execute("DELETE FROM userData")
         self.__c.execute("CREATE TABLE IF NOT EXISTS userData(userID TEXT, userLevel TEXT, userExp TEXT, userSentMsgs TEXT)")
-        for member in ctx.guild.members:
+        for member in interaction.guild.members:
             memberID = str(member.id)             
             self.__c.execute(f"INSERT INTO userData VALUES (?,0,0,0,0,?)", (memberID, "Fists", ))
-            self.__conn.commit()
+        self.__conn.commit()
         print("Storing fresh data successful.")
 
     def ResetUserData(self, authorId):
-        self.__c.execute(f"UPDATE userData SET userLevel = 0, userExp = 0, userSentMsgs = 0 WHERE userID = ?", (authorId, ))
+        self.__c.execute(f"UPDATE userData SET userLevel = 0, userExp = 0 WHERE userID = ?", (authorId, ))
         self.__conn.commit()
