@@ -36,7 +36,7 @@ class DatabaseController():
         userStats.append(math.floor(float(userData[1])))
         exp = userData[2]
         userStats.append(exp)
-        userStats.append(round((math.ceil(float(userData[1])) ** 2) / (self.__levellingConstant * self.__levellingConstant) - int(exp)))
+        userStats.append(self.ExpRemainingAlgorithm(exp))
         userStats.append(userData[3])
         return userStats
 
@@ -64,11 +64,12 @@ class DatabaseController():
     def CheckUserLevelUp(self, bot: discord.Client, authorId, userData, experience):
         if(bot != None):
             author: discord.Member = bot.get_user(authorId)
-            userExp = userData[2]
-            expRemaining = round((math.ceil(float(userData[1])) ** 2) / (self.__levellingConstant * self.__levellingConstant) - int(userExp))
-            if expRemaining - experience <= 0:
+            userExp = int(userData[2])
+            userLevelBefore = self.LevellingAlgorithm(userExp)
+            userLevelAfter = self.LevellingAlgorithm(userExp + experience)
+            if (userLevelBefore != userLevelAfter):
                 embed = discord.Embed(
-                    title = f"You Leveled Up!",
+                    title = f"You Leveled Up!",                    
                     description = f"You are now *{str(int(float(userData[1]))+1)}* steps closer to the cosmos!",
                     colour = discord.Colour.purple()
                 )        
@@ -82,10 +83,10 @@ class DatabaseController():
         levelUpEmbed = None
         if getExp:            
             userExp = int(userData[2]) + expAmount
-            userLevel = (self.__levellingConstant * math.sqrt(userExp))
+            userLevel = self.LevellingAlgorithm(userExp)
         else:
             userExp = int(userData[2])
-            userLevel = (self.__levellingConstant * math.sqrt(userExp))
+            userLevel = self.LevellingAlgorithm(userExp)
         userMessagesSent = int(userData[3]) + 1
         self.__c.execute(f"UPDATE userData SET userID = {authorId}, userLevel = {userLevel}, userExp = {int(userExp)}, userSentMsgs = {userMessagesSent} WHERE userID=?", (authorId, ))
         self.__conn.commit()  
@@ -109,3 +110,9 @@ class DatabaseController():
     def ResetUserData(self, authorId):
         self.__c.execute(f"UPDATE userData SET userLevel = 0, userExp = 0 WHERE userID = ?", (authorId, ))
         self.__conn.commit()
+
+    def LevellingAlgorithm(self, exp):
+        return int(self.__levellingConstant * math.sqrt(exp))
+
+    def ExpRemainingAlgorithm(self, exp):
+        return round((math.ceil(float(self.__levellingConstant * math.sqrt(int(exp) + 1))) ** 2) / (self.__levellingConstant * self.__levellingConstant) - int(exp))

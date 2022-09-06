@@ -70,7 +70,7 @@ levelUpChannel: discord.channel = None
 pvpChannel: discord.channel = None
 # Global ID variables
 botID = 0
-guildID = 249391493880479744
+guildID = 809668166984531968
 # Controllers
 encounterCont: EncounterController = None
 
