@@ -264,9 +264,9 @@ async def help(interaction: discord.Interaction):
        
 # Retrieves member, exp, and level data from levellingDB
 @tree.command(name="rank", description="Displays a user's rank data.", guild=discord.Object(id=guildID))
-async def req_rank(interaction: discord.Interaction):
+async def req_rank(interaction: discord.Interaction, otheruser: discord.User = None):
+    user = CheckIfOtherUser(interaction.user, otheruser)
     dbCont = DatabaseController()
-    user = interaction.user
     embed = discord.Embed(
         title = f"{levelEmote} Your stats for {interaction.guild}",
         colour = embedColour
@@ -280,6 +280,66 @@ async def req_rank(interaction: discord.Interaction):
     embed.add_field(name=f"Exp Until Next Level:", value=f"{userRank.expRemaining}", inline=False)
     embed.add_field(name=f"Messages Sent:", value=f"{userRank.msgSent}", inline=False)   
     await interaction.response.send_message(embed=embed)
+
+# Display the current equipment and modifier for a user that calls this command
+@tree.command(name="equipment", description="Displays your equipment name and modifier.", guild=discord.Object(id=guildID))
+async def ShowEquipment(interaction: discord.Interaction, otheruser: discord.User = None):
+    user = CheckIfOtherUser(interaction.user, otheruser)
+    userData = DatabaseController().RetrieveUser(user.id)
+    embed = discord.Embed(
+        title = f"Your Equipment",
+        colour = embedColour
+    )
+    embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767677300333477888/48cb5349f515f6e59edc2a4de294f439.png")
+    embed.set_author(name=f'{user.display_name}', icon_url=user.display_avatar)    
+    embed.add_field(name="Item", value=f"*{userData[5]}*", inline=True)
+    embed.add_field(name="Modifier", value=f"*+{userData[4]}*", inline=True)
+    await interaction.response.send_message(embed=embed)
+
+# WILL WIPE A USER'S DATA
+@tree.command(name="resetmydata", description="Reset your rank and equipment in the database.", guild=discord.Object(id=guildID))
+async def resetUserData(interaction: discord.Interaction):
+    authorID = str(interaction.user.id)
+    try:
+        DatabaseController().ResetUserData(authorID)
+        print(authorID+"'s data has been reset.")
+        await interaction.response.send_message("Resetting level successful.") 
+    except:
+        print("Error resetting user data.")
+        await interaction.response.send_message("Error resetting level.")
+
+# Retrieves user account info based on their public profile
+@tree.command(name="userinfo", description="Displays miscellaneous discord info.", guild=discord.Object(id=guildID))
+async def req_userinfo(interaction: discord.Interaction, otheruser: discord.User = None):
+    user = CheckIfOtherUser(interaction.user, otheruser)
+    authorName = user.name
+    authorAvatar = user.display_avatar
+    currentTime = datetime.now()
+    accCreatedAt = str(user.created_at).split(" ")
+    accJoinedAt = str(user.joined_at).split(" ")
+    timeCreated = accCreatedAt[1].split(".")
+    timeJoined = accJoinedAt[1].split(".")
+    timeSinceAccCreated = str(currentTime.replace(tzinfo=None) - user.created_at.replace(tzinfo=None)).split(",")
+    timeSinceAccJoined = str(currentTime.replace(tzinfo=None) - user.joined_at.replace(tzinfo=None)).split(",")
+    authorNick = user.nick
+    authorID = user.id
+    authorRoles = ""
+    if(len(user.roles) != 0):
+        for idx, role in enumerate(user.roles):
+            authorRoles = authorRoles+"<@&"+str(role.id)+"> "            
+    embed = discord.Embed(
+        title = f"{accountEmote} Your Account Details",
+        colour = embedColour
+    )
+    # embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767867171391930458/ApprovingElite.png")
+    embed.set_author(name=f'{authorName}', icon_url=authorAvatar)  
+    embed.add_field(name=f"Current Nickname:", value=f"{authorNick}", inline=True)
+    embed.add_field(name=f"Account Name:", value=f"{authorName}", inline=True)
+    embed.add_field(name=f"Roles:", value=f"{authorRoles}", inline=False)
+    embed.add_field(name=f"Account Created {timeSinceAccCreated[0]} ago", value=f"**{accCreatedAt[0]}** {timeCreated[0]} UTC", inline=True)
+    embed.add_field(name=f"Server Joined {timeSinceAccJoined[0]} ago", value=f"**{accJoinedAt[0]}** {timeJoined[0]} UTC", inline=True)    
+    embed.set_footer(text=f"UserID: {authorID}")
+    await interaction.response.send_message(embed=embed)  
 
 # Retrieves member, exp, and level data from levellingDB
 @tree.command(name="leaderboard", description="Displays the top 10 users sorted by exp.", guild=discord.Object(id=guildID))
@@ -313,39 +373,6 @@ async def req_leaderboard(interaction: discord.Interaction):
     await interaction.response.send_message(embed=embed)
 
 # Retrieves user account info based on their public profile
-@tree.command(name="userinfo", description="Displays miscellaneous discord info.", guild=discord.Object(id=guildID))
-async def req_userinfo(interaction: discord.Interaction):
-    user = interaction.user
-    authorName = user.name
-    authorAvatar = user.display_avatar
-    currentTime = datetime.now()
-    accCreatedAt = str(user.created_at).split(" ")
-    accJoinedAt = str(user.joined_at).split(" ")
-    timeCreated = accCreatedAt[1].split(".")
-    timeJoined = accJoinedAt[1].split(".")
-    timeSinceAccCreated = str(currentTime.replace(tzinfo=None) - user.created_at.replace(tzinfo=None)).split(",")
-    timeSinceAccJoined = str(currentTime.replace(tzinfo=None) - user.joined_at.replace(tzinfo=None)).split(",")
-    authorNick = user.nick
-    authorID = user.id
-    authorRoles = ""
-    if(len(user.roles) != 0):
-        for idx, role in enumerate(user.roles):
-            authorRoles = authorRoles+"<@&"+str(role.id)+"> "            
-    embed = discord.Embed(
-        title = f"{accountEmote} Your Account Details",
-        colour = embedColour
-    )
-    # embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767867171391930458/ApprovingElite.png")
-    embed.set_author(name=f'{authorName}', icon_url=authorAvatar)  
-    embed.add_field(name=f"Current Nickname:", value=f"{authorNick}", inline=True)
-    embed.add_field(name=f"Account Name:", value=f"{authorName}", inline=True)
-    embed.add_field(name=f"Roles:", value=f"{authorRoles}", inline=False)
-    embed.add_field(name=f"Account Created {timeSinceAccCreated[0]} ago", value=f"**{accCreatedAt[0]}** {timeCreated[0]} UTC", inline=True)
-    embed.add_field(name=f"Server Joined {timeSinceAccJoined[0]} ago", value=f"**{accJoinedAt[0]}** {timeJoined[0]} UTC", inline=True)    
-    embed.set_footer(text=f"UserID: {authorID}")
-    await interaction.response.send_message(embed=embed)  
-
-# Retrieves user account info based on their public profile
 @tree.command(name="encounterstats", description="Displays encounter and equipment droprates.", guild=discord.Object(id=guildID))
 async def encounterStats(interaction: discord.Interaction):
     global encounterCont
@@ -370,18 +397,6 @@ async def encounterStats(interaction: discord.Interaction):
 #     except:
 #         print("Error resetting database.")
 #         await interaction.response.send_message("Error resetting database.")
-
-# WILL WIPE A USER'S DATA
-@tree.command(name="resetmydata", description="Reset your rank and equipment in the database.", guild=discord.Object(id=guildID))
-async def resetUserData(interaction: discord.Interaction):
-    authorID = str(interaction.user.id)
-    try:
-        DatabaseController().ResetUserData(authorID)
-        print(authorID+"'s data has been reset.")
-        await interaction.response.send_message("Resetting level successful.") 
-    except:
-        print("Error resetting user data.")
-        await interaction.response.send_message("Error resetting level.")
 
 # If the command is sent with 'rollhelp', query a roll from the sent dice rolling data
 @tree.command(name="roll", description="To roll, type something like: 1d20. The modifiers '+' or '-' may be added: 1d20+3.", guild=discord.Object(id=guildID))
@@ -445,21 +460,6 @@ async def Roll(interaction: discord.Interaction, dice: str):
 #             await encounterMsg.add_reaction(rollEmote)  
 #     except Exception:
 #         pass
-
-# Display the current equipment and modifier for a user that calls this command
-@tree.command(name="equipment", description="Displays your equipment name and modifier.", guild=discord.Object(id=guildID))
-async def ShowEquipment(interaction: discord.Interaction):
-    user = interaction.user
-    userData = DatabaseController().RetrieveUser(user.id)
-    embed = discord.Embed(
-        title = f"Your Equipment",
-        colour = embedColour
-    )
-    embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767677300333477888/48cb5349f515f6e59edc2a4de294f439.png")
-    embed.set_author(name=f'{user.display_name}', icon_url=user.display_avatar)    
-    embed.add_field(name="Item", value=f"*{userData[5]}*", inline=True)
-    embed.add_field(name="Modifier", value=f"*+{userData[4]}*", inline=True)
-    await interaction.response.send_message(embed=embed)
 
 # Ping another player to fight
 @tree.command(name="challenge", description="To challenge another player, type: @<opponent> <expamount>", guild=discord.Object(id=guildID))
@@ -575,12 +575,11 @@ async def FightPlayer(reactionMessage, reactingUser):
         challengesDict.pop(dictKeyName)  
         return embed
 
-def FixUser(interaction):
-    if(interaction.user.id != None):
-        userNameInt = int(str(interaction.user.id).replace('<', '').replace('>', '').replace('@', ''))
-        return bot.get_user(userNameInt)
+def CheckIfOtherUser(interactionUser: discord.User, otherUser: discord.User):
+    if(otherUser == None):
+        return interactionUser
     else:
-        return interaction.user.id
+        return otherUser
 
 bot.run(TOKEN)
 
