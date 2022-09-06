@@ -57,6 +57,19 @@ class IEncounter(discord.Embed):
             case _ if randomInt < IEncounterable.legendaryChance:
                 return "legendary"
 
+    def GetRarityCircle(self, rarity: str) -> str:
+        match rarity:
+            case "common":
+                return "⚪"
+            case "uncommon":
+                return "🟢"
+            case "rare":
+                return "🔵"
+            case "veryrare":
+                return "🟣"
+            case "legendary":
+                return "🟠"
+
 
 
 
