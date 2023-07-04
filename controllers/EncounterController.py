@@ -20,7 +20,7 @@ class EncounterController():
     encClearID = 0
     encClearLoot = None
     encClearSuccess = False
-    encounterDropChance = 0.1
+    encounterDropChance = 0.05
     encounterTypeChance = 0.5
     lootDropChance = 0.5
     lootDropFloat = 0.0

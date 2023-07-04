@@ -10,6 +10,7 @@ from unicodedata import name
 import discord
 from discord import app_commands
 from discord.ext.commands import has_permissions
+from discord.ext import commands
 # Speech Recognition
 #import speech_recognition as sr
 # .env 
@@ -23,7 +24,10 @@ from collections import defaultdict
 from controllers.DatabaseController import DatabaseController
 from controllers.DiceController import DiceController
 from controllers.EncounterController import EncounterController
+from controllers.PollController import PollController
 from models.encounters.IEncounterable import IEncounterable
+from models.polls.poll import Poll
+from models.polls.poll import Option
 # User class
 from models.user.UserRank import UserRank
 
@@ -70,9 +74,10 @@ levelUpChannel: discord.channel = None
 pvpChannel: discord.channel = None
 # Global ID variables
 botID = 0
-guildID = 809668166984531968
+guildID = 249391493880479744
 # Controllers
 encounterCont: EncounterController = None
+pollCont: PollController = None
 
 # ---------------------------------------------------------------------------
 # ON EVENT METHODS
@@ -103,7 +108,10 @@ async def on_ready():
     botID = bot.user.id
     global encounterCont
     encounterCont = EncounterController()
+    global pollCont
+    pollCont = PollController()
     print("Connected and ready to go.")
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="that yee haw"))
 
 
 # On disconnecting, send a message
@@ -218,6 +226,18 @@ async def help(interaction: discord.Interaction):
     embed.add_field(name=f"{accountEmote} Account Info:", value=f"To view your or another user's account info, type: **/userinfo <otheruser>**", inline=False)
     embed.add_field(name=f"{prefixEmote} Command Prefixes:", value=f"To change the prefix, type: **/setprefix <prefix>** \nNote: you must be an administrator to do this", inline=False)
     await interaction.response.send_message(embed=embed)
+
+    # If the command is sent with 'help', send a message showing ways to use the bot
+@tree.command(name="poll", description="Create a poll with options of your choice.", guild=discord.Object(id=guildID))
+async def poll(interaction: discord.Interaction, title: str, options: str):
+    pollOptions = options.replace(" ", "").split(",")
+    optionsList = list()
+    for idx, option in enumerate(pollOptions):
+        optionsList.append(Option(index = idx, name = option))    
+
+    embed, view = pollCont.AddPoll(interaction, Poll(title, optionsList, datetime.now()))    
+
+    await interaction.response.send_message(embed=embed, view=view)
 
 # If the command is sent with 'join', join the voice channel that the author is in
 # @bot.command(name='join')
