@@ -41,7 +41,7 @@ class PollButton(discord.ui.Button):
         embed = interaction.message.embeds[0]        
         self.option.votes += 1
         embed.description += " " + interaction.user.name + f"(**{self.option.index+1}**), "
-        embed.set_field_at(index=self.option.index, name=(self.option.index+1)+": "+self.option.name, value=self.option.votes)
+        embed.set_field_at(index=self.option.index, name=f"{self.option.index+1}: "+self.option.name, value=self.option.votes)
         await interaction.response.edit_message(content =f"{interaction.user.name} has voted for {self.option.name}!", embed=embed)
             
         
