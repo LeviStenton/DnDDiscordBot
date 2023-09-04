@@ -39,6 +39,7 @@ class Option():
         self._index = index
         self._name = name
         self._votes = 0
+        self._voters = ""
 
     @property
     def index(self) -> str:
@@ -60,3 +61,10 @@ class Option():
     @votes.setter
     def votes(self, value: int):
         self._votes = value
+
+    @property
+    def voters(self) -> str:
+        return self._voters
+    @voters.setter
+    def voters(self, value: str):
+        self._voters = value

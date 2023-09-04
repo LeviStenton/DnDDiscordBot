@@ -230,7 +230,7 @@ async def help(interaction: discord.Interaction):
     # If the command is sent with 'help', send a message showing ways to use the bot
 @tree.command(name="poll", description="Create a poll with options of your choice.", guild=discord.Object(id=guildID))
 async def poll(interaction: discord.Interaction, title: str, options: str):
-    pollOptions = options.replace(" ", "").split(",")
+    pollOptions = options.strip().split(",")
     optionsList = list()
     for idx, option in enumerate(pollOptions):
         optionsList.append(Option(index = idx, name = option))    

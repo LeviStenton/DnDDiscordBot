@@ -20,9 +20,9 @@ class EncounterController():
     encClearID = 0
     encClearLoot = None
     encClearSuccess = False
-    encounterDropChance = 0.05
+    encounterDropChance = 0.025
     encounterTypeChance = 0.5
-    lootDropChance = 0.5
+    lootDropChance = 1
     lootDropFloat = 0.0
 
     def __init__(self):
