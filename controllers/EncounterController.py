@@ -28,18 +28,18 @@ class EncounterController():
     def __init__(self):
         pass
 
-    def RollEncounter(self, author, encounterChance = encounterDropChance) -> IEncounter:  
+    def RollEncounter(self, author, encounterChance = encounterDropChance, rarityOverride = None) -> IEncounter:  
         self.ClearEncounterVariables()      
         encounterDropFloat = random.uniform(0, 1)        
         encounterTypeFloat = random.uniform(0, 1)
         self.encounterUserID = author.id
         if encounterDropFloat < encounterChance and encounterTypeFloat >= self.encounterTypeChance:
-            encounterEmbed = MonsterEncounter(author) 
+            encounterEmbed = MonsterEncounter(author, rarityOverride) 
             self.encounter = encounterEmbed.encounter
             self.encounterActive = True
             return encounterEmbed 
         elif encounterDropFloat < encounterChance and encounterTypeFloat < self.encounterTypeChance:
-            encounterEmbed = SkillCheckEncounter(author) 
+            encounterEmbed = SkillCheckEncounter(author, rarityOverride) 
             self.encounter = encounterEmbed.encounter
             self.encounterActive = True
             return encounterEmbed    

@@ -30,8 +30,8 @@ class IEncounter(discord.Embed):
     def tableName(self, value: str):
         self._tableName = value
 
-    def GenerateEncounter(self) -> IEncounterable:
-        rarity = self.GetRarity()
+    def GenerateEncounter(self, rarityOverride: float) -> IEncounterable:
+        rarity = self.GetRarity(rarityOverride)
         conn = sqlite3.connect('databases/encountersdb.db')
         c = conn.cursor()
         c.execute("SELECT name, experience, challengeRating, armourClass, picturePath " +
@@ -43,8 +43,11 @@ class IEncounter(discord.Embed):
             encounters.append(IEncounterable(row[0], row[1], row[2], row[3], row[4], rarity)) 
         self.encounter = encounters[random.randint(0, len(encounters) - 1)]
 
-    def GetRarity(self) -> str:
-        randomInt = random.random()
+    def GetRarity(self, rarityOverride: float) -> str:
+        if rarityOverride == None:
+            randomInt = random.random()
+        else:
+            randomInt = rarityOverride
         match randomInt:
             case _ if randomInt > IEncounterable.uncommonChance:
                 return "common"

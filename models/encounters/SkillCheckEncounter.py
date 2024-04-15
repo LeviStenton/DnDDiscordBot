@@ -2,9 +2,9 @@ from models.encounters.IEncounter import IEncounter
 import discord
 
 class SkillCheckEncounter(IEncounter):
-    def __init__(self, user):
+    def __init__(self, user, rarityOverride: float):
         self.tableName = "skillchecks"
-        self.GenerateEncounter()
+        self.GenerateEncounter(rarityOverride)
         super().__init__(
             title=self.encounter.name,
             description=self.GetRarityCircle(str(self.encounter.rarity)) + " (" + str(self.encounter.rarity) + ")",

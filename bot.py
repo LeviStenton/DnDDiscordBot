@@ -72,6 +72,7 @@ challengeCount = 0
 generalChannel: discord.channel = None
 levelUpChannel: discord.channel = None
 pvpChannel: discord.channel = None
+huntChannel: discord.channel = None
 # Global ID variables
 botID = 0
 guildID = 249391493880479744
@@ -104,6 +105,9 @@ async def on_ready():
         if(channel.name == "pvp"):
             global pvpChannel
             pvpChannel = channel
+        if(channel.name == "hunts"):
+            global huntChannel
+            huntChannel = channel
     global botID
     botID = bot.user.id
     global encounterCont
@@ -193,9 +197,9 @@ async def on_reaction_add(reaction, user):
         if encounterCont.encounterUserID == user.id and reaction.emoji == encounterCont.rollEmote and user.id != botID and reaction.message.id == encounterCont.encounterID and encounterCont.encounterActive:
             embeds = encounterCont.ClearEncounter(bot, user)
             if (len(embeds) == 1):
-                encClearMsg = await generalChannel.send(embed=embeds[0])
+                encClearMsg = await reaction.message.channel.send(embed=embeds[0])
             else:
-                encClearMsg = await generalChannel.send(embed=embeds[1])
+                encClearMsg = await reaction.message.channel.send(embed=embeds[1])
                 await levelUpChannel.send(embed=embeds[0])
             encounterCont.encClearID = encClearMsg.id 
             if encounterCont.lootDropFloat <= encounterCont.lootDropChance and encounterCont.encClearSuccess:
@@ -417,6 +421,61 @@ async def encounterStats(interaction: discord.Interaction):
 #     except:
 #         print("Error resetting database.")
 #         await interaction.response.send_message("Error resetting database.")
+
+@tree.command(name="huntinfo", description="Display the cost of each tier of hunting.", guild=discord.Object(id=guildID))
+async def Hunt(interaction: discord.Interaction):
+    author = interaction.user.display_name
+    authorAvatar = interaction.user.display_avatar
+    embed = discord.Embed(
+        title = f"Hunt Information",
+        description="EXP cost for each hunt \n(Case & whitespace sensitive)",
+        colour = embedColour
+    )
+    embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767677300333477888/48cb5349f515f6e59edc2a4de294f439.png")
+    embed.set_author(name=f'{author}', icon_url=authorAvatar)    
+    embed.add_field(name="common", value=f"26", inline=True)
+    embed.add_field(name="uncommon", value=f"48", inline=True)
+    embed.add_field(name="rare", value=f"76", inline=True)
+    embed.add_field(name="veryrare", value=f"110", inline=True)
+    embed.add_field(name="legendary", value=f"150", inline=True)
+    await interaction.response.send_message(embed=embed)
+
+@tree.command(name="hunt", description="Summon an encounter using a certain amount of your own exp.", guild=discord.Object(id=guildID))
+async def Hunt(interaction: discord.Interaction, tier: str):
+    global generalChannel
+    if True:
+        rarity = 0
+        expSpent = 0
+        if tier == "common":
+            rarity = 1
+            expSpent = 26
+        elif tier == "uncommon":
+            rarity = 0.39
+            expSpent = 48
+        elif tier == "rare":
+            rarity = 0.149
+            expSpent = 76
+        elif tier == "veryrare":
+            rarity = 0.049
+            expSpent = 110
+        elif tier == "legendary":
+            rarity = 0.009
+            expSpent = 150
+        if rarity == 0:
+            return        
+        encounterEmbed = encounterCont.RollEncounter(interaction.user, encounterChance=1,rarityOverride=rarity)
+        if(encounterEmbed != None):
+            encounterMsg = await huntChannel.send(embed=encounterEmbed)                        
+            encounterCont.encounterID = encounterMsg.id
+            await encounterMsg.add_reaction(rollEmote)   
+            msgExpEmbed = DatabaseController().StoreUserExp(bot, interaction.user.id, True, -expSpent)
+            if(msgExpEmbed != None):
+                await levelUpChannel.send(embed=msgExpEmbed)  
+            await interaction.response.send_message(content=f"You paid {expSpent} EXP to hunt!", ephemeral=False)
+        else:
+            return
+    else:
+        return
 
 # If the command is sent with 'rollhelp', query a roll from the sent dice rolling data
 @tree.command(name="roll", description="To roll, type something like: 1d20. The modifiers '+' or '-' may be added: 1d20+3.", guild=discord.Object(id=guildID))
