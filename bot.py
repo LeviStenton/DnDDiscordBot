@@ -9,8 +9,7 @@ from unicodedata import name
 # Discord
 import discord
 from discord import app_commands
-from discord.ext.commands import has_permissions
-from discord.ext import commands
+from discord.ext import tasks
 # Speech Recognition
 #import speech_recognition as sr
 # .env 
@@ -18,12 +17,14 @@ from dotenv import load_dotenv
 # Datetime
 from datetime import datetime
 from datetime import timedelta
+import asyncio
 # Dictionary
 from collections import defaultdict
 # Controllers
 from controllers.DatabaseController import DatabaseController
 from controllers.DiceController import DiceController
 from controllers.EncounterController import EncounterController
+from controllers.RaidController import RaidController
 from controllers.PollController import PollController
 from models.encounters.IEncounterable import IEncounterable
 from models.polls.poll import Poll
@@ -73,11 +74,13 @@ generalChannel: discord.channel = None
 levelUpChannel: discord.channel = None
 pvpChannel: discord.channel = None
 huntChannel: discord.channel = None
+raidChannel: discord.channel = None
 # Global ID variables
 botID = 0
 guildID = 249391493880479744
 # Controllers
 encounterCont: EncounterController = None
+raidCont: RaidController = None
 pollCont: PollController = None
 
 # ---------------------------------------------------------------------------
@@ -108,12 +111,17 @@ async def on_ready():
         if(channel.name == "hunts"):
             global huntChannel
             huntChannel = channel
+        if(channel.name == "raids"):
+            global raidChannel
+            raidChannel = channel
     global botID
     botID = bot.user.id
     global encounterCont
     encounterCont = EncounterController()
     global pollCont
     pollCont = PollController()
+    global raidCont
+    raidCont = RaidController()
     print("Connected and ready to go.")
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="that yee haw"))
 
@@ -164,7 +172,7 @@ async def on_message(message):
                     if chnlMsg.author.id == message.author.id and message.id != chnlMsg.id:                    
                         rateLimitBool = False 
                 if(not rateLimitBool):
-                    print(chnlMsg.author.display_name + " is being exp rate limited.")
+                    print(chnlMsg.author.display_name + " is being gold rate limited.")
                 try:
                     msgExpEmbed = DatabaseController().StoreUserExp(bot, message.author.id, rateLimitBool)
                     if(msgExpEmbed != None):
@@ -222,7 +230,7 @@ async def help(interaction: discord.Interaction):
     )
     embed.set_author(name=f'{author}', icon_url=authorAvatar)
     embed.add_field(name=f"{rollEmote} Dice rolling:", value=f"To roll, type something like: **/roll 1d20**\nThe modifiers '+' or '-' may be added: **/roll 1d20+3**", inline=False)
-    embed.add_field(name=f"{challengeEmote} PvP:", value=f"To challenge another player, type: **/challenge @<opponent> <expamount>**", inline=False)
+    embed.add_field(name=f"{challengeEmote} PvP:", value=f"To challenge another player, type: **/challenge @<opponent> <goldamount>**", inline=False)
     embed.add_field(name=f"{leaderboardEmote} Leaderboard:", value=f"To view the leaderboard, type: **/leaderboard**", inline=False)
     embed.add_field(name=f"{levelEmote} Rank:", value=f"To view your or another user's level stats, type: **/rank <otheruser>**", inline=False)
     embed.add_field(name=f"{equipmentEmote} Equipment:", value=f"To view your or another user's current equipment, type: **/equipment <otheruser>**", inline=False)
@@ -297,12 +305,19 @@ async def req_rank(interaction: discord.Interaction, otheruser: discord.User = N
     )
     userRankRaw = dbCont.RetrieveUserRank(user.id)
     userRank = UserRank(user.display_name, user.display_avatar, userRankRaw[0], userRankRaw[1], userRankRaw[2], userRankRaw[3])
+    userTitlesRaw = dbCont.RetrieveUserTitles(user.id)
+    userTitles = ""
+    for title in userTitlesRaw:
+        if userTitles:
+            userTitles + ", "
+        userTitles += title
     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767867171391930458/ApprovingElite.png")
     embed.set_author(name=f'{userRank.displayName}', icon_url=userRank.avatar)      
     embed.add_field(name="Level:", value=f"{userRank.level}", inline=False)
-    embed.add_field(name=f"Exp:", value=f"{userRank.exp}", inline=False)
-    embed.add_field(name=f"Exp Until Next Level:", value=f"{userRank.expRemaining}", inline=False)
+    embed.add_field(name=f"Gold:", value=f"{userRank.exp}", inline=False)
+    embed.add_field(name=f"Gold Until Next Level:", value=f"{userRank.expRemaining}", inline=False)
     embed.add_field(name=f"Messages Sent:", value=f"{userRank.msgSent}", inline=False)   
+    embed.add_field(name=f"Titles:", value=userTitles, inline=False)   
     await interaction.response.send_message(embed=embed)
 
 # Display the current equipment and modifier for a user that calls this command
@@ -366,7 +381,7 @@ async def req_userinfo(interaction: discord.Interaction, otheruser: discord.User
     await interaction.response.send_message(embed=embed)  
 
 # Retrieves member, exp, and level data from levellingDB
-@tree.command(name="leaderboard", description="Displays the top 10 users sorted by exp.", guild=discord.Object(id=guildID))
+@tree.command(name="leaderboard", description="Displays the top 10 users sorted by gold.", guild=discord.Object(id=guildID))
 async def req_leaderboard(interaction: discord.Interaction):
     user = interaction.user
     userIdx = None
@@ -390,10 +405,10 @@ async def req_leaderboard(interaction: discord.Interaction):
             break
     leaderboardList = leaderboardList[:10]
     for idx, item in enumerate(leaderboardList):   
-        embed.add_field(name=str(idx+1)+". "+leaderboardList[idx][0], value=f"Level: {leaderboardList[idx][1]}, Exp: {leaderboardList[idx][2]}", inline=True)
+        embed.add_field(name=str(idx+1)+". "+leaderboardList[idx][0], value=f"Level: {leaderboardList[idx][1]}, Gold: {leaderboardList[idx][2]}", inline=True)
     if(not userInTopTen):
         userList = DatabaseController().RetrieveUserRank(interaction.user.id)
-        embed.add_field(name=f"*{str(userIdx)}. {userList[0]}*", value=f"*Level: {userList[1]}, Exp: {userList[2]}*", inline=False)
+        embed.add_field(name=f"*{str(userIdx)}. {userList[0]}*", value=f"*Level: {userList[1]}, Gold: {userList[2]}*", inline=False)
     await interaction.response.send_message(embed=embed)
 
 # Retrieves user account info based on their public profile
@@ -428,7 +443,7 @@ async def Hunt(interaction: discord.Interaction):
     authorAvatar = interaction.user.display_avatar
     embed = discord.Embed(
         title = f"Hunt Information",
-        description="EXP cost for each hunt \n(Case & whitespace sensitive)",
+        description="Gold cost for each hunt \n(Case & whitespace sensitive)",
         colour = embedColour
     )
     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767677300333477888/48cb5349f515f6e59edc2a4de294f439.png")
@@ -440,10 +455,10 @@ async def Hunt(interaction: discord.Interaction):
     embed.add_field(name="legendary", value=f"150", inline=True)
     await interaction.response.send_message(embed=embed)
 
-@tree.command(name="hunt", description="Summon an encounter using a certain amount of your own exp.", guild=discord.Object(id=guildID))
+@tree.command(name="hunt", description="Summon an encounter using a certain amount of your own gold.", guild=discord.Object(id=guildID))
 async def Hunt(interaction: discord.Interaction, tier: str):
-    global generalChannel
-    if True:
+    global huntChannel
+    if interaction.channel.id == huntChannel.id:
         rarity = 0
         expSpent = 0
         if tier == "common":
@@ -471,11 +486,25 @@ async def Hunt(interaction: discord.Interaction, tier: str):
             msgExpEmbed = DatabaseController().StoreUserExp(bot, interaction.user.id, True, -expSpent)
             if(msgExpEmbed != None):
                 await levelUpChannel.send(embed=msgExpEmbed)  
-            await interaction.response.send_message(content=f"You paid {expSpent} EXP to hunt!", ephemeral=False)
+            await interaction.response.send_message(content=f"You paid {expSpent} gold to hunt!", ephemeral=False)
         else:
             return
-    else:
-        return
+        
+@tree.command(name="raid", description="Initiate a raid and fight a boss using 1000 gold.", guild=discord.Object(id=guildID))
+async def Raid(interaction: discord.Interaction):
+    global raidChannel
+    if interaction.channel.id == raidChannel.id:
+        global raidCont
+        raidPreludeTimer = 1
+        raidConclusionTimer = 15
+        raidCost = 1000
+        await interaction.response.send_message(f"# Raid starting in {raidPreludeTimer} seconds.")
+        await asyncio.sleep(raidPreludeTimer)
+        raidStartEmbed, raidView = raidCont.InitiateRaid(interaction.user.id, raidCost, bot, raidConclusionTimer)
+        raidStartMsg = await interaction.channel.send(embed=raidStartEmbed, view=raidView)   
+        await asyncio.sleep(raidConclusionTimer)
+        raidEndEmbed = raidCont.ConcludeRaid()
+        raidEndMsg = await interaction.channel.send(embed=raidEndEmbed)   
 
 # If the command is sent with 'rollhelp', query a roll from the sent dice rolling data
 @tree.command(name="roll", description="To roll, type something like: 1d20. The modifiers '+' or '-' may be added: 1d20+3.", guild=discord.Object(id=guildID))
@@ -541,7 +570,7 @@ async def Roll(interaction: discord.Interaction, dice: str):
 #         pass
 
 # Ping another player to fight
-@tree.command(name="challenge", description="To challenge another player, type: @<opponent> <expamount>", guild=discord.Object(id=guildID))
+@tree.command(name="challenge", description="To challenge another player, type: @<opponent> <goldamount>", guild=discord.Object(id=guildID))
 async def ChallengePlayer(interaction: discord.Interaction, opponent: discord.User, wager: str):
     global pvpChannel
     if(interaction.channel.id == pvpChannel.id):
@@ -590,15 +619,15 @@ async def ChallengePlayer(interaction: discord.Interaction, opponent: discord.Us
                 opponentEquip = opponentData[5]
                     
                 if(int(challengerExp) < int(wager) and int(opponentExp) < int(wager)):
-                    raise Exception(challengerName+' does not have enough exp.\n'+opponentName+' does not have enough exp.')
+                    raise Exception(challengerName+' does not have enough gold.\n'+opponentName+' does not have enough gold.')
                 elif(int(challengerExp) < int(wager)):
-                    raise Exception(challengerName+' does not have enough exp.')
+                    raise Exception(challengerName+' does not have enough gold.')
                 elif(int(opponentExp) < int(wager)):
-                    raise Exception(opponentName+' does not have enough exp.')
+                    raise Exception(opponentName+' does not have enough gold.')
                 embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767677300333477888/48cb5349f515f6e59edc2a4de294f439.png")
                 embed.set_author(name=f'{challengerName}', icon_url=challengerAvatar)    
                 embed.add_field(name=challengerName, value=f"{challengerEquip}, +{challengerMod}", inline=True)
-                embed.add_field(name=f"***WAGERING***", value=f"***{wager}xp AGAINST***", inline=True)
+                embed.add_field(name=f"***WAGERING***", value=f"***{wager} gold AGAINST***", inline=True)
                 embed.add_field(name=opponentName, value=f"{opponentEquip}, +{opponentMod}", inline=True)
                 embed.add_field(name=f"TO ACCEPT,", value=f"*Click the dice to fight!*", inline=False)
                 embed.set_footer(text=opponentName, icon_url=opponentAvatar)    

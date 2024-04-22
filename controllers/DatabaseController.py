@@ -39,6 +39,14 @@ class DatabaseController():
         userStats.append(self.ExpRemainingAlgorithm(exp))
         userStats.append(userData[3])
         return userStats
+    def RetrieveUserTitles(self, userId: int) -> list:
+        self.__c.execute(f'SELECT * FROM userTitles WHERE userID=?', (userId, ))
+        splitRow = str(self.__c.fetchone()).split(", ")
+        for idx, item in enumerate(splitRow):
+            splitRow[idx] = splitRow[idx].replace('(', '')
+            splitRow[idx] = splitRow[idx].replace(')', '')
+            splitRow[idx] = splitRow[idx].replace('\'', '')
+        return splitRow
 
     def RetrieveAllUsers(self, ctx) -> list:
         leaderboardList = []
@@ -96,6 +104,10 @@ class DatabaseController():
 
     def StoreUserEquipment(self, userId, equipment: Equipment):
         self.__c.execute(f"UPDATE userData SET userMod = \"{equipment.modifier}\", userEquipment = \"{equipment.name}\" WHERE userID=?", (userId, ))
+        self.__conn.commit()
+
+    def StoreUserTitle(self, userId, title: str):
+        self.__c.execute(f"INSERT INTO userTitles (userID, userTitle) VALUES (?, ?)", (userId, title, ))
         self.__conn.commit()
 
     def ResetServerRankData(self, interaction: discord.Interaction):

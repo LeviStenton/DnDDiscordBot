@@ -19,8 +19,6 @@ class PollController():
         embed.set_footer(text=f"Time: {poll.timeStamp}")
         for idx, option in enumerate(poll.options):
             embed.add_field(name=f"{idx+1}: {option.name} *({option.votes})*", value=f"{option.voters}", inline=True)
-        
-        #poll.view = discord.ui.View()
         poll.view = PollButtons(poll.options)
         
         return embed, poll.view
