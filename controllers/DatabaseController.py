@@ -39,14 +39,13 @@ class DatabaseController():
         userStats.append(self.ExpRemainingAlgorithm(exp))
         userStats.append(userData[3])
         return userStats
+    
     def RetrieveUserTitles(self, userId: int) -> list:
-        self.__c.execute(f'SELECT * FROM userTitles WHERE userID=?', (userId, ))
-        splitRow = str(self.__c.fetchone()).split(", ")
-        for idx, item in enumerate(splitRow):
-            splitRow[idx] = splitRow[idx].replace('(', '')
-            splitRow[idx] = splitRow[idx].replace(')', '')
-            splitRow[idx] = splitRow[idx].replace('\'', '')
-        return splitRow
+        self.__c.execute(f'SELECT userTitle FROM userTitles WHERE userID=?', (userId, ))
+        fetchedRows = str(self.__c.fetchall()).split(", ")
+        for idx, item in enumerate(fetchedRows):
+            fetchedRows[idx] = fetchedRows[idx].replace('(', '').replace(')', '').replace('\'', '').replace('[', '').replace(']', '').replace(',', '')
+        return fetchedRows
 
     def RetrieveAllUsers(self, ctx) -> list:
         leaderboardList = []

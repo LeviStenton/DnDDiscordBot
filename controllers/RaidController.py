@@ -13,45 +13,52 @@ class RaidController():
     legendaryChance = 0.01
 
     _currentRaid: Raid
+    costMultiplier: int = 10
 
     def __init__(self):
         pass
 
-    def InitiateRaid(self, authorID: str, cost: int, bot: discord.Client, conclusionTime: int, rarityOverride: float = None) -> discord.Embed:
-        #DatabaseController().StoreUserExp(bot, authorID, False, cost)
-        rarity = self.GetRarity(rarityOverride)
+    def InitiateRaid(self, authorID: str, bot: discord.Client, initiationCost: int, conclusionTime: int, rarityOverride: float = None) -> discord.Embed:                
         conn = sqlite3.connect('databases/raidsdb.db')
         c = conn.cursor()
-        c.execute("SELECT name, hitpoints, title, image " +
-           f"FROM {self.tableName} " + 
-            "WHERE rarity=?; ", 
-            (rarity,))
         raids = []
-        for row in c.fetchall():
-            raids.append(Raid(row[0], row[1], row[2], row[3], rarity, conclusionTime)) 
-        global _currentRaid
-        _currentRaid = raids[random.randint(0, len(raids) - 1)]
-        _currentRaid.view = RaidButtons(cost)
-        return _currentRaid, _currentRaid.view
+        while not raids:
+            rarity = self.GetRarity(rarityOverride)
+            c.execute("SELECT name, hitpoints, title, image " +
+            f"FROM {self.tableName} " + 
+                "WHERE rarity=?; ", 
+                (rarity,))
+            for row in c.fetchall():
+                raids.append(Raid(row[0], row[1], row[2], row[3], rarity, conclusionTime))         
+        
+        self._currentRaid = raids[random.randint(0, len(raids) - 1)]
+        engagementCost: int = self._currentRaid.hitPoints * self.costMultiplier # cost to engage is 10 x hitpoints in gold
+        self._currentRaid.view = RaidButtons(bot=bot, currentRaid=self._currentRaid, engagementCost=engagementCost)
+        DatabaseController().StoreUserExp(bot, authorID, False, initiationCost)
+        return self._currentRaid, self._currentRaid.view
     
-    def ConcludeRaid(self, bot: discord.Client) -> discord.Embed:
-        global _currentRaid
-        if(_currentRaid.raiderPower >= _currentRaid.hitPoints):
+    def ConcludeRaid(self) -> discord.Embed:
+        print(self._currentRaid.raiderPower)
+        print(self._currentRaid.hitPoints)
+        if(self._currentRaid.raiderPower >= self._currentRaid.hitPoints):
             embed = discord.Embed(
                 title = "You conquered the raid!",
                 colour = discord.Colour.gold()
             )
-            embed.set_author(name=_currentRaid.title, icon_url=_currentRaid.image)  
-            embed.add_field(name=f"All participents have been earned the raid's title!", value=_currentRaid.title, inline=True)  
-            for participant in _currentRaid.raidParticipants:
-                DatabaseController().StoreUserTitle(participant, _currentRaid.title)
+            embed.set_author(name=self._currentRaid.title, icon_url=self._currentRaid.image)  
+            embed.add_field(name=f"All participents have been earned the raid's title!", value=self._currentRaid.title, inline=True)  
+            for participant in self._currentRaid.raidParticipants:
+                try:
+                    DatabaseController().StoreUserTitle(participant, self._currentRaid.title)
+                except:
+                    pass
             return embed
         else:
             embed = discord.Embed(
                 title = "You failed the raid!",
                 colour = discord.Colour.gold()
             )
-            embed.set_author(name=_currentRaid.title, icon_url=_currentRaid.image)  
+            embed.set_author(name=self._currentRaid.title, icon_url=self._currentRaid.image)  
             return embed
 
     def GetRarity(self, rarityOverride: float) -> str:
@@ -74,26 +81,33 @@ class RaidController():
                 return "legendary"           
 
 class RaidButtons(discord.ui.View):
-    def __init__(self, engagementCost: float):
+    def __init__(self, bot: discord.Client, currentRaid: Raid, engagementCost: int):
         super().__init__(timeout = 86400) # 1 day in seconds
-        self.add_item(PollButton(label=f"🗡️ 100 Gold", style=discord.ButtonStyle.red))
+        self.add_item(PollButton(label=f"🗡️ {engagementCost} Gold", style=discord.ButtonStyle.red, bot=bot, currentRaid=currentRaid, engagementCost=engagementCost))
             
 
-class PollButton(discord.ui.Button):  
-    def __init__(self, label: str, style: discord.ButtonStyle):
+class PollButton(discord.ui.Button): 
+    bot: discord.Client
+    currentRaid: Raid 
+    engagementCost: int
+    def __init__(self, label: str, style: discord.ButtonStyle, bot: discord.Client, currentRaid: Raid, engagementCost: int):
         super().__init__(label=label, style = style)
+        self.engagementCost = engagementCost
+        self.bot = bot
+        self.currentRaid = currentRaid
     async def callback(self, interaction):
-        global _currentRaid
         embed = interaction.message.embeds[0]
         currentRaiders = embed.fields[2].value
         if interaction.user.name in currentRaiders:
               return     
         if currentRaiders:
             currentRaiders += ", "
-        currentRaiders += interaction.user.name   
-        _currentRaid.raidParticipants.append(interaction.user.id)
+        currentRaiders += interaction.user.name 
+        self.currentRaid.raidParticipants.append(interaction.user.id)   
+        DatabaseController().StoreUserExp(self.bot, interaction.user.id, False, -self.engagementCost)
         userData = DatabaseController().RetrieveUser(interaction.user.id)
-        currentPower: int = int(embed.fields[1].value) + int(userData[4])
-        embed.set_field_at(index=1, name=f"Your Power", value=currentPower)
+        userPower = int(userData[4])
+        self.currentRaid.raiderPower += userPower
+        embed.set_field_at(index=1, name=f"Your Power", value=self.currentRaid.raiderPower)
         embed.set_field_at(index=2, name=f"Participants", value=currentRaiders)
         await interaction.response.edit_message(content =f"{interaction.user.name} has joined the fray!", embed=embed)

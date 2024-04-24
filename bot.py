@@ -45,6 +45,7 @@ class client(discord.Client):
     def __init__(self):
         super().__init__(intents=discord.Intents.all())       
 
+global bot
 bot: discord.Client = client()
 tree = app_commands.CommandTree(bot)
 
@@ -69,6 +70,8 @@ challengeColour = discord.Color.dark_orange()
 # PvP variables for Challenges
 challengesDict = defaultdict(dict)
 challengeCount = 0
+# Raid variables
+initiationCost: int = 500
 # Global channel variables
 generalChannel: discord.channel = None
 levelUpChannel: discord.channel = None
@@ -311,6 +314,8 @@ async def req_rank(interaction: discord.Interaction, otheruser: discord.User = N
         if userTitles:
             userTitles + ", "
         userTitles += title
+    if not userTitles:
+        userTitles = 'None'
     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767867171391930458/ApprovingElite.png")
     embed.set_author(name=f'{userRank.displayName}', icon_url=userRank.avatar)      
     embed.add_field(name="Level:", value=f"{userRank.level}", inline=False)
@@ -490,17 +495,32 @@ async def Hunt(interaction: discord.Interaction, tier: str):
         else:
             return
         
-@tree.command(name="raid", description="Initiate a raid and fight a boss using 1000 gold.", guild=discord.Object(id=guildID))
+@tree.command(name="raidinfo", description="Display the cost of a raid and the odds of each rarity.", guild=discord.Object(id=guildID))
+async def Hunt(interaction: discord.Interaction):
+    author = interaction.user.display_name
+    authorAvatar = interaction.user.display_avatar
+    embed = discord.Embed(
+        title = f"Raid Information",
+        description="Gold cost for initiating a raid and the odds of each rarity",
+        colour = embedColour
+    )
+    embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767677300333477888/48cb5349f515f6e59edc2a4de294f439.png")
+    embed.set_author(name=f'{author}', icon_url=authorAvatar)    
+    embed.add_field(name="Cost", value=f"{initiationCost} gold", inline=False)
+    embed.add_field(name="Odds", value=f"Random chance for each rarity to spawn equally.", inline=False)
+    await interaction.response.send_message(embed=embed)
+
+@tree.command(name="raid", description=f"Initiate a raid and fight a boss using {initiationCost} gold.", guild=discord.Object(id=guildID))
 async def Raid(interaction: discord.Interaction):
     global raidChannel
     if interaction.channel.id == raidChannel.id:
         global raidCont
-        raidPreludeTimer = 1
-        raidConclusionTimer = 15
-        raidCost = 1000
+        raidPreludeTimer = 10
+        raidConclusionTimer = 15      
+        global initiationCost
         await interaction.response.send_message(f"# Raid starting in {raidPreludeTimer} seconds.")
         await asyncio.sleep(raidPreludeTimer)
-        raidStartEmbed, raidView = raidCont.InitiateRaid(interaction.user.id, raidCost, bot, raidConclusionTimer)
+        raidStartEmbed, raidView = raidCont.InitiateRaid(interaction.user.id, initiationCost, bot, raidConclusionTimer)
         raidStartMsg = await interaction.channel.send(embed=raidStartEmbed, view=raidView)   
         await asyncio.sleep(raidConclusionTimer)
         raidEndEmbed = raidCont.ConcludeRaid()
