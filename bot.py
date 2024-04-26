@@ -71,7 +71,9 @@ challengeColour = discord.Color.dark_orange()
 challengesDict = defaultdict(dict)
 challengeCount = 0
 # Raid variables
-initiationCost: int = 500
+initiationCost: int = 50
+raidPreludeTimer: int = 10
+raidConclusionTimer: int = 15   
 # Global channel variables
 generalChannel: discord.channel = None
 levelUpChannel: discord.channel = None
@@ -507,7 +509,7 @@ async def Hunt(interaction: discord.Interaction):
     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767677300333477888/48cb5349f515f6e59edc2a4de294f439.png")
     embed.set_author(name=f'{author}', icon_url=authorAvatar)    
     embed.add_field(name="Cost", value=f"{initiationCost} gold", inline=False)
-    embed.add_field(name="Odds", value=f"Random chance for each rarity to spawn equally.", inline=False)
+    embed.add_field(name=f"Rarity", value=f"Common: {(RaidController.commonDropChance * 100)}% \nUncommon: {(RaidController.uncommonDropChance * 100)}% \nRare: {(RaidController.rareDropChance * 100)}% \nVery Rare: {(RaidController.veryrareDropChance * 100)}% \nLegendary: {(RaidController.legendaryDropChance * 100)}% \n", inline=False) 
     await interaction.response.send_message(embed=embed)
 
 @tree.command(name="raid", description=f"Initiate a raid and fight a boss using {initiationCost} gold.", guild=discord.Object(id=guildID))
@@ -515,8 +517,8 @@ async def Raid(interaction: discord.Interaction):
     global raidChannel
     if interaction.channel.id == raidChannel.id:
         global raidCont
-        raidPreludeTimer = 10
-        raidConclusionTimer = 15      
+        global raidPreludeTimer
+        global raidConclusionTimer   
         global initiationCost
         await interaction.response.send_message(f"# Raid starting in {raidPreludeTimer} seconds.")
         await asyncio.sleep(raidPreludeTimer)

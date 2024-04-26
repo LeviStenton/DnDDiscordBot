@@ -11,9 +11,14 @@ class RaidController():
     rareChance = 0.15
     veryrareChance = 0.05
     legendaryChance = 0.01
+    commonDropChance = 1 - uncommonChance
+    uncommonDropChance = uncommonChance - rareChance
+    rareDropChance = rareChance - veryrareChance
+    veryrareDropChance = veryrareChance - legendaryChance
+    legendaryDropChance = legendaryChance   
 
     _currentRaid: Raid
-    costMultiplier: int = 10
+    costMultiplier: float = 0.5
 
     def __init__(self):
         pass
@@ -38,8 +43,6 @@ class RaidController():
         return self._currentRaid, self._currentRaid.view
     
     def ConcludeRaid(self) -> discord.Embed:
-        print(self._currentRaid.raiderPower)
-        print(self._currentRaid.hitPoints)
         if(self._currentRaid.raiderPower >= self._currentRaid.hitPoints):
             embed = discord.Embed(
                 title = "You conquered the raid!",
@@ -83,7 +86,7 @@ class RaidController():
 class RaidButtons(discord.ui.View):
     def __init__(self, bot: discord.Client, currentRaid: Raid, engagementCost: int):
         super().__init__(timeout = 86400) # 1 day in seconds
-        self.add_item(PollButton(label=f"🗡️ {engagementCost} Gold", style=discord.ButtonStyle.red, bot=bot, currentRaid=currentRaid, engagementCost=engagementCost))
+        self.add_item(PollButton(label=f"🗡️ {int(engagementCost)} Gold", style=discord.ButtonStyle.red, bot=bot, currentRaid=currentRaid, engagementCost=engagementCost))
             
 
 class PollButton(discord.ui.Button): 
