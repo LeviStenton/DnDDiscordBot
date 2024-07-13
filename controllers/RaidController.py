@@ -37,7 +37,7 @@ class RaidController():
                 raids.append(Raid(row[0], row[1], row[2], row[3], rarity, conclusionTime))         
         
         self._currentRaid = raids[random.randint(0, len(raids) - 1)]
-        engagementCost: int = self._currentRaid.hitPoints * self.costMultiplier # cost to engage is 10 x hitpoints in gold
+        engagementCost: int = self._currentRaid.hitPoints * self.costMultiplier
         self._currentRaid.view = RaidButtons(bot=bot, currentRaid=self._currentRaid, engagementCost=engagementCost)
         DatabaseController().StoreUserExp(bot, authorID, False, initiationCost)
         return self._currentRaid, self._currentRaid.view
@@ -48,7 +48,7 @@ class RaidController():
                 title = "You conquered the raid!",
                 colour = discord.Colour.gold()
             )
-            embed.set_author(name=self._currentRaid.title, icon_url=self._currentRaid.image)  
+            embed.set_author(name=self._currentRaid.name, icon_url=self._currentRaid.image)  
             embed.add_field(name=f"All participents have been earned the raid's title!", value=self._currentRaid.title, inline=True)  
             for participant in self._currentRaid.raidParticipants:
                 try:

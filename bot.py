@@ -32,6 +32,8 @@ from models.polls.poll import Option
 # User class
 from models.user.UserRank import UserRank
 
+import random
+
 
 # ----------------------------------------------------------------------------
 # DECLARE ALL VARIABLES NECESSARY TO RUN THE PROGRAM
@@ -63,7 +65,8 @@ tickEmote = '✔️'
 crossEmote = '❌'
 challengeEmote = '⚔️'
 equipmentEmote = '🗡️'
-encounterEmote = '👹'
+huntEmote = '👹'
+raidEmote = '☠️'
 # Colours
 embedColour = discord.Colour.dark_blue()
 challengeColour = discord.Color.dark_orange()
@@ -73,9 +76,10 @@ challengeCount = 0
 # Raid variables
 initiationCost: int = 50
 raidPreludeTimer: int = 10
-raidConclusionTimer: int = 15   
+raidConclusionTimer: int = 30
 # Global channel variables
 generalChannel: discord.channel = None
+eventsChannel: discord.ForumChannel = None
 levelUpChannel: discord.channel = None
 pvpChannel: discord.channel = None
 huntChannel: discord.channel = None
@@ -107,6 +111,9 @@ async def on_ready():
         if(channel.name == "general"):
             global generalChannel
             generalChannel = channel
+        if(channel.name == "events"):
+            global eventsChannel
+            eventsChannel = channel
         if(channel.name == "level-ups"):
             global levelUpChannel
             levelUpChannel = channel
@@ -159,6 +166,13 @@ async def on_member_join(member: discord.Member):
 @bot.event
 async def on_message(message):
     if (bot.is_ready()):
+        # Fuck with Peter
+        print(message.author.id)
+        if(message.author.id == 0):
+            responses = ["Bitch.", "I could beat you in a fight.", "I'm in your walls.", "Run.", "I know who you are.", "114.219.161.38, 39°15′N 9°03′E"]
+            messageChannel = bot.get_channel(message.channel.id)
+            await messageChannel.send(responses[random.randint(0, len(responses))]);
+
         # If messages are sent to the bot through DMs, do not count for anything
         if (isinstance(message.channel, discord.channel.DMChannel)):
             pass
@@ -185,14 +199,14 @@ async def on_message(message):
                 except Exception as e:    
                     print(e.with_traceback())    
                 # Generating an encounter                    
-                if(messageChannel.id == generalChannel.id): 
-                    if(rateLimitBool):
-                        global encounterCont 
-                        encounterEmbed = encounterCont.RollEncounter(message.author)
-                        if(encounterEmbed != None):
-                            encounterMsg = await messageChannel.send(embed=encounterEmbed)                        
-                            encounterCont.encounterID = encounterMsg.id
-                            await encounterMsg.add_reaction(rollEmote)   
+                # if(messageChannel.id == generalChannel.id): 
+                #     if(rateLimitBool):
+                #         global encounterCont 
+                #         encounterEmbed = encounterCont.RollEncounter(message.author)
+                #         if(encounterEmbed != None):
+                #             encounterMsg = await messageChannel.send(embed=encounterEmbed)                        
+                #             encounterCont.encounterID = encounterMsg.id
+                #             await encounterMsg.add_reaction(rollEmote)   
                         
 
 # Method to do things when a reaction is added
@@ -220,6 +234,14 @@ async def on_reaction_add(reaction, user):
         if user.id == encounterCont.encounterUserID and user.id != botID and reaction.message.id == encounterCont.encClearID and reaction.emoji == encounterCont.tickEmote:
             DatabaseController().StoreUserEquipment(user.id, encounterCont.encClearLoot)           
 
+@bot.event
+async def on_scheduled_event_create(event):
+    if(bot.is_ready()):
+        global eventsChannel
+        await eventsChannel.create_thread(name=event.name, content=event.url)
+
+    
+
 # ---------------------------------------------------------------------------
 # COMMAND METHODS
 
@@ -234,29 +256,33 @@ async def help(interaction: discord.Interaction):
         colour = embedColour
     )
     embed.set_author(name=f'{author}', icon_url=authorAvatar)
-    embed.add_field(name=f"{rollEmote} Dice rolling:", value=f"To roll, type something like: **/roll 1d20**\nThe modifiers '+' or '-' may be added: **/roll 1d20+3**", inline=False)
-    embed.add_field(name=f"{challengeEmote} PvP:", value=f"To challenge another player, type: **/challenge @<opponent> <goldamount>**", inline=False)
-    embed.add_field(name=f"{leaderboardEmote} Leaderboard:", value=f"To view the leaderboard, type: **/leaderboard**", inline=False)
-    embed.add_field(name=f"{levelEmote} Rank:", value=f"To view your or another user's level stats, type: **/rank <otheruser>**", inline=False)
-    embed.add_field(name=f"{equipmentEmote} Equipment:", value=f"To view your or another user's current equipment, type: **/equipment <otheruser>**", inline=False)
-    embed.add_field(name=f"{encounterEmote} Encounter Statistics:", value=f"To view the statistics for encounters, type: **/encounterstats**", inline=False)
-    embed.add_field(name=f"{accountEmote} Account Info:", value=f"To view your or another user's account info, type: **/userinfo <otheruser>**", inline=False)
-    embed.add_field(name=f"{prefixEmote} Command Prefixes:", value=f"To change the prefix, type: **/setprefix <prefix>** \nNote: you must be an administrator to do this", inline=False)
+    embed.add_field(name=f"{accountEmote} Account Info:", value=f"To view your or another user's account info, type: **/userinfo <otheruser>.**", inline=False)    
+    embed.add_field(name=f"{leaderboardEmote} Leaderboard:", value=f"To view the leaderboard, type: **/leaderboard.**", inline=False)        
+    embed.add_field(name=f"{equipmentEmote} Equipment:", value=f"To view your or another user's current equipment, type: **/equipment <otheruser>.**", inline=False)    
+    embed.add_field(name=f"{levelEmote} Rank:", value=f"To view your or another user's level stats, type: **/rank <otheruser>.**", inline=False)   
+    embed.add_field(name=f"{huntEmote} Hunt Info:", value=f"To view the info on hunts, type: **/huntinfo.**", inline=False)
+    embed.add_field(name=f"{raidEmote} Raid Info:", value=f"To view the info on raids, type: **/raidinfo.**", inline=False)
+    #embed.add_field(name=f"{huntEmote} Hunt Costs:", value=f"To view the costs for the different hunt tiers, type: **/huntcosts.**", inline=False) 
+    embed.add_field(name=f"{challengeEmote} PvP:", value=f"To challenge another player type: **/challenge @<opponent> <goldamount>** in the *# pvp* channel.", inline=False)
+    embed.add_field(name=f"{huntEmote} Hunt:", value=f"To summon an encounter, type: **/hunt <rarity>** in the *# hunt* channel. The rarities are 'common', 'uncommon', 'rare', 'veryrare', 'legendary'.", inline=False)
+    embed.add_field(name=f"{raidEmote} Raid:", value=f"To initiate another raid, type: **/raid** in the *# raid* channel. To beat the raid, surpass the raid's health with cumulative equipment modifiers.", inline=False)
+    embed.add_field(name=f"{rollEmote} Dice rolling:", value=f"To roll, type something like: **/roll 1d20**\nThe modifiers '+' or '-' may be added: **/roll 1d20+3.**", inline=False)
+    #embed.add_field(name=f"{prefixEmote} Command Prefixes:", value=f"To change the prefix, type: **/setprefix <prefix>** \nNote: you must be an administrator to do this", inline=False)
     await interaction.response.send_message(embed=embed)
 
-    # If the command is sent with 'help', send a message showing ways to use the bot
-@tree.command(name="poll", description="Create a poll with options of your choice.", guild=discord.Object(id=guildID))
-async def poll(interaction: discord.Interaction, title: str, options: str):
-    pollOptions = options.strip().split(",")
-    optionsList = list()
-    for idx, option in enumerate(pollOptions):
-        optionsList.append(Option(index = idx, name = option))    
+#     # If the command is sent with 'help', send a message showing ways to use the bot
+# @tree.command(name="poll", description="Create a poll with options of your choice.", guild=discord.Object(id=guildID))
+# async def poll(interaction: discord.Interaction, title: str, options: str):
+#     pollOptions = options.strip().split(",")
+#     optionsList = list()
+#     for idx, option in enumerate(pollOptions):
+#         optionsList.append(Option(index = idx, name = option))    
 
-    embed, view = pollCont.AddPoll(interaction, Poll(title, optionsList, datetime.now()))    
+#     embed, view = pollCont.AddPoll(interaction, Poll(title, optionsList, datetime.now()))    
 
-    await interaction.response.send_message(embed=embed, view=view)
+#     await interaction.response.send_message(embed=embed, view=view)
 
-# If the command is sent with 'join', join the voice channel that the author is in
+# # If the command is sent with 'join', join the voice channel that the author is in
 # @bot.command(name='join')
 # async def join_voice(ctx):
 #     author = ctx.author.name
@@ -419,15 +445,22 @@ async def req_leaderboard(interaction: discord.Interaction):
     await interaction.response.send_message(embed=embed)
 
 # Retrieves user account info based on their public profile
-@tree.command(name="encounterstats", description="Displays encounter and equipment droprates.", guild=discord.Object(id=guildID))
+@tree.command(name="huntinfo", description="Displays hunt costs and equipment droprates.", guild=discord.Object(id=guildID))
 async def encounterStats(interaction: discord.Interaction):
     global encounterCont
     embed = discord.Embed(
-        title = f"{encounterEmote} Encounter Statistics",
+        title = f"{huntEmote} Hunt Info",
         colour = embedColour
     )
     embed.set_author(name=f'{interaction.user.name}', icon_url=interaction.user.display_avatar)  
-    embed.add_field(name=f"Encounter Spawn", value=f"{(encounterCont.encounterDropChance * 100)}%", inline=True)  
+    #embed.add_field(name=f"Encounter Spawn", value=f"{(encounterCont.encounterDropChance * 100)}%", inline=True) 
+    embed.add_field(name="Hunt Costs:", value=f"", inline=False)
+    embed.add_field(name="common", value=f"26", inline=True)
+    embed.add_field(name="uncommon", value=f"48", inline=True)
+    embed.add_field(name="rare", value=f"76", inline=True)
+    embed.add_field(name="veryrare", value=f"110", inline=True)
+    embed.add_field(name="legendary", value=f"150", inline=True)
+    embed.add_field(name="Loot Info:", value=f"", inline=False)
     embed.add_field(name=f"Loot Drop", value=f"{(encounterCont.lootDropChance * 100)}%", inline=True) 
     embed.add_field(name=f"Encounter Rarity", value=f"Common: {(IEncounterable.commonDropChance * 100)}% \nUncommon: {(IEncounterable.uncommonDropChance * 100)}% \nRare: {(IEncounterable.rareDropChance * 100)}% \nVery Rare: {(IEncounterable.veryrareDropChance * 100)}% \nLegendary: {(IEncounterable.legendaryDropChance * 100)}% \n", inline=False) 
     await interaction.response.send_message(embed=embed)  
@@ -444,25 +477,25 @@ async def encounterStats(interaction: discord.Interaction):
 #         print("Error resetting database.")
 #         await interaction.response.send_message("Error resetting database.")
 
-@tree.command(name="huntinfo", description="Display the cost of each tier of hunting.", guild=discord.Object(id=guildID))
-async def Hunt(interaction: discord.Interaction):
-    author = interaction.user.display_name
-    authorAvatar = interaction.user.display_avatar
-    embed = discord.Embed(
-        title = f"Hunt Information",
-        description="Gold cost for each hunt \n(Case & whitespace sensitive)",
-        colour = embedColour
-    )
-    embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767677300333477888/48cb5349f515f6e59edc2a4de294f439.png")
-    embed.set_author(name=f'{author}', icon_url=authorAvatar)    
-    embed.add_field(name="common", value=f"26", inline=True)
-    embed.add_field(name="uncommon", value=f"48", inline=True)
-    embed.add_field(name="rare", value=f"76", inline=True)
-    embed.add_field(name="veryrare", value=f"110", inline=True)
-    embed.add_field(name="legendary", value=f"150", inline=True)
-    await interaction.response.send_message(embed=embed)
+# @tree.command(name="huntcosts", description="Display the cost of each tier of hunting.", guild=discord.Object(id=guildID))
+# async def Hunt(interaction: discord.Interaction):
+#     author = interaction.user.display_name
+#     authorAvatar = interaction.user.display_avatar
+#     embed = discord.Embed(
+#         title = f"Hunt Costs",
+#         description="Gold cost for each hunt \n(Case & whitespace sensitive)",
+#         colour = embedColour
+#     )
+#     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767677300333477888/48cb5349f515f6e59edc2a4de294f439.png")
+#     embed.set_author(name=f'{author}', icon_url=authorAvatar)    
+#     embed.add_field(name="common", value=f"26", inline=True)
+#     embed.add_field(name="uncommon", value=f"48", inline=True)
+#     embed.add_field(name="rare", value=f"76", inline=True)
+#     embed.add_field(name="veryrare", value=f"110", inline=True)
+#     embed.add_field(name="legendary", value=f"150", inline=True)
+#     await interaction.response.send_message(embed=embed)
 
-@tree.command(name="hunt", description="Summon an encounter using a certain amount of your own gold.", guild=discord.Object(id=guildID))
+@tree.command(name="hunt", description="Summon an encounter using a certain amount of your own gold. Rarity costs can be found at /huntinfo.", guild=discord.Object(id=guildID))
 async def Hunt(interaction: discord.Interaction, tier: str):
     global huntChannel
     if interaction.channel.id == huntChannel.id:
@@ -499,6 +532,7 @@ async def Hunt(interaction: discord.Interaction, tier: str):
         
 @tree.command(name="raidinfo", description="Display the cost of a raid and the odds of each rarity.", guild=discord.Object(id=guildID))
 async def Hunt(interaction: discord.Interaction):
+    global raidConclusionTimer 
     author = interaction.user.display_name
     authorAvatar = interaction.user.display_avatar
     embed = discord.Embed(
@@ -509,6 +543,7 @@ async def Hunt(interaction: discord.Interaction):
     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767677300333477888/48cb5349f515f6e59edc2a4de294f439.png")
     embed.set_author(name=f'{author}', icon_url=authorAvatar)    
     embed.add_field(name="Cost", value=f"{initiationCost} gold", inline=False)
+    embed.add_field(name="Raid Timer", value=f"{raidConclusionTimer} seconds", inline=False)
     embed.add_field(name=f"Rarity", value=f"Common: {(RaidController.commonDropChance * 100)}% \nUncommon: {(RaidController.uncommonDropChance * 100)}% \nRare: {(RaidController.rareDropChance * 100)}% \nVery Rare: {(RaidController.veryrareDropChance * 100)}% \nLegendary: {(RaidController.legendaryDropChance * 100)}% \n", inline=False) 
     await interaction.response.send_message(embed=embed)
 
