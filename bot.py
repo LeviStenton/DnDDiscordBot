@@ -31,8 +31,8 @@ from models.polls.poll import Poll
 from models.polls.poll import Option
 # User class
 from models.user.UserRank import UserRank
-
-import random
+# Groq
+import groq
 
 
 # ----------------------------------------------------------------------------
@@ -51,8 +51,10 @@ global bot
 bot: discord.Client = client()
 tree = app_commands.CommandTree(bot)
 
-# Initialize the voice recognizer
-#r = sr.Recognizer()
+# Initialize OpenAI client
+client = groq.AsyncGroq(
+    api_key=os.environ.get('GROQ_API_KEY')
+)
 # Emotes
 rollEmote = '🎲'
 voiceEmote = ':microphone2:'
@@ -79,6 +81,7 @@ raidPreludeTimer: int = 10
 raidConclusionTimer: int = 30
 # Global channel variables
 generalChannel: discord.channel = None
+privateChannel: discord.channel = None
 eventsChannel: discord.ForumChannel = None
 levelUpChannel: discord.channel = None
 pvpChannel: discord.channel = None
@@ -111,7 +114,10 @@ async def on_ready():
         if(channel.name == "general"):
             global generalChannel
             generalChannel = channel
-        if(channel.name == "events"):
+        if(channel.name == "private"):
+            global privateChannel
+            privateChannel = channel
+        if(channel.name == "events" and type(channel) == discord.ForumChannel):
             global eventsChannel
             eventsChannel = channel
         if(channel.name == "level-ups"):
@@ -152,10 +158,10 @@ async def on_member_join(member: discord.Member):
         global generalChannel
         print(f"{member.id} joined!")
         DatabaseController().StoreNewUser(member) 
-        role = discord.utils.get(member.guild.roles, name='ｄｅｂｒｉｓ 𝓭𝓻𝓲𝓯𝓽𝓮𝓻𝓼')
+        role = discord.utils.get(member.guild.roles, name='Wayward Wanderer')
         embed = discord.Embed(
-            title = f"{cowboyEmote} Eyes up",
-            description = "You're a ｍｏｏｎ 𝒸𝑜𝓌𝒷𝑜𝓎 now.",
+            title = f"{cowboyEmote} Howdy pardner!",
+            description = "Welcome to the cowbs.",
             colour = embedColour
         )
         embed.set_author(name=member.name, icon_url=member.display_avatar)          
@@ -166,12 +172,29 @@ async def on_member_join(member: discord.Member):
 @bot.event
 async def on_message(message):
     if (bot.is_ready()):
-        # Fuck with Peter
-        print(message.author.id)
-        if(message.author.id == 0):
-            responses = ["Bitch.", "I could beat you in a fight.", "I'm in your walls.", "Run.", "I know who you are.", "114.219.161.38, 39°15′N 9°03′E"]
-            messageChannel = bot.get_channel(message.channel.id)
-            await messageChannel.send(responses[random.randint(0, len(responses))]);
+        # OpenAI
+        if("The Moon Cowboy" in message.content or "715110532532797490" in message.content):
+            messageWithoutMention = message.content.strip().replace("The Moon Cowboy", "").replace("715110532532797490", "")
+            chat_completion = await client.chat.completions.create(
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a space cowboy. Respond like you're a helpful cowboy from outer space who looks after a community of other space cowboys. You also don't like anyone named Josh."
+                    },
+                    {
+                        "role": "user",
+                        "content": messageWithoutMention,
+                    }
+                ],
+                model="llama3-8b-8192",
+                temperature=0.5,
+                max_tokens=512,
+                top_p=1,
+                stop=None,
+                stream=False,
+            )
+            await bot.get_channel(message.channel.id).send(chat_completion.choices[0].message.content)
+                    
 
         # If messages are sent to the bot through DMs, do not count for anything
         if (isinstance(message.channel, discord.channel.DMChannel)):
@@ -238,7 +261,9 @@ async def on_reaction_add(reaction, user):
 async def on_scheduled_event_create(event):
     if(bot.is_ready()):
         global eventsChannel
-        await eventsChannel.create_thread(name=event.name, content=event.url)
+        eventThread = await eventsChannel.create_thread(name=event.name, content=event.url)
+        global privateChannel
+        await privateChannel.send(f"## New Event!\nDiscuss here: {eventThread.thread.mention}\n\n{event.url}");
 
     
 
@@ -262,12 +287,10 @@ async def help(interaction: discord.Interaction):
     embed.add_field(name=f"{levelEmote} Rank:", value=f"To view your or another user's level stats, type: **/rank <otheruser>.**", inline=False)   
     embed.add_field(name=f"{huntEmote} Hunt Info:", value=f"To view the info on hunts, type: **/huntinfo.**", inline=False)
     embed.add_field(name=f"{raidEmote} Raid Info:", value=f"To view the info on raids, type: **/raidinfo.**", inline=False)
-    #embed.add_field(name=f"{huntEmote} Hunt Costs:", value=f"To view the costs for the different hunt tiers, type: **/huntcosts.**", inline=False) 
     embed.add_field(name=f"{challengeEmote} PvP:", value=f"To challenge another player type: **/challenge @<opponent> <goldamount>** in the *# pvp* channel.", inline=False)
     embed.add_field(name=f"{huntEmote} Hunt:", value=f"To summon an encounter, type: **/hunt <rarity>** in the *# hunt* channel. The rarities are 'common', 'uncommon', 'rare', 'veryrare', 'legendary'.", inline=False)
     embed.add_field(name=f"{raidEmote} Raid:", value=f"To initiate another raid, type: **/raid** in the *# raid* channel. To beat the raid, surpass the raid's health with cumulative equipment modifiers.", inline=False)
     embed.add_field(name=f"{rollEmote} Dice rolling:", value=f"To roll, type something like: **/roll 1d20**\nThe modifiers '+' or '-' may be added: **/roll 1d20+3.**", inline=False)
-    #embed.add_field(name=f"{prefixEmote} Command Prefixes:", value=f"To change the prefix, type: **/setprefix <prefix>** \nNote: you must be an administrator to do this", inline=False)
     await interaction.response.send_message(embed=embed)
 
 #     # If the command is sent with 'help', send a message showing ways to use the bot
@@ -403,7 +426,6 @@ async def req_userinfo(interaction: discord.Interaction, otheruser: discord.User
         title = f"{accountEmote} Your Account Details",
         colour = embedColour
     )
-    # embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767867171391930458/ApprovingElite.png")
     embed.set_author(name=f'{authorName}', icon_url=authorAvatar)  
     embed.add_field(name=f"Current Nickname:", value=f"{authorNick}", inline=True)
     embed.add_field(name=f"Account Name:", value=f"{authorName}", inline=True)
@@ -453,7 +475,6 @@ async def encounterStats(interaction: discord.Interaction):
         colour = embedColour
     )
     embed.set_author(name=f'{interaction.user.name}', icon_url=interaction.user.display_avatar)  
-    #embed.add_field(name=f"Encounter Spawn", value=f"{(encounterCont.encounterDropChance * 100)}%", inline=True) 
     embed.add_field(name="Hunt Costs:", value=f"", inline=False)
     embed.add_field(name="common", value=f"26", inline=True)
     embed.add_field(name="uncommon", value=f"48", inline=True)
