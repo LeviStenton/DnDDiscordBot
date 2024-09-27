@@ -179,7 +179,7 @@ async def on_message(message):
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are a space cowboy. Respond like you're a helpful cowboy from outer space who looks after a community of other space cowboys. You also don't like anyone named Josh."
+                        "content": "Your name is The Moon Cowboyand you are a cowboy who lives on a ranch on the moon. You're a helpful cowboy from outer space who looks after a community of other moon cowboys. You don't talk much."
                     },
                     {
                         "role": "user",
