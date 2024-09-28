@@ -103,43 +103,13 @@ pollCont: PollController = None
 async def on_guild_join(guild):
     channels = bot.get_all_channels()
     general = discord.utils.get(channels, name="general")
-    await general.send(f":cowboy: Eyes up Moon Cowboys, I'm connected!") # Type **{ReadCommandPrefix()}help** to get started.")
+    await general.send(f":cowboy: Howdy pardners, I'm connected!")
 
 # On ready, get channel IDs
 @bot.event
 async def on_ready():
     await tree.sync(guild=discord.Object(id=guildID))
-    channels = bot.get_all_channels()
-    for channel in channels:
-        if(channel.name == "general"):
-            global generalChannel
-            generalChannel = channel
-        if(channel.name == "private"):
-            global privateChannel
-            privateChannel = channel
-        if(channel.name == "events" and type(channel) == discord.ForumChannel):
-            global eventsChannel
-            eventsChannel = channel
-        if(channel.name == "level-ups"):
-            global levelUpChannel
-            levelUpChannel = channel
-        if(channel.name == "pvp"):
-            global pvpChannel
-            pvpChannel = channel
-        if(channel.name == "hunts"):
-            global huntChannel
-            huntChannel = channel
-        if(channel.name == "raids"):
-            global raidChannel
-            raidChannel = channel
-    global botID
-    botID = bot.user.id
-    global encounterCont
-    encounterCont = EncounterController()
-    global pollCont
-    pollCont = PollController()
-    global raidCont
-    raidCont = RaidController()
+    RetrieveChannels()
     print("Connected and ready to go.")
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="that yee haw"))
 
@@ -155,115 +125,27 @@ async def close():
 @bot.event
 async def on_member_join(member: discord.Member):
     if (bot.is_ready()):
-        global generalChannel
-        print(f"{member.id} joined!")
-        DatabaseController().StoreNewUser(member) 
-        role = discord.utils.get(member.guild.roles, name='Wayward Wanderer')
-        embed = discord.Embed(
-            title = f"{cowboyEmote} Howdy pardner!",
-            description = "Welcome to the cowbs.",
-            colour = embedColour
-        )
-        embed.set_author(name=member.name, icon_url=member.display_avatar)          
-        await member.add_roles(role)    
-        await generalChannel.send(embed=embed)
+        await GreetWithGroq(member)
+        
 
 # Method to do things when a message is sent
 @bot.event
 async def on_message(message):
     if (bot.is_ready()):
-        # OpenAI
-        if("The Moon Cowboy" in message.content or "715110532532797490" in message.content):
-            messageWithoutMention = message.content.strip().replace("The Moon Cowboy", "").replace("715110532532797490", "")
-            chat_completion = await client.chat.completions.create(
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "Your name is The Moon Cowboyand you are a cowboy who lives on a ranch on the moon. You're a helpful cowboy from outer space who looks after a community of other moon cowboys. You don't talk much."
-                    },
-                    {
-                        "role": "user",
-                        "content": messageWithoutMention,
-                    }
-                ],
-                model="llama3-8b-8192",
-                temperature=0.5,
-                max_tokens=512,
-                top_p=1,
-                stop=None,
-                stream=False,
-            )
-            await bot.get_channel(message.channel.id).send(chat_completion.choices[0].message.content)
-                    
-
-        # If messages are sent to the bot through DMs, do not count for anything
-        if (isinstance(message.channel, discord.channel.DMChannel)):
-            pass
-        else:            
-            # Rate limiting the exp users gain from messages
-            if(message.author.id != botID):
-                # Declaring variables to be used
-                global generalChannel
-                global levelUpChannel
-                messageChannel = bot.get_channel(message.channel.id)
-                channelHistoryLength = 50
-                rateLimitBool = True
-
-                channelMessages = [message async for message in message.channel.history(limit=channelHistoryLength, after=(datetime.now() - timedelta(seconds=3)))]   
-                for chnlMsg in channelMessages:
-                    if chnlMsg.author.id == message.author.id and message.id != chnlMsg.id:                    
-                        rateLimitBool = False 
-                if(not rateLimitBool):
-                    print(chnlMsg.author.display_name + " is being gold rate limited.")
-                try:
-                    msgExpEmbed = DatabaseController().StoreUserExp(bot, message.author.id, rateLimitBool)
-                    if(msgExpEmbed != None):
-                        await levelUpChannel.send(embed=msgExpEmbed)    
-                except Exception as e:    
-                    print(e.with_traceback())    
-                # Generating an encounter                    
-                # if(messageChannel.id == generalChannel.id): 
-                #     if(rateLimitBool):
-                #         global encounterCont 
-                #         encounterEmbed = encounterCont.RollEncounter(message.author)
-                #         if(encounterEmbed != None):
-                #             encounterMsg = await messageChannel.send(embed=encounterEmbed)                        
-                #             encounterCont.encounterID = encounterMsg.id
-                #             await encounterMsg.add_reaction(rollEmote)   
-                        
+        await RespondWithGroq(message)
+        await GiveGoldForMessage(message)                           
 
 # Method to do things when a reaction is added
 @bot.event
 async def on_reaction_add(reaction, user):
     if (bot.is_ready()):
-        global generalChannel
-        global levelUpChannel
-        global pvpChannel
-        global encounterCont
-
-        if(reaction.emoji == challengeEmote and user.id != botID):
-            await pvpChannel.send(embed=await FightPlayer(reaction.message, user))
-
-        if encounterCont.encounterUserID == user.id and reaction.emoji == encounterCont.rollEmote and user.id != botID and reaction.message.id == encounterCont.encounterID and encounterCont.encounterActive:
-            embeds = encounterCont.ClearEncounter(bot, user)
-            if (len(embeds) == 1):
-                encClearMsg = await reaction.message.channel.send(embed=embeds[0])
-            else:
-                encClearMsg = await reaction.message.channel.send(embed=embeds[1])
-                await levelUpChannel.send(embed=embeds[0])
-            encounterCont.encClearID = encClearMsg.id 
-            if encounterCont.lootDropFloat <= encounterCont.lootDropChance and encounterCont.encClearSuccess:
-                await encClearMsg.add_reaction(encounterCont.tickEmote)
-        if user.id == encounterCont.encounterUserID and user.id != botID and reaction.message.id == encounterCont.encClearID and reaction.emoji == encounterCont.tickEmote:
-            DatabaseController().StoreUserEquipment(user.id, encounterCont.encClearLoot)           
+        await DeclareFight(reaction, user)     
+        await ClearEncounterAndGold(reaction, user)    
 
 @bot.event
 async def on_scheduled_event_create(event):
     if(bot.is_ready()):
-        global eventsChannel
-        eventThread = await eventsChannel.create_thread(name=event.name, content=event.url)
-        global privateChannel
-        await privateChannel.send(f"## New Event!\nDiscuss here: {eventThread.thread.mention}\n\n{event.url}");
+        await DeclareEvent(event)
 
     
 
@@ -760,12 +642,147 @@ async def FightPlayer(reactionMessage, reactingUser):
         embed.add_field(name=opponentName, value=f"**{opponentRollTotal}** (*{opponentRoll[0]}, +{opponentMod}*)", inline=True)
         challengesDict.pop(dictKeyName)  
         return embed
+    
+async def DeclareFight(reaction, user):
+    global pvpChannel
+    if(reaction.emoji == challengeEmote and user.id != botID):
+        await pvpChannel.send(embed=await FightPlayer(reaction.message, user))
 
-def CheckIfOtherUser(interactionUser: discord.User, otherUser: discord.User):
+def CheckIfOtherUser(interactionUser, otherUser):
     if(otherUser == None):
         return interactionUser
     else:
         return otherUser
+    
+def RetrieveChannels():
+    channels = bot.get_all_channels()
+    for channel in channels:
+        if(channel.name == "general"):
+            global generalChannel
+            generalChannel = channel
+        if(channel.name == "private"):
+            global privateChannel
+            privateChannel = channel
+        if(channel.name == "events" and type(channel) == discord.ForumChannel):
+            global eventsChannel
+            eventsChannel = channel
+        if(channel.name == "level-ups"):
+            global levelUpChannel
+            levelUpChannel = channel
+        if(channel.name == "pvp"):
+            global pvpChannel
+            pvpChannel = channel
+        if(channel.name == "hunts"):
+            global huntChannel
+            huntChannel = channel
+        if(channel.name == "raids"):
+            global raidChannel
+            raidChannel = channel
+    global botID
+    botID = bot.user.id
+    global encounterCont
+    encounterCont = EncounterController()
+    global pollCont
+    pollCont = PollController()
+    global raidCont
+    raidCont = RaidController()
+    
+async def GreetWithGroq(member):
+    global generalChannel
+    DatabaseController().StoreNewUser(member) 
+    role = discord.utils.get(member.guild.roles, name='Wayward Wanderer')        
+    await member.add_roles(role)    
+    chat_completion = await client.chat.completions.create(
+        messages=[
+            {
+                "role": "system",
+                "content": "Your name is The Moon Cowboy and you are a cowboy who lives on a ranch on the moon. You are kind and you don't talk much."
+            },
+            {
+                "role": "user",
+                "content": f"There is someone by the name of '{member.mention}'. Greet them succinctly with a warm welcome to The Moon Cowboy ranch. You must mention their name in the greeting.",
+            }
+        ],
+        model="llama3-8b-8192",
+        temperature=0.5,
+        max_tokens=512,
+        top_p=1,
+        stop=None,
+        stream=False,
+    )
+    await generalChannel.send(chat_completion.choices[0].message.content)
+
+async def RespondWithGroq(message):
+    if("715110532532797490" in message.content):
+        messageWithoutMention = message.content.strip().replace("The Moon Cowboy", "").replace("715110532532797490", "")
+        chat_completion = await client.chat.completions.create(
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Your name is The Moon Cowboy and you are a cowboy who lives on a ranch on the moon. You're a helpful cowboy from outer space who looks after a community of other moon cowboys. You don't talk much."
+                },
+                {
+                    "role": "user",
+                    "content": messageWithoutMention,
+                }
+            ],
+            model="llama3-8b-8192",
+            temperature=0.5,
+            max_tokens=512,
+            top_p=1,
+            stop=None,
+            stream=False,
+        )
+        await bot.get_channel(message.channel.id).send(chat_completion.choices[0].message.content)
+
+async def GiveGoldForMessage(message):
+    # If messages are sent to the bot through DMs, do not count for anything
+    if (isinstance(message.channel, discord.channel.DMChannel)):
+        pass
+    else:            
+        # Rate limiting the exp users gain from messages
+        if(message.author.id != botID):
+            # Declaring variables to be used
+            global generalChannel
+            global levelUpChannel
+            messageChannel = bot.get_channel(message.channel.id)
+            channelHistoryLength = 50
+            rateLimitBool = True
+
+            channelMessages = [message async for message in message.channel.history(limit=channelHistoryLength, after=(datetime.now() - timedelta(seconds=3)))]   
+            for chnlMsg in channelMessages:
+                if chnlMsg.author.id == message.author.id and message.id != chnlMsg.id:                    
+                    rateLimitBool = False 
+            if(not rateLimitBool):
+                print(chnlMsg.author.display_name + " is being gold rate limited.")
+            try:
+                msgExpEmbed = DatabaseController().StoreUserExp(bot, message.author.id, rateLimitBool)
+                if(msgExpEmbed != None):
+                    await levelUpChannel.send(embed=msgExpEmbed)    
+            except Exception as e:    
+                print(e.with_traceback()) 
+
+async def ClearEncounterAndGold(reaction, user):
+    global levelUpChannel
+    global encounterCont
+    if encounterCont.encounterUserID == user.id and reaction.emoji == encounterCont.rollEmote and user.id != botID and reaction.message.id == encounterCont.encounterID and encounterCont.encounterActive:
+        embeds = encounterCont.ClearEncounter(bot, user)
+        if (len(embeds) == 1):
+            encClearMsg = await reaction.message.channel.send(embed=embeds[0])
+        else:
+            encClearMsg = await reaction.message.channel.send(embed=embeds[1])
+            await levelUpChannel.send(embed=embeds[0])
+        encounterCont.encClearID = encClearMsg.id 
+        if encounterCont.lootDropFloat <= encounterCont.lootDropChance and encounterCont.encClearSuccess:
+            await encClearMsg.add_reaction(encounterCont.tickEmote)
+    if user.id == encounterCont.encounterUserID and user.id != botID and reaction.message.id == encounterCont.encClearID and reaction.emoji == encounterCont.tickEmote:
+        DatabaseController().StoreUserEquipment(user.id, encounterCont.encClearLoot)  
+
+async def DeclareEvent(event):
+    global eventsChannel
+    eventThread = await eventsChannel.create_thread(name=event.name, content=event.url)
+    global privateChannel
+    await privateChannel.send(f"## New Event!\nDiscuss here: {eventThread.thread.mention}\n\n{event.url}");
 
 bot.run(TOKEN)
 
