@@ -9,9 +9,6 @@ from unicodedata import name
 # Discord
 import discord
 from discord import app_commands
-from discord.ext import tasks
-# Speech Recognition
-#import speech_recognition as sr
 # .env 
 from dotenv import load_dotenv
 # Datetime
@@ -27,13 +24,10 @@ from controllers.EncounterController import EncounterController
 from controllers.RaidController import RaidController
 from controllers.PollController import PollController
 from models.encounters.IEncounterable import IEncounterable
-from models.polls.poll import Poll
-from models.polls.poll import Option
 # User class
 from models.user.UserRank import UserRank
 # Groq
 import groq
-
 
 # ----------------------------------------------------------------------------
 # DECLARE ALL VARIABLES NECESSARY TO RUN THE PROGRAM
@@ -41,19 +35,18 @@ import groq
 # Parse the bot's token, my server, and the file the text to speech reads from
 # This file is in the .gitignore and you will need to create your own
 load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
-
+DISCORD_API_TOKEN = os.getenv('DISCORD_TOKEN')
 class client(discord.Client):
     def __init__(self):
         super().__init__(intents=discord.Intents.all())       
-
 global bot
 bot: discord.Client = client()
 tree = app_commands.CommandTree(bot)
 
 # Initialize OpenAI client
+GROQ_API_KEY = os.environ.get('GROQ_API_KEY')
 client = groq.AsyncGroq(
-    api_key=os.environ.get('GROQ_API_KEY')
+    api_key=GROQ_API_KEY
 )
 # Emotes
 rollEmote = '🎲'
@@ -98,44 +91,37 @@ pollCont: PollController = None
 # ---------------------------------------------------------------------------
 # ON EVENT METHODS
 
-# When joining a server for the first time, send a message
 @bot.event
 async def on_guild_join(guild):
     channels = bot.get_all_channels()
     general = discord.utils.get(channels, name="general")
     await general.send(f":cowboy: Howdy pardners, I'm connected!")
 
-# On ready, get channel IDs
 @bot.event
 async def on_ready():
     await tree.sync(guild=discord.Object(id=guildID))
     RetrieveChannels()
+    InitializeControllers()
     print("Connected and ready to go.")
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="that yee haw"))
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="the lunar ranch"))
 
-
-# On disconnecting, send a message
 @bot.event
 async def close():     
     DatabaseController().CloseDatabase() 
     for vc in bot.voice_clients: 
         await vc.disconnect()
     
-# When a member joins the server, send a welcoming message
 @bot.event
 async def on_member_join(member: discord.Member):
     if (bot.is_ready()):
         await GreetWithGroq(member)
         
-
-# Method to do things when a message is sent
 @bot.event
 async def on_message(message):
     if (bot.is_ready()):
         await RespondWithGroq(message)
         await GiveGoldForMessage(message)                           
 
-# Method to do things when a reaction is added
 @bot.event
 async def on_reaction_add(reaction, user):
     if (bot.is_ready()):
@@ -145,9 +131,7 @@ async def on_reaction_add(reaction, user):
 @bot.event
 async def on_scheduled_event_create(event):
     if(bot.is_ready()):
-        await DeclareEvent(event)
-
-    
+        await DeclareEvent(event)   
 
 # ---------------------------------------------------------------------------
 # COMMAND METHODS
@@ -163,127 +147,17 @@ async def help(interaction: discord.Interaction):
         colour = embedColour
     )
     embed.set_author(name=f'{author}', icon_url=authorAvatar)
-    embed.add_field(name=f"{accountEmote} Account Info:", value=f"To view your or another user's account info, type: **/userinfo <otheruser>.**", inline=False)    
-    embed.add_field(name=f"{leaderboardEmote} Leaderboard:", value=f"To view the leaderboard, type: **/leaderboard.**", inline=False)        
-    embed.add_field(name=f"{equipmentEmote} Equipment:", value=f"To view your or another user's current equipment, type: **/equipment <otheruser>.**", inline=False)    
+    embed.add_field(name=f"{accountEmote} Account Info:", value=f"To view your or another user's account info, type: **/userinfo <otheruser>.**", inline=False)          
     embed.add_field(name=f"{levelEmote} Rank:", value=f"To view your or another user's level stats, type: **/rank <otheruser>.**", inline=False)   
-    embed.add_field(name=f"{huntEmote} Hunt Info:", value=f"To view the info on hunts, type: **/huntinfo.**", inline=False)
-    embed.add_field(name=f"{raidEmote} Raid Info:", value=f"To view the info on raids, type: **/raidinfo.**", inline=False)
-    embed.add_field(name=f"{challengeEmote} PvP:", value=f"To challenge another player type: **/challenge @<opponent> <goldamount>** in the *# pvp* channel.", inline=False)
-    embed.add_field(name=f"{huntEmote} Hunt:", value=f"To summon an encounter, type: **/hunt <rarity>** in the *# hunt* channel. The rarities are 'common', 'uncommon', 'rare', 'veryrare', 'legendary'.", inline=False)
-    embed.add_field(name=f"{raidEmote} Raid:", value=f"To initiate another raid, type: **/raid** in the *# raid* channel. To beat the raid, surpass the raid's health with cumulative equipment modifiers.", inline=False)
+    embed.add_field(name=f"{leaderboardEmote} Leaderboard:", value=f"To view the leaderboard, type: **/leaderboard.**", inline=False)            
     embed.add_field(name=f"{rollEmote} Dice rolling:", value=f"To roll, type something like: **/roll 1d20**\nThe modifiers '+' or '-' may be added: **/roll 1d20+3.**", inline=False)
+    embed.add_field(name=f"{equipmentEmote} Equipment:", value=f"To view your or another user's current equipment, type: **/equipment <otheruser>.**", inline=False)   
+    embed.add_field(name=f"{huntEmote} Hunt Info:", value=f"To view the info on hunts, type: **/huntinfo.**", inline=False)
+    embed.add_field(name=f"{huntEmote} Hunt:", value=f"To summon an encounter, type: **/hunt <rarity>** in the *# hunt* channel. The rarities are 'common', 'uncommon', 'rare', 'veryrare', 'legendary'.", inline=False)   
+    embed.add_field(name=f"{raidEmote} Raid Info:", value=f"To view the info on raids, type: **/raidinfo.**", inline=False)
+    embed.add_field(name=f"{raidEmote} Raid:", value=f"To initiate another raid, type: **/raid** in the *# raid* channel. To beat the raid, surpass the raid's health with cumulative equipment modifiers.", inline=False)
+    embed.add_field(name=f"{challengeEmote} PvP:", value=f"To challenge another player type: **/challenge @<opponent> <goldamount>** in the *# pvp* channel.", inline=False)
     await interaction.response.send_message(embed=embed)
-
-#     # If the command is sent with 'help', send a message showing ways to use the bot
-# @tree.command(name="poll", description="Create a poll with options of your choice.", guild=discord.Object(id=guildID))
-# async def poll(interaction: discord.Interaction, title: str, options: str):
-#     pollOptions = options.strip().split(",")
-#     optionsList = list()
-#     for idx, option in enumerate(pollOptions):
-#         optionsList.append(Option(index = idx, name = option))    
-
-#     embed, view = pollCont.AddPoll(interaction, Poll(title, optionsList, datetime.now()))    
-
-#     await interaction.response.send_message(embed=embed, view=view)
-
-# # If the command is sent with 'join', join the voice channel that the author is in
-# @bot.command(name='join')
-# async def join_voice(ctx):
-#     author = ctx.author.name
-#     authorAvatar = ctx.author.display_avatar
-#     embedMessage = '' 
-#     connected = None
-#     channel = None
-#     try:
-#         connected = ctx.author.voice
-#         channel = ctx.author.voice.channel        
-#     except:
-#         embedMessage = f"You need to join a voice channel first!"
-#     try:
-#         if connected:           
-#             await channel.connect()          
-#             for client in bot.voice_clients:
-#                 if client.channel == channel:
-#                     embedMessage = f"I've connected to **{str(channel)}**!"
-#     except:
-#         embedMessage = f"I\'m already connected to **{str(channel)}**."
-#     joinEmbed = discord.Embed(
-#         title = f"{voiceEmote} Connecting...",
-#         description = embedMessage,
-#         colour = embedColour
-#     )
-#     joinEmbed.set_author(name=f'{author}', icon_url=authorAvatar) 
-#     await ctx.send(embed=joinEmbed)
-
-# # If the command is sent with 'leave', leave all voice channels    
-# @bot.command(name='leave')
-# async def leave_voice(ctx):
-#     for vc in bot.voice_clients: 
-#         if(vc.guild == ctx.guild):
-#             await vc.disconnect()
-#             joinEmbed = discord.Embed(
-#                 title = f"{voiceEmote} Leaving...",
-#                 description = f"Left!",
-#                 colour = embedColour
-#             )
-#             joinEmbed.set_author(name=f'{ctx.message.author.name}', icon_url=ctx.author.display_avatar) 
-#             await ctx.send(embed=joinEmbed)
-       
-# Retrieves member, exp, and level data from levellingDB
-@tree.command(name="rank", description="Displays a user's rank data.", guild=discord.Object(id=guildID))
-async def req_rank(interaction: discord.Interaction, otheruser: discord.User = None):
-    user = CheckIfOtherUser(interaction.user, otheruser)
-    dbCont = DatabaseController()
-    embed = discord.Embed(
-        title = f"{levelEmote} Your stats for {interaction.guild}",
-        colour = embedColour
-    )
-    userRankRaw = dbCont.RetrieveUserRank(user.id)
-    userRank = UserRank(user.display_name, user.display_avatar, userRankRaw[0], userRankRaw[1], userRankRaw[2], userRankRaw[3])
-    userTitlesRaw = dbCont.RetrieveUserTitles(user.id)
-    userTitles = ""
-    for title in userTitlesRaw:
-        if userTitles:
-            userTitles + ", "
-        userTitles += title
-    if not userTitles:
-        userTitles = 'None'
-    embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767867171391930458/ApprovingElite.png")
-    embed.set_author(name=f'{userRank.displayName}', icon_url=userRank.avatar)      
-    embed.add_field(name="Level:", value=f"{userRank.level}", inline=False)
-    embed.add_field(name=f"Gold:", value=f"{userRank.exp}", inline=False)
-    embed.add_field(name=f"Gold Until Next Level:", value=f"{userRank.expRemaining}", inline=False)
-    embed.add_field(name=f"Messages Sent:", value=f"{userRank.msgSent}", inline=False)   
-    embed.add_field(name=f"Titles:", value=userTitles, inline=False)   
-    await interaction.response.send_message(embed=embed)
-
-# Display the current equipment and modifier for a user that calls this command
-@tree.command(name="equipment", description="Displays your equipment name and modifier.", guild=discord.Object(id=guildID))
-async def ShowEquipment(interaction: discord.Interaction, otheruser: discord.User = None):
-    user = CheckIfOtherUser(interaction.user, otheruser)
-    userData = DatabaseController().RetrieveUser(user.id)
-    embed = discord.Embed(
-        title = f"Your Equipment",
-        colour = embedColour
-    )
-    embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767677300333477888/48cb5349f515f6e59edc2a4de294f439.png")
-    embed.set_author(name=f'{user.display_name}', icon_url=user.display_avatar)    
-    embed.add_field(name="Item", value=f"*{userData[5]}*", inline=True)
-    embed.add_field(name="Modifier", value=f"*+{userData[4]}*", inline=True)
-    await interaction.response.send_message(embed=embed)
-
-# WILL WIPE A USER'S DATA
-@tree.command(name="resetmydata", description="Reset your rank and equipment in the database.", guild=discord.Object(id=guildID))
-async def resetUserData(interaction: discord.Interaction):
-    authorID = str(interaction.user.id)
-    try:
-        DatabaseController().ResetUserData(authorID)
-        print(authorID+"'s data has been reset.")
-        await interaction.response.send_message("Resetting level successful.") 
-    except:
-        print("Error resetting user data.")
-        await interaction.response.send_message("Error resetting level.")
 
 # Retrieves user account info based on their public profile
 @tree.command(name="userinfo", description="Displays miscellaneous discord info.", guild=discord.Object(id=guildID))
@@ -317,6 +191,114 @@ async def req_userinfo(interaction: discord.Interaction, otheruser: discord.User
     embed.set_footer(text=f"UserID: {authorID}")
     await interaction.response.send_message(embed=embed)  
 
+# WILL WIPE A USER'S DATA
+@tree.command(name="resetmydata", description="Reset your rank and equipment in the database.", guild=discord.Object(id=guildID))
+async def resetUserData(interaction: discord.Interaction):
+    authorID = str(interaction.user.id)
+    try:
+        DatabaseController().ResetUserData(authorID)
+        print(authorID+"'s data has been reset.")
+        await interaction.response.send_message("Resetting level successful.") 
+    except:
+        print("Error resetting user data.")
+        await interaction.response.send_message("Error resetting level.")
+
+# DO NOT USE THIS UNLESS YOU WANT TO WIPE ALL LEVEL DATA
+# @tree.command(name="resetserverranks", description="Reset all users' rank and equipment in the database.", guild=discord.Object(id=guildID))
+# @has_permissions(administrator=True, manage_messages=True, manage_roles=True)
+# async def collectLevelData(interaction: discord.Interaction):
+#     try:
+#         if(interaction.user.id == 218890729550774282):
+#             DatabaseController().ResetServerRankData(interaction)
+#             await interaction.response.send_message("Storing fresh data successful.")
+#     except:
+#         print("Error resetting database.")
+#         await interaction.response.send_message("Error resetting database.")
+
+
+# If the command is sent with 'join', join the voice channel that the author is in
+@tree.command(name="join", description="Join your voice channel.", guild=discord.Object(id=guildID))
+async def join_voice(ctx):
+    author = ctx.author.name
+    authorAvatar = ctx.author.display_avatar
+    embedMessage = '' 
+    connected = None
+    channel = None
+    try:
+        connected = ctx.author.voice
+        channel = ctx.author.voice.channel        
+    except:
+        embedMessage = f"You need to join a voice channel first!"
+    try:
+        if connected:           
+            await channel.connect()          
+            for client in bot.voice_clients:
+                if client.channel == channel:
+                    embedMessage = f"I've connected to **{str(channel)}**!"
+    except:
+        embedMessage = f"I\'m already connected to **{str(channel)}**."
+    joinEmbed = discord.Embed(
+        title = f"{voiceEmote} Connecting...",
+        description = embedMessage,
+        colour = embedColour
+    )
+    joinEmbed.set_author(name=f'{author}', icon_url=authorAvatar) 
+    await ctx.send(embed=joinEmbed)
+
+# If the command is sent with 'leave', leave all voice channels    
+@tree.command(name="leave", description="Leave the current voice channel.", guild=discord.Object(id=guildID))
+async def leave_voice(ctx):
+    for vc in bot.voice_clients: 
+        if(vc.guild == ctx.guild):
+            await vc.disconnect()
+            
+# If the command is sent with 'rollhelp', query a roll from the sent dice rolling data
+@tree.command(name="roll", description="To roll, type something like: 1d20. The modifiers '+' or '-' may be added: 1d20+3.", guild=discord.Object(id=guildID))
+async def Roll(interaction: discord.Interaction, dice: str):
+    author = interaction.user.id
+    author = interaction.user.display_name
+    authorAvatar = interaction.user.display_avatar
+    outcome = DiceController().QueryRoll(dice)
+    embed = discord.Embed(
+        title = f"{rollEmote} Rolling!",
+        colour = embedColour
+    )
+    embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767677300333477888/48cb5349f515f6e59edc2a4de294f439.png")
+    embed.set_author(name=f'{author}', icon_url=authorAvatar)    
+    embed.add_field(name="You Rolled", value=f"{outcome[0]}", inline=True)
+    embed.add_field(name="Modifier", value=f"{outcome[1]}", inline=True)
+    if len(outcome) > 3:
+        embed.add_field(name="Total With Mod", value=f"{outcome[3]}", inline=True)    
+    await interaction.response.send_message(embed=embed)
+       
+# Retrieves member, exp, and level data from levellingDB
+@tree.command(name="rank", description="Displays a user's rank data.", guild=discord.Object(id=guildID))
+async def req_rank(interaction: discord.Interaction, otheruser: discord.User = None):
+    user = CheckIfOtherUser(interaction.user, otheruser)
+    dbCont = DatabaseController()
+    embed = discord.Embed(
+        title = f"{levelEmote} Your stats for {interaction.guild}",
+        colour = embedColour
+    )
+    userRankRaw = dbCont.RetrieveUserRank(user.id)
+    userRank = UserRank(user.display_name, user.display_avatar, userRankRaw[0], userRankRaw[1], userRankRaw[2], userRankRaw[3])
+    userTitlesRaw = dbCont.RetrieveUserTitles(user.id)
+    userTitles = ""
+    for title in userTitlesRaw:
+        if userTitles:
+            userTitles + ", "
+        userTitles += title
+    if not userTitles:
+        userTitles = 'None'
+    embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767867171391930458/ApprovingElite.png")
+    embed.set_author(name=f'{userRank.displayName}', icon_url=userRank.avatar)      
+    embed.add_field(name="Level:", value=f"{userRank.level}", inline=False)
+    embed.add_field(name=f"Gold:", value=f"{userRank.exp}", inline=False)
+    embed.add_field(name=f"Gold Until Next Level:", value=f"{userRank.expRemaining}", inline=False)
+    embed.add_field(name=f"Messages Sent:", value=f"{userRank.msgSent}", inline=False)   
+    embed.add_field(name=f"Titles:", value=userTitles, inline=False)   
+    await interaction.response.send_message(embed=embed)
+
 # Retrieves member, exp, and level data from levellingDB
 @tree.command(name="leaderboard", description="Displays the top 10 users sorted by gold.", guild=discord.Object(id=guildID))
 async def req_leaderboard(interaction: discord.Interaction):
@@ -348,6 +330,21 @@ async def req_leaderboard(interaction: discord.Interaction):
         embed.add_field(name=f"*{str(userIdx)}. {userList[0]}*", value=f"*Level: {userList[1]}, Gold: {userList[2]}*", inline=False)
     await interaction.response.send_message(embed=embed)
 
+# Display the current equipment and modifier for a user that calls this command
+@tree.command(name="equipment", description="Displays your equipment name and modifier.", guild=discord.Object(id=guildID))
+async def ShowEquipment(interaction: discord.Interaction, otheruser: discord.User = None):
+    user = CheckIfOtherUser(interaction.user, otheruser)
+    userData = DatabaseController().RetrieveUser(user.id)
+    embed = discord.Embed(
+        title = f"Your Equipment",
+        colour = embedColour
+    )
+    embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767677300333477888/48cb5349f515f6e59edc2a4de294f439.png")
+    embed.set_author(name=f'{user.display_name}', icon_url=user.display_avatar)    
+    embed.add_field(name="Item", value=f"*{userData[5]}*", inline=True)
+    embed.add_field(name="Modifier", value=f"*+{userData[4]}*", inline=True)
+    await interaction.response.send_message(embed=embed)
+
 # Retrieves user account info based on their public profile
 @tree.command(name="huntinfo", description="Displays hunt costs and equipment droprates.", guild=discord.Object(id=guildID))
 async def encounterStats(interaction: discord.Interaction):
@@ -367,36 +364,6 @@ async def encounterStats(interaction: discord.Interaction):
     embed.add_field(name=f"Loot Drop", value=f"{(encounterCont.lootDropChance * 100)}%", inline=True) 
     embed.add_field(name=f"Encounter Rarity", value=f"Common: {(IEncounterable.commonDropChance * 100)}% \nUncommon: {(IEncounterable.uncommonDropChance * 100)}% \nRare: {(IEncounterable.rareDropChance * 100)}% \nVery Rare: {(IEncounterable.veryrareDropChance * 100)}% \nLegendary: {(IEncounterable.legendaryDropChance * 100)}% \n", inline=False) 
     await interaction.response.send_message(embed=embed)  
-
-# DO NOT USE THIS UNLESS YOU WANT TO WIPE ALL LEVEL DATA
-# @tree.command(name="resetserverranks", description="Reset all users' rank and equipment in the database.", guild=discord.Object(id=guildID))
-# @has_permissions(administrator=True, manage_messages=True, manage_roles=True)
-# async def collectLevelData(interaction: discord.Interaction):
-#     try:
-#         if(interaction.user.id == 218890729550774282):
-#             DatabaseController().ResetServerRankData(interaction)
-#             await interaction.response.send_message("Storing fresh data successful.")
-#     except:
-#         print("Error resetting database.")
-#         await interaction.response.send_message("Error resetting database.")
-
-# @tree.command(name="huntcosts", description="Display the cost of each tier of hunting.", guild=discord.Object(id=guildID))
-# async def Hunt(interaction: discord.Interaction):
-#     author = interaction.user.display_name
-#     authorAvatar = interaction.user.display_avatar
-#     embed = discord.Embed(
-#         title = f"Hunt Costs",
-#         description="Gold cost for each hunt \n(Case & whitespace sensitive)",
-#         colour = embedColour
-#     )
-#     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767677300333477888/48cb5349f515f6e59edc2a4de294f439.png")
-#     embed.set_author(name=f'{author}', icon_url=authorAvatar)    
-#     embed.add_field(name="common", value=f"26", inline=True)
-#     embed.add_field(name="uncommon", value=f"48", inline=True)
-#     embed.add_field(name="rare", value=f"76", inline=True)
-#     embed.add_field(name="veryrare", value=f"110", inline=True)
-#     embed.add_field(name="legendary", value=f"150", inline=True)
-#     await interaction.response.send_message(embed=embed)
 
 @tree.command(name="hunt", description="Summon an encounter using a certain amount of your own gold. Rarity costs can be found at /huntinfo.", guild=discord.Object(id=guildID))
 async def Hunt(interaction: discord.Interaction, tier: str):
@@ -464,70 +431,7 @@ async def Raid(interaction: discord.Interaction):
         raidStartMsg = await interaction.channel.send(embed=raidStartEmbed, view=raidView)   
         await asyncio.sleep(raidConclusionTimer)
         raidEndEmbed = raidCont.ConcludeRaid()
-        raidEndMsg = await interaction.channel.send(embed=raidEndEmbed)   
-
-# If the command is sent with 'rollhelp', query a roll from the sent dice rolling data
-@tree.command(name="roll", description="To roll, type something like: 1d20. The modifiers '+' or '-' may be added: 1d20+3.", guild=discord.Object(id=guildID))
-async def Roll(interaction: discord.Interaction, dice: str):
-    author = interaction.user.id
-    author = interaction.user.display_name
-    authorAvatar = interaction.user.display_avatar
-    outcome = DiceController().QueryRoll(dice)
-    embed = discord.Embed(
-        title = f"{rollEmote} Rolling!",
-        colour = embedColour
-    )
-    embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767677300333477888/48cb5349f515f6e59edc2a4de294f439.png")
-    embed.set_author(name=f'{author}', icon_url=authorAvatar)    
-    embed.add_field(name="You Rolled", value=f"{outcome[0]}", inline=True)
-    embed.add_field(name="Modifier", value=f"{outcome[1]}", inline=True)
-    if len(outcome) > 3:
-        embed.add_field(name="Total With Mod", value=f"{outcome[3]}", inline=True)    
-    await interaction.response.send_message(embed=embed)
-
-# When a voice command asking to roll dice is said, convert it to text and query a roll from it
-# @bot.command(name='test')
-# async def Speech2Text(ctx,):
-#     # open the file
-#     filename = "TestCases/4d20plus4.wav"
-#     with sr.AudioFile(filename) as source:
-#         # listen for the data (load audio into memory)
-#         audio_data = r.record(source)
-#         # recognize (convert from speech to text)
-#         text = r.recognize_google(audio_data)
-
-#     authorName = ctx.author.name
-#     authorAvatar = ctx.author.display_avatar
-#     outcome = QueryRoll(text)
-#     embed = discord.Embed(
-#         title = f"{rollEmote} Rolling!",
-#         description = f"You said: *\"{text}\"*",
-#         colour = embedColour
-#     )
-#     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/758193066913562656/767677300333477888/48cb5349f515f6e59edc2a4de294f439.png")
-#     embed.set_author(name=f'{authorName}', icon_url=authorAvatar)    
-#     embed.add_field(name="You Rolled:", value=f"{outcome[0]}", inline=False)
-#     embed.add_field(name="Modifier", value=f"{outcome[1]}", inline=True)
-#     if len(outcome) > 3:
-#         embed.add_field(name="Total With Mod", value=f"{outcome[3]}", inline=True)
-
-#     await ctx.send(embed=embed)
-
-# Spawns an encounter
-# @tree.command(name="spawnencounter", description="Manually spawn an encounter.", guild=discord.Object(id=guildID))
-# @has_permissions(administrator=True, manage_messages=True, manage_roles=True)
-# async def Spawn_Encounter(interaction: discord.Interaction):
-#     # Generating an encounter  
-#     global encounterCont
-#     global generalChannel
-#     try:
-#         if(interaction.channel.id == generalChannel.id and interaction.user.id != botID):
-#             await interaction.response.send_message(content="Encounter manually spawned.")
-#             encounterMsg: discord.abc.Messageable = await generalChannel.send(embed=encounterCont.RollEncounter(interaction.user, 1))
-#             encounterCont.encounterID = encounterMsg.id
-#             await encounterMsg.add_reaction(rollEmote)  
-#     except Exception:
-#         pass
+        raidEndMsg = await interaction.channel.send(embed=raidEndEmbed)  
 
 # Ping another player to fight
 @tree.command(name="challenge", description="To challenge another player, type: @<opponent> <goldamount>", guild=discord.Object(id=guildID))
@@ -600,6 +504,11 @@ async def ChallengePlayer(interaction: discord.Interaction, opponent: discord.Us
                 challengesDict[dictKeyName][2] = {'challengeID' : challenge.id, 'challengeWager' : wager}
                 await challenge.add_reaction(challengeEmote)
 
+async def DeclareFight(reaction, user):
+    global pvpChannel
+    if(reaction.emoji == challengeEmote and user.id != botID):
+        await pvpChannel.send(embed=await FightPlayer(reaction.message, user))
+
 async def FightPlayer(reactionMessage, reactingUser):
     global challengesDict
     dictKeyName = str(reactingUser.id)+'_'+str(reactionMessage.id)
@@ -642,11 +551,6 @@ async def FightPlayer(reactionMessage, reactingUser):
         embed.add_field(name=opponentName, value=f"**{opponentRollTotal}** (*{opponentRoll[0]}, +{opponentMod}*)", inline=True)
         challengesDict.pop(dictKeyName)  
         return embed
-    
-async def DeclareFight(reaction, user):
-    global pvpChannel
-    if(reaction.emoji == challengeEmote and user.id != botID):
-        await pvpChannel.send(embed=await FightPlayer(reaction.message, user))
 
 def CheckIfOtherUser(interactionUser, otherUser):
     if(otherUser == None):
@@ -677,9 +581,11 @@ def RetrieveChannels():
             huntChannel = channel
         if(channel.name == "raids"):
             global raidChannel
-            raidChannel = channel
+            raidChannel = channel       
+
+def InitializeControllers():
     global botID
-    botID = bot.user.id
+    botID = bot.user.id 
     global encounterCont
     encounterCont = EncounterController()
     global pollCont
@@ -743,9 +649,7 @@ async def GiveGoldForMessage(message):
         # Rate limiting the exp users gain from messages
         if(message.author.id != botID):
             # Declaring variables to be used
-            global generalChannel
             global levelUpChannel
-            messageChannel = bot.get_channel(message.channel.id)
             channelHistoryLength = 50
             rateLimitBool = True
 
@@ -784,6 +688,6 @@ async def DeclareEvent(event):
     global privateChannel
     await privateChannel.send(f"## New Event!\nDiscuss here: {eventThread.thread.mention}\n\n{event.url}");
 
-bot.run(TOKEN)
+bot.run(DISCORD_API_TOKEN)
 
 # ----------------------------------------------------------------------------------
