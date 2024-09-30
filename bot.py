@@ -620,7 +620,11 @@ async def GreetWithGroq(member):
 
 async def RespondWithGroq(message):
     if("715110532532797490" in message.content):
-        messageWithoutMention = message.content.strip().replace("The Moon Cowboy", "").replace("715110532532797490", "")
+        channelHistoryLength = 10
+        channelMessages = reversed([message async for message in message.channel.history(limit=channelHistoryLength)])
+        chatTranscript = "You are given a list of messages, with each speaker represented by their name before a colon after an apostrophe. The messages are read top to bottom, with the most recent message first. You must respond to the first message. You are The Moon Cowboy.\n"
+        for message in channelMessages:
+            chatTranscript += f"'{message.author.name if message.author.nick == None else message.author.nick}: {message.content.replace('<@715110532532797490>', 'The Moon Cowboy')}'\n"
         chat_completion = await client.chat.completions.create(
             messages=[
                 {
@@ -629,10 +633,10 @@ async def RespondWithGroq(message):
                 },
                 {
                     "role": "user",
-                    "content": messageWithoutMention,
+                    "content": chatTranscript,
                 }
             ],
-            model="llama3-8b-8192",
+            model="llama-3.2-3b-preview",
             temperature=0.5,
             max_tokens=512,
             top_p=1,
@@ -652,7 +656,6 @@ async def GiveGoldForMessage(message):
             global levelUpChannel
             channelHistoryLength = 50
             rateLimitBool = True
-
             channelMessages = [message async for message in message.channel.history(limit=channelHistoryLength, after=(datetime.now() - timedelta(seconds=3)))]   
             for chnlMsg in channelMessages:
                 if chnlMsg.author.id == message.author.id and message.id != chnlMsg.id:                    
