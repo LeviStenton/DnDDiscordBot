@@ -23,11 +23,16 @@ from controllers.DiceController import DiceController
 from controllers.EncounterController import EncounterController
 from controllers.RaidController import RaidController
 from controllers.PollController import PollController
+from controllers.SaidditController import SaidditController
 from models.encounters.IEncounterable import IEncounterable
 # User class
 from models.user.UserRank import UserRank
 # Groq
 import groq
+# iCal
+import icalendar
+# Path
+import pathlib
 
 # ----------------------------------------------------------------------------
 # DECLARE ALL VARIABLES NECESSARY TO RUN THE PROGRAM
@@ -87,6 +92,7 @@ guildID = 249391493880479744
 encounterCont: EncounterController = None
 raidCont: RaidController = None
 pollCont: PollController = None
+saidditController: SaidditController = None
 
 # ---------------------------------------------------------------------------
 # ON EVENT METHODS
@@ -504,6 +510,18 @@ async def ChallengePlayer(interaction: discord.Interaction, opponent: discord.Us
                 challengesDict[dictKeyName][2] = {'challengeID' : challenge.id, 'challengeWager' : wager}
                 await challenge.add_reaction(challengeEmote)
 
+@tree.command(name="saiddit", description=f"Guess who wrote a message from the past.", guild=discord.Object(id=guildID))
+async def Saiddit(interaction: discord.Interaction):
+    global saidditController
+    if(saidditController.gameRunning):
+        waitEmbed = await saidditController.DeclareWait()
+        await interaction.response.send_message(embed=waitEmbed)
+    saidditStartEmbed, saidditView = await saidditController.InitiateGuessing(bot, interaction)
+    if(saidditView == None):
+        await interaction.response.send_message(embed=saidditStartEmbed)
+    else:
+        await interaction.response.send_message(content="/saiddit", embed=saidditStartEmbed, view=saidditView)
+
 async def DeclareFight(reaction, user):
     global pvpChannel
     if(reaction.emoji == challengeEmote and user.id != botID):
@@ -592,6 +610,8 @@ def InitializeControllers():
     pollCont = PollController()
     global raidCont
     raidCont = RaidController()
+    global saidditController
+    saidditController = SaidditController()
     
 async def GreetWithGroq(member):
     global generalChannel
@@ -620,7 +640,7 @@ async def GreetWithGroq(member):
 
 async def RespondWithGroq(message):
     if("715110532532797490" in message.content):
-        channelHistoryLength = 10
+        channelHistoryLength = 15
         channelMessages = reversed([message async for message in message.channel.history(limit=channelHistoryLength)])
         chatTranscript = "You are given a list of messages, with each speaker represented by their name before a colon after an apostrophe. The messages are read top to bottom, with the most recent message first. You must respond to the first message. You are The Moon Cowboy.\n"
         for message in channelMessages:
@@ -686,10 +706,31 @@ async def ClearEncounterAndGold(reaction, user):
         DatabaseController().StoreUserEquipment(user.id, encounterCont.encClearLoot)  
 
 async def DeclareEvent(event):
+    path = CreateICalFromEvent(event)
+    file = discord.File(fp=path, filename=event.name + ".ics")
     global eventsChannel
-    eventThread = await eventsChannel.create_thread(name=event.name, content=event.url)
+    eventThread = await eventsChannel.create_thread(name=event.name, content="Add to your calendar by opening the '.ics' file below.\n" + event.url, file=file)
     global privateChannel
-    await privateChannel.send(f"## New Event!\nDiscuss here: {eventThread.thread.mention}\n\n{event.url}");
+    await privateChannel.send(content=f"## New Event!\nDiscuss here: {eventThread.thread.mention}\n\n{event.url}");
+    RemoveFile(path)
+
+def CreateICalFromEvent(discordEvent) -> str:
+    iCal = icalendar.Calendar()
+    iCalEvent = icalendar.Event()
+    iCalEvent.add('summary', discordEvent.name)
+    iCalEvent.add('description', discordEvent.description)
+    iCalEvent.add('location', discordEvent.location)
+    iCalEvent.add('dtstart', discordEvent.start_time)
+    iCalEvent.add('dtend', discordEvent.end_time)
+    iCal.add_component(iCalEvent)
+    path = os.path.join(pathlib.Path().resolve(), r"icaltest.ics")
+    f = open(path, "wb+")
+    f.write(iCal.to_ical())
+    f.close
+    return path
+
+def RemoveFile(path: str):
+    os.remove(path)
 
 bot.run(DISCORD_API_TOKEN)
 
